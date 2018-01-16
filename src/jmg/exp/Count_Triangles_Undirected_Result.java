@@ -8,8 +8,11 @@ class Count_Triangles_Undirected_Result
 	@Override
 	public String toString()
 	{
-		return " - nbTriangles=" + nbTriangles + "\n - nbPotentialTrianglesComputed="
-				+ nbPotentialTrianglesComputed + "\n - nbPotentialTrianglesIncremented="
-				+ nbPotentialTrianglesIncremented;
+		String s = "";
+		s += " - nbTriangles=" + nbTriangles;
+		s += "\n - nbPotentialTrianglesComputed=" + nbPotentialTrianglesComputed;
+		s += "\n - nbPotentialTrianglesIncremented=" + nbPotentialTrianglesIncremented;
+		s += "\n - CCundirected=" + (3 * nbTriangles / (double) nbPotentialTrianglesComputed);
+		return s;
 	}
 }

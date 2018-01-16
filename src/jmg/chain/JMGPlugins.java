@@ -8,7 +8,6 @@ import jmg.algo.Degrees;
 import jmg.algo.ReverseGraph;
 import jmg.gen.DirectedGNP;
 import jmg.gen.GridGenerator;
-import jmg.gen.DirectedGNP;
 import jmg.io.DotWriter;
 import jmg.io.EdgeListFileReader;
 import jmg.io.EdgeListFileWriter;
@@ -32,7 +31,7 @@ public class JMGPlugins extends DefaultPlugins
 	@Override
 	public TooolsPlugin<?, ?> create(String name, boolean bootstrap)
 	{
-		if (name.endsWith(".jmg"))
+		if (name.endsWith(".jmg") || name.endsWith(".jmg/"))
 		{
 			if (bootstrap)
 			{

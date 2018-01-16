@@ -32,7 +32,7 @@ public class CountK2_2_Thibaud implements TooolsPlugin<Digraph, CountK2_2_Thilba
 			@Override
 			protected void process(int rank, int lowerBound, int upperBound)
 			{
-				long _sum_nK22pot = 0;
+				long _sum_fourTimesNbK22pot = 0;
 				long _sum_nK22 = 0;
 				int[] _distri = new int[maxDegree + 1];
 				long lastK22saved = 0;
@@ -67,10 +67,10 @@ public class CountK2_2_Thibaud implements TooolsPlugin<Digraph, CountK2_2_Thilba
 									--dw;
 								}
 
-								int _nK22pot = nbCN * (du + dw - 2) / 4;
+								int _fourTimeNbK22pot = nbCN * (du + dw - 2);
 
 								_sum_nK22 += _nK22;
-								_sum_nK22pot += _nK22pot;
+								_sum_fourTimesNbK22pot += _fourTimeNbK22pot;
 							}
 						}
 					}
@@ -81,8 +81,8 @@ public class CountK2_2_Thibaud implements TooolsPlugin<Digraph, CountK2_2_Thilba
 					{
 						synchronized (r)
 						{
-							r.nK22pot += _sum_nK22pot;
-							_sum_nK22pot = 0;
+							r.fourTimesNbK22pot += _sum_fourTimesNbK22pot;
+							_sum_fourTimesNbK22pot = 0;
 							r.nK22 += _sum_nK22;
 							lastK22saved = _sum_nK22;
 							_sum_nK22 = 0;
@@ -98,7 +98,7 @@ public class CountK2_2_Thibaud implements TooolsPlugin<Digraph, CountK2_2_Thilba
 
 				synchronized (r)
 				{
-					r.nK22pot += _sum_nK22pot;
+					r.fourTimesNbK22pot += _sum_fourTimesNbK22pot;
 					r.nK22 += _sum_nK22;
 
 					for (int i = 0; i < maxDegree; ++i)

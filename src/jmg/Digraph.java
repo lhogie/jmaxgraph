@@ -78,11 +78,11 @@ public class Digraph
 		}
 		else if (in == null)
 		{
-			in = ReverseGraph.computeInverseADJ(out, false);
+			in = ReverseGraph.computeInverseADJ_par(out, false);
 		}
 		else if (out == null)
 		{
-			out = ReverseGraph.computeInverseADJ(in, false);
+			out = ReverseGraph.computeInverseADJ_par(in, false);
 		}
 	}
 

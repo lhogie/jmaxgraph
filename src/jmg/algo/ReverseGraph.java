@@ -1,6 +1,6 @@
 package jmg.algo;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
@@ -56,27 +56,14 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 
 	public static int[][] computeInverseADJ_par(int[][] adj, boolean pruneSrc)
 	{
-		int[][] r = allocates(computeReverseDegrees(adj));
+		int[] degrees = computeReverseDegrees(adj);
+		int[][] r = allocates(degrees);
 
 		int nbVertex = adj.length;
 
 		LongProcess initIndex = new LongProcess("initializing indices", nbVertex);
-		AtomicInteger[] pos = new AtomicInteger[nbVertex];
+		int[] pos = new int[nbVertex];
 		initIndex.progressStatus.set(0);
-		new ParallelIntervalProcessing(nbVertex)
-		{
-			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
-			{
-				for (int u = lowerBound; u < upperBound; ++u)
-				{
-					pos[u] = new AtomicInteger(0);
-
-					if (u % 1000 == 0)
-						initIndex.progressStatus.addAndGet(1000);
-				}
-			}
-		};
 
 		initIndex.end();
 		LongProcess computing = new LongProcess("computing inverse adjacencies",
@@ -92,7 +79,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 					for (int v : adj[u])
 					{
 						int[] vAdj = r[v];
-						vAdj[pos[v].getAndIncrement()] = u;
+						vAdj[pos[v]++] = u;
 					}
 
 					if (pruneSrc)
@@ -115,6 +102,29 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 			}
 		}
 
+		// check
+		AtomicLong nbError = new AtomicLong(0);
+		new ParallelIntervalProcessing(nbVertex)
+		{
+			@Override
+			protected void process(int rank, int lowerBound, int upperBound)
+			{
+				for (int u = lowerBound; u < upperBound; ++u)
+				{
+					if (pos[u] != degrees[u])
+					{
+						nbError.incrementAndGet();
+					}
+
+				}
+			}
+		};
+
+		if (nbError.get() > 0)
+		{
+			throw new IllegalStateException("ADJ ERROR " + nbError.get());
+		}
+		
 		computing.end();
 		return r;
 	}
@@ -157,7 +167,8 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 				++degree[v];
 			}
 
-			compute.progressStatus.incrementAndGet();
+			if (u % 100 == 0)
+				compute.progressStatus.addAndGet(100);
 		}
 
 		compute.end();
