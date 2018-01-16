@@ -94,9 +94,6 @@ public class JMGReader
 	{
 		RegularFile adjFile = JMGDataset.getADJFile(dataset.directory);
 
-		int[] degrees = Conversion.toIntArray(
-				JMGDataset.getDegreesFile(dataset.directory).readValues(nbThreads));
-
 		long[] index = JMGDataset.getIndexFile(dataset.directory).readValues(nbThreads);
 
 		int[][] adj = new int[nbVertex][];
@@ -117,22 +114,30 @@ public class JMGReader
 
 				for (int _u = lowerBound; _u < upperBound; ++_u)
 				{
-					int _nbNeighbor = degrees[_u];
+					long endPosition = _u < index.length - 1 ? index[_u + 1]
+							: adjFile.getSize();
+					long nbBytes = endPosition - index[_u];
+					boolean hasNoNeighbors = nbBytes == 0;
 
-					if (_nbNeighbor == 0)
+					if (hasNoNeighbors)
 					{
 						adj[_u] = Utils.emptyArray;
 					}
 					else
 					{
-						int[] _neighbors = new int[_nbNeighbor];
-						_neighbors[0] = Conversion.long2int(_r.next(8));
+						int firstNeighbor = Conversion.long2int(_r.next(8));
 						nbBytesRead += 8;
+						boolean hasMoreThanOneNeighbor = nbBytes > 8;
 
-						if (_nbNeighbor > 1)
+						if (hasMoreThanOneNeighbor)
 						{
 							int encoding = (int) _r.next(1);
-							int previous = _neighbors[0];
+							int _nbNeighbor = 1
+									+ Conversion.long2int((nbBytes - 9) / encoding);
+
+							int[] _neighbors = new int[_nbNeighbor];
+							_neighbors[0] = firstNeighbor;
+							int previous = firstNeighbor;
 
 							for (int i = 1; i < _nbNeighbor; ++i)
 							{
@@ -148,9 +153,13 @@ public class JMGReader
 								reading.progressStatus.addAndGet(1000000);
 								nbBytesRead -= 1000000;
 							}
-						}
 
-						adj[_u] = _neighbors;
+							adj[_u] = _neighbors;
+						}
+						else
+						{
+							adj[_u] = new int[] { firstNeighbor };
+						}
 					}
 				}
 			}

@@ -1,13 +1,14 @@
 package jmg;
 
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Random;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
+import jmg.algo.Adj;
 import jmg.algo.ReverseGraph;
 import jmg.io.JMGDataset;
 import toools.collection.LazyArray;
@@ -20,9 +21,70 @@ public class Digraph
 {
 	public int[][] out;
 	public int[][] in;
+	public boolean isMultiGraph = true;
 	public Vertex2LabelMap vertex2label;
 	public int[] label2vertex;
 	public JMGDataset origin;
+
+	public void addArc(int u, int v)
+	{
+		if (out != null)
+		{
+			out[u] = Utils.insert(out[u], v, isMultiGraph);
+		}
+
+		if (in != null)
+		{
+			in[v] = Utils.insert(in[v], u, isMultiGraph);
+		}
+	}
+
+	public void addArcs(int u, int... V)
+	{
+		if (out != null)
+		{
+			out[u] = Utils.union(out[u], V);
+		}
+
+		if (in != null)
+		{
+			for (int v : V)
+			{
+				Utils.insert(in[v], u, isMultiGraph);
+			}
+		}
+	}
+
+	public void removeArc(int u, int v)
+	{
+		if (out != null)
+		{
+			out[u] = Utils.remove(out[u], v, ! isMultiGraph);
+		}
+
+		if (in != null)
+		{
+			in[v] = Utils.remove(in[v], u, ! isMultiGraph);
+		}
+	}
+
+	public static void main(String[] args)
+	{
+		Digraph g = new Digraph();
+		g.out = new int[1][];
+		g.out[0] = new int[0];
+		Random r = new Random();
+
+		LongProcess p = new LongProcess("perfomance", 1000000);
+
+		for (int i = 0; i < 1000000; ++i)
+		{
+			g.addArc(0, r.nextInt());
+			p.progressStatus.incrementAndGet();
+		}
+
+		p.end();
+	}
 
 	public int[][] getRefAdj()
 	{
@@ -78,11 +140,11 @@ public class Digraph
 		}
 		else if (in == null)
 		{
-			in = ReverseGraph.computeInverseADJ_par(out, false);
+			in = ReverseGraph.computeInverseADJ(out, false);
 		}
 		else if (out == null)
 		{
-			out = ReverseGraph.computeInverseADJ_par(in, false);
+			out = ReverseGraph.computeInverseADJ(in, false);
 		}
 	}
 
@@ -121,25 +183,18 @@ public class Digraph
 
 	public long countArcs()
 	{
-		AtomicLong r = new AtomicLong(0);
-
-		new ParallelIntervalProcessing(out.length)
+		if (out != null)
 		{
-			@Override
-			protected void process(int _rank, int _lowerBound, int _upperBound)
-			{
-				int _n = 0;
-
-				for (int _v = _lowerBound; _v < _upperBound; ++_v)
-				{
-					_n += out[_v].length;
-				}
-
-				r.addAndGet(_n);
-			}
-		};
-
-		return r.get();
+			return Adj.countArcs(out);
+		}
+		else if (in != null)
+		{
+			return Adj.countArcs(in);
+		}
+		else
+		{
+			return 0;
+		}
 	}
 
 	public static Digraph from(Int2ObjectMap<int[]> adj, boolean addUndeclared,

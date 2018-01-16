@@ -23,13 +23,12 @@ public class Utils
 
 		new ParallelIntervalProcessing(nbVertex)
 		{
-
 			@Override
 			protected void process(int rank, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					a[u] = Utils.union2(a[u], b[u]);
+					a[u] = Utils.union(a[u], b[u]);
 
 					if (prune)
 					{
@@ -65,12 +64,11 @@ public class Utils
 		r.append(']');
 		return r.toString();
 	}
-/*
-	public static int pick(int[] weights, Random prng)
-	{
-		return pick(partialSums(weights), prng);
-	}
-*/
+
+	/*
+	 * public static int pick(int[] weights, Random prng) { return
+	 * pick(partialSums(weights), prng); }
+	 */
 	public static long[] partialSums(int[] weights)
 	{
 		LongProcess lp = new LongProcess("computing partial sums", weights.length);
@@ -129,24 +127,6 @@ public class Utils
 			return min;
 
 		return max;
-	}
-
-	public static void main(String[] args)
-	{
-		long[] w = new long[] { 2, 4, 6, 6, 7, 12 };
-
-		Random r = new Random();
-		int[] distribution = new int[6];
-int n = 12000;
-
-		for (int i = 0; i < n; ++i)
-		{
-			++distribution[pick(w, r)];
-		}
-
-
-		
-		Cout.debug(distribution);
 	}
 
 	public static int countElementsInCommon_dichotomic(int[] A, int[] B)
@@ -325,6 +305,118 @@ int n = 12000;
 
 	}
 
+	public static boolean contains(int[] a, int u)
+	{
+		return IntArrays.binarySearch(a, u) >= 0;
+	}
+
+	public static final int[] emptyArray = new int[0];
+
+	public static <A extends IntCollection> int[][] convert(A[] a)
+	{
+		int[][] r = new int[a.length][];
+
+		for (int i = 0; i < r.length; ++i)
+		{
+			r[i] = a[i].toIntArray();
+
+			// free memory
+			a[i] = null;
+		}
+
+		return r;
+	}
+
+	public static int[][] convert(Int2ObjectMap<int[]> m)
+	{
+		int sz = m.size();
+		int[][] r = new int[sz][];
+
+		for (int i = 0; i < sz; ++i)
+		{
+			r[i] = m.get(i);
+		}
+
+		return r;
+	}
+
+	public static void printAsMap(int[] a, String separator, PrintStream os)
+	{
+		for (int v = 0; v < a.length; ++v)
+		{
+			os.println(v + separator + a[v]);
+		}
+	}
+
+	public static int[] insert(int[] a, int v, boolean allowsMultipleInstances)
+	{
+		int pos = IntArrays.binarySearch(a, v);
+
+		if (pos >= 0 && ! allowsMultipleInstances)
+			return a;
+
+		if (pos < 0)
+		{
+			pos = - pos - 1;
+		}
+
+		int[] r = new int[a.length + 1];
+		System.arraycopy(a, 0, r, 0, pos);
+		r[pos] = v;
+		System.arraycopy(a, pos, r, pos + 1, a.length - pos);
+		return r;
+	}
+
+	public static int[] remove(int[] a, int v, boolean removeAll)
+	{
+		int pos = IntArrays.binarySearch(a, v);
+
+		if (pos >= 0)
+		{
+			int n = 1;
+
+			if (removeAll)
+			{
+				int i = pos + 1;
+
+				while (i < a.length && a[i++] == v)
+				{
+					++n;
+				}
+			}
+
+			int[] r = new int[a.length - n];
+			System.arraycopy(a, 0, r, 0, pos);
+			System.arraycopy(a, pos + n, r, pos, a.length - pos - n);
+			return r;
+		}
+
+		return a;
+	}
+
+	public static void main(String[] args)
+	{
+		int[] w = new int[] { 2, 4, 6, 6, 7, 12, 12 };
+
+		Cout.debug(remove(w, 12, true));
+	}
+
+	public static void main1(String[] args)
+	{
+		long[] w = new long[] { 2, 4, 6, 6, 7, 12 };
+
+		Random r = new Random();
+		int[] distribution = new int[6];
+		int n = 12000;
+
+		for (int i = 0; i < n; ++i)
+		{
+			++distribution[pick(w, r)];
+		}
+
+		Cout.debug(distribution);
+	}
+
 	public static void main2(String[] args)
 	{
 		Random r = new Random();
@@ -341,48 +433,4 @@ int n = 12000;
 			Cout.debug("****");
 		}
 	}
-
-	public static boolean contains(int[] a, int u)
-	{
-		return IntArrays.binarySearch(a, u) >= 0;
-	}
-
-	public static final int[] emptyArray = new int[0];
-
-	public static <A extends IntCollection> int[][] convert(A[] a)
-	{
-		int[][] r = new int[a.length][];
-	
-		for (int i = 0; i < r.length; ++i)
-		{
-			r[i] = a[i].toIntArray();
-	
-			// free memory
-			a[i] = null;
-		}
-	
-		return r;
-	}
-
-	public static int[][] convert(Int2ObjectMap<int[]> m)
-	{
-		int sz = m.size();
-		int[][] r = new int[sz][];
-	
-		for (int i = 0; i < sz; ++i)
-		{
-			r[i] = m.get(i);
-		}
-	
-		return r;
-	}
-
-	public static void printAsMap(int[] a, String separator, PrintStream os)
-	{
-		for (int v = 0; v < a.length; ++v)
-		{
-			os.println(v + separator + a[v]);
-		}
-	}
-
 }

@@ -10,6 +10,7 @@ import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.gen.GridGenerator;
 import toools.io.Bits;
+import toools.io.Utilities;
 import toools.io.file.Directory;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
@@ -118,7 +119,7 @@ public class JMGWriter
 				if (neighbors.length > 1)
 				{
 					// write the encoding for the other neighbors
-					int encoding = getNbBytes(maxgap(neighbors));
+					int encoding = Utilities.getNbBytesRequireToEncode(maxgap(neighbors));
 					Bits.putLong(b, 0, encoding, 1);
 					os.write(b, 0, 1);
 					pos += 1;
@@ -141,10 +142,7 @@ public class JMGWriter
 
 		os.close();
 
-		JMGDataset.getIndexFile(d).saveValues(index.length, v -> index[v],
-				getNbBytes(index[index.length - 1]));
-
-		JMGDataset.getDegreesFile(d).saveValues(adj.length, v -> adj[v].length, 4);
+		JMGDataset.getIndexFile(d).saveValues(index);
 		saving.end();
 	}
 
@@ -162,26 +160,6 @@ public class JMGWriter
 		}
 
 		return r;
-	}
-
-	private static byte getNbBytes(long n)
-	{
-		if (n < 256)
-			return 1;
-		else if (n < 65536)
-			return 2;
-		else if (n < 16777216)
-			return 3;
-		else if (n < 4294967296L)
-			return 4;
-		else if (n < 1099511627776L)
-			return 5;
-		else if (n < 281474976710656L)
-			return 6;
-		else if (n < 72057594037927936L)
-			return 7;
-		else
-			return 8;
 	}
 
 	public static void main(String[] args) throws IOException
