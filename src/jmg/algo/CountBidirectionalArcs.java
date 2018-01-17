@@ -14,6 +14,7 @@ public class CountBidirectionalArcs
 	{
 		LongProcess p = new LongProcess("count bidirectional arcs", g.getNbVertex());
 		AtomicLong count = new AtomicLong(0);
+		p.temporaryResult = count;
 
 		new ParallelIntervalProcessing(g.getNbVertex())
 		{
@@ -25,9 +26,12 @@ public class CountBidirectionalArcs
 				{
 					for (int v : g.out[u])
 					{
-						if (g.exists(v, u))
+						if (v < u)
 						{
-							count.incrementAndGet();
+							if (g.exists(v, u))
+							{
+								count.incrementAndGet();
+							}
 						}
 					}
 
@@ -36,7 +40,7 @@ public class CountBidirectionalArcs
 			}
 		};
 
-		p.end();
+		p.end(count.toString());
 		return count.get();
 	}
 

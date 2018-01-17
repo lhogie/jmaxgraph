@@ -70,7 +70,7 @@ public class JMGWriter
 	{
 		Properties p = new Properties();
 		p.put("nbVertices", "" + g.getNbVertex());
-		p.put("adj type", getRefAdjType(g));
+		p.put("adjType", getRefAdjType(g));
 		OutputStream pos = JMGDataset.getPropertyFile(d).createWritingStream();
 		p.store(pos, "JMG property file");
 		pos.close();

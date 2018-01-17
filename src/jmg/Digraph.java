@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
-import jmg.algo.Adj;
 import jmg.algo.ReverseGraph;
 import jmg.io.JMGDataset;
 import toools.collection.LazyArray;
@@ -25,6 +24,18 @@ public class Digraph
 	public Vertex2LabelMap vertex2label;
 	public int[] label2vertex;
 	public JMGDataset origin;
+
+	public void setOuts(int u, int... N)
+	{
+
+		if (u != out.length)
+			throw new IllegalArgumentException();
+
+		int[][] newOut = new int[out.length + 1][];
+		System.arraycopy(out, 0, newOut, 0, out.length);
+		newOut[u] = N;
+		this.out = newOut;
+	}
 
 	public void addArc(int u, int v)
 	{
@@ -107,7 +118,7 @@ public class Digraph
 		return getRefAdj().length;
 	}
 
-	public void undirectionalize()
+	public void symmetrize()
 	{
 		ensureBothDirections();
 		Utils.union(out, in, true);
@@ -124,7 +135,9 @@ public class Digraph
 			return Utils.contains(in[v], u);
 		}
 		else
+		{
 			throw new IllegalStateException("no ADJ");
+		}
 	}
 
 	public void ensureSorted()
@@ -185,11 +198,11 @@ public class Digraph
 	{
 		if (out != null)
 		{
-			return Adj.countArcs(out);
+			return Utils.countArcs(out);
 		}
 		else if (in != null)
 		{
-			return Adj.countArcs(in);
+			return Utils.countArcs(in);
 		}
 		else
 		{
@@ -296,10 +309,7 @@ public class Digraph
 				{
 					if (v >= booleanArray.length)
 					{
-						Cout.debug("((( reallocating");
-						long a = System.currentTimeMillis();
 						booleanArray = Arrays.copyOf(booleanArray, v + 1);
-						Cout.debug("((( wasted " + (System.currentTimeMillis() - a));
 					}
 
 					if ( ! booleanArray[v])

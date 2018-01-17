@@ -110,7 +110,7 @@ public class GridGenerator implements TooolsPlugin<Void, Digraph>
 		int[][] adj = GridGenerator.dgrid_outs(3,  30, true, true, true, false);
 		Digraph g = new Digraph();
 		g.out= adj;
-		g.undirectionalize();
+		g.symmetrize();
 		Cout.debug(DotWriter.toString(g.in));
 	}
 

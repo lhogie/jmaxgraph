@@ -2,6 +2,7 @@ package jmg;
 
 import java.io.PrintStream;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrays;
@@ -432,5 +433,28 @@ public class Utils
 			Cout.debug(union(a, b));
 			Cout.debug("****");
 		}
+	}
+
+	public static long countArcs(int[][] adj)
+	{
+		AtomicLong r = new AtomicLong(0);
+	
+		new ParallelIntervalProcessing(adj.length)
+		{
+			@Override
+			protected void process(int _rank, int _lowerBound, int _upperBound)
+			{
+				int _n = 0;
+	
+				for (int _v = _lowerBound; _v < _upperBound; ++_v)
+				{
+					_n += adj[_v].length;
+				}
+	
+				r.addAndGet(_n);
+			}
+		};
+	
+		return r.get();
 	}
 }
