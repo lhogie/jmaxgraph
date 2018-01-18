@@ -1,0 +1,59 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\title{JMaxGraph\\ dealing with huge graphs in memory}
+\author{Luc Hogie}
+\begin{document}
+\section{Measure performance}
+On the NEF Inria cluster.
+\begin{itemize}
+\item loading up to 2GB/s, loading the entire Twitter text ADJ file (215GB) took 7min.
+\item iterating on 500M vertices takes 1s.
+\end{itemize}
+Loading
+\section{The text ADJ file format}
+First line is the number of vertices. Each following line then consists of:
+\begin{enumerate}
+\item the ID of the vertex;
+\item the number of neighbors;
+\item the ID for each neighbor.
+\end{enumerate}
+It takes lots of disk space: slow to read, to parse and to manipulate.
+Twitter graph takes 215GB. 
+On NEF, using 8 threads, reading it takes 7min.
+
+\section{The binary ADJ file format}
+The same of text ADJ, but each number/vertex is represented by a sequence of 4 bytes.
+The size can be reduced up to 3.
+\section{The JMG file format}
+It is a directory
+\begin{description}
+\item[properties.txt] 
+\item[label2vertex.nbs] contains a sequence of vertex ID, each coded on 4 bytes. The index of the vertex is its label. The number of vertices in the graph is the size of this file divided by 4.
+\item[adj.edg] contains the adj
+\item[index.nbs] contains the adj
+ \end{description}
+The JMG file format ensures that, after loading:
+\begin{enumerate}
+\item adjacency lists are ordered
+\item there is no vertex in ADJlists that is not in the key set
+\end{enumerate}
+
+Takes 2-3min
+
+\section{Computing }
+
+\subsection{Computing reverse degrees}
+17s on one thread
+
+\subsection{Allocates}
+
+\subsection{Building reverse ADJ}
+on one thread, by allocated on the fly, 6.1min.
+
+
+
+
+\end{document}
