@@ -24,18 +24,18 @@ public class CountBidirectionalArcs
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					for (int v : g.out[u])
+					for (int v : g.out.adj[u])
 					{
 						if (v < u)
 						{
-							if (g.exists(v, u))
+							if (g.arcExists(v, u))
 							{
 								count.incrementAndGet();
 							}
 						}
 					}
 
-					p.progressStatus.incrementAndGet();
+					++p.progressStatus;
 				}
 			}
 		};

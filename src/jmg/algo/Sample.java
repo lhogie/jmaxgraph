@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntArrays;
 import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
+import jmg.Labelling;
 import jmg.Vertex2LabelMap;
 import toools.io.Cout;
 import toools.progression.LongProcess;
@@ -21,27 +22,29 @@ public class Sample implements TooolsPlugin<Digraph, Digraph>
 	{
 		Digraph sampleGraph = new Digraph();
 
-		if (g.label2vertex != null)
+		if (g.labelling != null)
 		{
-			sampleGraph.label2vertex = IntArrays.copy(g.label2vertex);
-			sampleGraph.vertex2label = new Vertex2LabelMap(g.vertex2label);
+			sampleGraph.labelling = new Labelling();
+			sampleGraph.labelling.label2vertex = IntArrays.copy(g.labelling.label2vertex);
+			sampleGraph.labelling.vertex2label = new Vertex2LabelMap(
+					g.labelling.vertex2label);
 		}
 
-		if (g.out != null && g.in != null)
+		if (g.out.adj != null && g.in.adj != null)
 		{
 			// free some memory before sample g.out
-			g.in = null;
-			g.out = sample(g.out);
+			g.in.adj = null;
+			g.out.adj = sample(g.out.adj);
 			Cout.progress("Sampling completed, now needs to update IN ADJ");
-			g.in = ReverseGraph.computeInverseADJ(g.out, true);
+			g.in.adj = ReverseGraph.computeInverseADJ(g.out.adj, true);
 		}
-		else if (g.out == null)
+		else if (g.out.adj == null)
 		{
-			sampleGraph.in = sample(g.in);
+			sampleGraph.in.adj = sample(g.in.adj);
 		}
-		else if (g.in == null)
+		else if (g.in.adj == null)
 		{
-			sampleGraph.out = sample(g.out);
+			sampleGraph.out.adj = sample(g.out.adj);
 		}
 
 		return sampleGraph;
@@ -73,7 +76,7 @@ public class Sample implements TooolsPlugin<Digraph, Digraph>
 					}
 
 					r[u] = IntArrays.copy(retain, 0, nbRetained);
-					sampling.progressStatus.incrementAndGet();
+					++sampling.progressStatus;
 				}
 			}
 		};

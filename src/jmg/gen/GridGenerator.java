@@ -1,7 +1,6 @@
 package jmg.gen;
 
 import java.io.IOException;
-import java.nio.channels.NotYetBoundException;
 import java.util.Arrays;
 
 import java4unix.pluginchain.PluginConfig;
@@ -28,7 +27,7 @@ public class GridGenerator implements TooolsPlugin<Void, Digraph>
 	public Digraph process(Void v)
 	{
 		Digraph g = new Digraph();
-		g.out = dgrid_outs(nbRows, nbColumns, horizontal, vertical, diags, tore);
+		g.out.adj = dgrid_outs(nbRows, nbColumns, horizontal, vertical, diags, tore);
 		return g;
 	}
 
@@ -48,8 +47,7 @@ public class GridGenerator implements TooolsPlugin<Void, Digraph>
 
 				for (int v = lowerBound; v < upperBound; ++v)
 				{
-					if (v % 100 == 0)
-						lp.progressStatus.addAndGet(100);
+					++	lp.progressStatus;
 
 					int i = v / nbColumn;
 					int j = v % nbColumn;
@@ -109,9 +107,9 @@ public class GridGenerator implements TooolsPlugin<Void, Digraph>
 	{
 		int[][] adj = GridGenerator.dgrid_outs(3,  30, true, true, true, false);
 		Digraph g = new Digraph();
-		g.out= adj;
+		g.out.adj= adj;
 		g.symmetrize();
-		Cout.debug(DotWriter.toString(g.in));
+		Cout.debug(DotWriter.toString(g.in.adj));
 	}
 
 	@Override

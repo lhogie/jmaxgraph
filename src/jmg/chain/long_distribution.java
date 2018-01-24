@@ -17,8 +17,7 @@ public class long_distribution implements TooolsPlugin<long[], Long2IntMap>
 
 		for (long n : m)
 		{
-			if (n % 100 == 0)
-				pm.progressStatus.addAndGet(100);
+			++pm.progressStatus;
 
 			distribution.put(n, distribution.get(n) + 1);
 		}

@@ -11,14 +11,14 @@ import jmg.gen.GridGenerator;
 import jmg.io.DotWriter;
 import jmg.io.EdgeListFileReader;
 import jmg.io.EdgeListFileWriter;
-import jmg.io.JMGReader;
-import jmg.io.JMGWriter;
 import jmg.io.adj.ADJ32Reader;
 import jmg.io.adj.ADJ32Writer;
 import jmg.io.adj.TextADJReader;
 import jmg.io.adj.TextADJWriter;
+import jmg.io.jmg.JMGDirectory;
+import jmg.io.jmg.JMGReader;
+import jmg.io.jmg.JMGWriter;
 import toools.io.NBSFile;
-import toools.io.file.Directory;
 import toools.io.file.RegularFile;
 
 public class JMGPlugins extends DefaultPlugins
@@ -36,13 +36,13 @@ public class JMGPlugins extends DefaultPlugins
 			if (bootstrap)
 			{
 				JMGReader.Plugin w = new JMGReader.Plugin();
-				w.from = new Directory(name);
+				w.from = new JMGDirectory(name);
 				return w;
 			}
 			else
 			{
 				JMGWriter.Plugin w = new JMGWriter.Plugin();
-				w.to = new Directory(name);
+				w.to = new JMGDirectory(name);
 				return w;
 			}
 		}

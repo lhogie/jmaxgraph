@@ -25,7 +25,7 @@ public class BigGrphReader
 		Cout.result("total number of vertices in " + files.size() + " files: "
 				+ totalNbEntry);
 		Digraph g = new Digraph();
-		g.out = new int[totalNbEntry][];
+		g.out.adj = new int[totalNbEntry][];
 		int[] label2vertex = new int[totalNbEntry];
 		Arrays.fill(label2vertex, - 2);
 
@@ -86,10 +86,9 @@ public class BigGrphReader
 			is.read(b, 0, 4);
 			int nbNeighbors = DataBinaryEncoding.readInt(b, 0);
 			int[] inNeighbors = new int[nbNeighbors];
-			g.out[label] = inNeighbors;
+			g.out.adj[label] = inNeighbors;
 
-			if (offset % 100 == 0)
-				pm.progressStatus.addAndGet(100);
+			++pm.progressStatus;
 
 			is.read(b, 0, 1);
 			boolean is32bit = DataBinaryEncoding.readBoolean(b, 0);

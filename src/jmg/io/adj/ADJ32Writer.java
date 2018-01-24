@@ -9,10 +9,11 @@ import toools.progression.LongProcess;
 
 public class ADJ32Writer extends ADJWriter
 {
+
 	@Override
 	public long[] write(Digraph g, OutputStream os) throws IOException
 	{
-		int nbVertex = g.out.length;
+		int nbVertex = g.getNbVertex();
 		long pos = 4;
 		long[] index = new long[nbVertex];
 
@@ -24,10 +25,10 @@ public class ADJ32Writer extends ADJWriter
 
 		for (int v = 0; v < nbVertex; ++v)
 		{
-			int[] neighbors = g.out[v];
+			int[] neighbors = g.out.adj[v];
 
 			index[v] = pos;
-			Bits.putInt(b, 0, g.label2vertex == null ? v : g.label2vertex[v]);
+			Bits.putInt(b, 0, g.labelling == null ? v : g.labelling.label2vertex[v]);
 			os.write(b);
 
 			Bits.putInt(b, 0, neighbors.length);
@@ -36,11 +37,11 @@ public class ADJ32Writer extends ADJWriter
 			for (int i = 0; i < neighbors.length; ++i)
 			{
 				int n = neighbors[i];
-				Bits.putInt(b, 0, g.label2vertex == null ? n : g.label2vertex[n]);
+				Bits.putInt(b, 0, g.labelling == null ? n : g.labelling.label2vertex[n]);
 				os.write(b);
 			}
 
-			lp.progressStatus.incrementAndGet();
+			++lp.progressStatus;
 			pos += 8 + neighbors.length * 4;
 		}
 

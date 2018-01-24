@@ -8,25 +8,25 @@ import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
-import jmg.io.JMGReader;
-import toools.io.file.Directory;
+import jmg.io.jmg.JMGDirectory;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountTriangles
-		implements TooolsPlugin<Digraph, Count_Triangle_Stephane_Result>
+public class CountTriangles implements TooolsPlugin<Digraph, CountTriangleResult>
 {
 
 	@Override
-	public Count_Triangle_Stephane_Result process(Digraph g)
+	public CountTriangleResult process(Digraph g)
 	{
 		return count(g);
 	}
 
-	public static Count_Triangle_Stephane_Result count(Digraph g)
+	public static CountTriangleResult count(Digraph g)
 	{
-		g.ensureBothDirections();
+		g.out.ensureDefined();
+		g.in.ensureDefined();
+
 		// g.symmetrize();
 
 		int nbVertices = g.getNbVertex();
@@ -43,12 +43,10 @@ public class CountTriangles
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					int din = g.in[u].length;
-					int dout = g.out[u].length;
+					int din = g.in.adj[u].length;
+					int dout = g.out.adj[u].length;
 					weigths[u] = din * dout;
-
-					if (u % 1000 == 0)
-						assigningWeights.progressStatus.addAndGet(1000);
+					++assigningWeights.progressStatus;
 				}
 			}
 		};
@@ -57,7 +55,7 @@ public class CountTriangles
 
 		long[] partialSums = Utils.partialSums(weigths);
 
-		Count_Triangle_Stephane_Result r = new Count_Triangle_Stephane_Result();
+		CountTriangleResult r = new CountTriangleResult();
 
 		LongProcess l = new LongProcess("tracking K2,2 by Stephane", - 1);
 		l.temporaryResult = r;
@@ -67,28 +65,28 @@ public class CountTriangles
 			@Override
 			protected void runInParallel(int rank, List<Thread> threads) throws Throwable
 			{
-				Count_Triangle_Stephane_Result _r = new Count_Triangle_Stephane_Result();
+				CountTriangleResult _r = new CountTriangleResult();
 
 				while (true)
 				{
-					l.progressStatus.incrementAndGet();
+					++l.progressStatus;
 
 					Random prng = new Random();
 					int u = Utils.pick(partialSums, prng);
-					int[] in = g.in[u];
-					int[] out = g.out[u];
+					int[] in = g.in.adj[u];
+					int[] out = g.out.adj[u];
 
 					int v1 = in[prng.nextInt(in.length)];
 					int v2 = out[prng.nextInt(out.length)];
 
 					if (v1 != v2)
 					{
-						if (g.exists(v1, v2))
+						if (g.arcExists(v1, v2))
 						{
 							++_r.nbTransitiveTriangles;
 						}
 
-						if (g.exists(v1, v2))
+						if (g.arcExists(v1, v2))
 						{
 							++_r.nbCyclicTriangles;
 						}
@@ -113,8 +111,8 @@ public class CountTriangles
 			}
 		};
 
-		// we counted each K22 twice
-		r.nbCyclicTriangles /= 3;
+		// we counted each K22 three twice
+		r.nPossibleEvents = partialSums[partialSums.length - 1];
 		l.end();
 		return r;
 	}
@@ -126,8 +124,8 @@ public class CountTriangles
 
 	public static void main(String[] args) throws IOException
 	{
-		Directory d = new Directory("$HOME/datasets/sample-0.001b.jmg");
-		Digraph g = JMGReader.readDirectory(d, 8, false);
+		JMGDirectory d = new JMGDirectory("$HOME/datasets/sample-0.001b.jmg");
+		Digraph g = d.readDirectory(8, false);
 		CountTriangles.count(g);
 	}
 }

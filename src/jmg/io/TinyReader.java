@@ -3,6 +3,7 @@ package jmg.io;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import jmg.Digraph;
+import jmg.Labelling;
 
 public class TinyReader
 {
@@ -29,7 +30,10 @@ public class TinyReader
 		public Digraph toGraph()
 		{
 			Int2ObjectMap<int[]> adj = TinyReader.parse(toString());
-			return Digraph.from(adj, true, false, true);
+			Digraph g = new Digraph();
+			g.labelling = new Labelling();
+			g.out.from(adj, true, true, g.labelling);
+			return g;
 		}
 	}
 

@@ -9,7 +9,7 @@ public class Vertex2LabelMap extends LazyArray
 	{
 		super(a);
 	}
-	
+
 	public Vertex2LabelMap(int[] label2vertex)
 	{
 		super(128, - 1);
@@ -19,8 +19,7 @@ public class Vertex2LabelMap extends LazyArray
 
 		for (int label = 0; label < nbLabels; ++label)
 		{
-			if (label % 100 == 0)
-				pm.progressStatus.set(label);
+			++pm.progressStatus;
 
 			int v = label2vertex[label];
 			put(v, label);
@@ -29,6 +28,5 @@ public class Vertex2LabelMap extends LazyArray
 		assert countDefinedCells() == label2vertex.length;
 		pm.end(nbLabels + " labels defined");
 	}
-	
-	
+
 }

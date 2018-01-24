@@ -15,7 +15,7 @@ public class DegreeDistribution
 
 		for (int[] neighbors : adj)
 		{
-			pm.progressStatus.incrementAndGet();
+			++pm.progressStatus;
 
 			int degree = neighbors.length;
 

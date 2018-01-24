@@ -12,9 +12,9 @@ public class adj implements TooolsPlugin<Digraph, int[][]>
 	public int[][] process(Digraph g)
 	{
 		if (type.equals("out"))
-			return g.out;
+			return g.out.adj;
 		else if (type.equals("in"))
-			return g.in;
+			return g.in.adj;
 		else
 			throw new IllegalStateException("unknown ADJ type: " + type);
 	}

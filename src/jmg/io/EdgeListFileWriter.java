@@ -37,15 +37,16 @@ public class EdgeListFileWriter
 		}
 	}
 
+	
 	public static void write(Digraph g, PrintStream out)
 	{
-		for (int l = 0; l < g.out.length; ++l)
+		for (int l = 0; l < g.out.adj.length; ++l)
 		{
-			int v = g.label2vertex[l];
+			int v = g.labelling == null ? l : g.labelling.label2vertex[l];
 
-			for (int nl : g.out[l])
+			for (int nl : g.out.adj[l])
 			{
-				int n = g.label2vertex[nl];
+				int n =  g.labelling == null ? nl : g.labelling.label2vertex[nl];
 				out.print(v);
 				out.print('\t');
 				out.print(n);

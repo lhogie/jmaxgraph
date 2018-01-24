@@ -36,17 +36,15 @@ public abstract class ADJWriter implements TooolsPlugin<Digraph, RegularFile>
 
 		if (writeIndex)
 		{
-			new NBSFile(to.getPath() + ".index").saveValues(index.length,
-					i -> index[i], 8);
+			new NBSFile(to.getPath() + ".index").saveValues(index.length, i -> index[i],
+					8);
 
-			if (g.label2vertex != null)
+			if (g.labelling != null)
 			{
-				new NBSFile(to.getPath() + ".label2vertex").saveValues(
-						g.label2vertex.length,
-						i -> g.label2vertex[i], 4);
+				new NBSFile(to.getPath() + ".label2vertex")
+						.saveValues(g.labelling.label2vertex);
 			}
 		}
-
 	}
 
 	@Override

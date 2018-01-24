@@ -1,13 +1,18 @@
 package jmg;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.ObjectCollection;
+import toools.collection.LazyArray;
 import toools.io.Cout;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
@@ -16,6 +21,111 @@ import toools.thread.ParallelIntervalProcessing;
 public class Utils
 {
 	public static int nbThreads = Runtime.getRuntime().availableProcessors() * 2;
+
+	public static IntSet findUndeclaredVertices(Int2ObjectMap<int[]> adjTable)
+	{
+		boolean[] booleanArray = null;
+		LazyArray known = null;
+
+		{
+			LongProcess marking = new LongProcess(
+					"marking " + adjTable.keySet().size()
+							+ " declared vertices as 'present'",
+					adjTable.keySet().size());
+
+			int[] vertices = adjTable.keySet().toIntArray();
+
+			try
+			{
+				int maxV = MathsUtilities.max(vertices);
+				booleanArray = new boolean[maxV + 1];
+				Cout.info("using boolean array for known vertex set");
+			}
+			catch (Throwable e)
+			{
+				known = new LazyArray();
+				Cout.info(
+						"using lazy int array for known vertex set: not enough RAM for allocating a large boolean array");
+			}
+
+			for (int v : vertices)
+			{
+				++marking.progressStatus;
+
+				if (booleanArray != null)
+					booleanArray[v] = true;
+				else
+					known.put(v, 1);
+			}
+
+			marking.end();
+		}
+
+		ObjectCollection<int[]> adjLists = adjTable.values();
+		LongProcess tracking = new LongProcess(
+				"tracking non-'present' vertices in ADJ-lists", " list", adjLists.size());
+		IntSet undeclared = new IntOpenHashSet(adjTable.size());
+
+		if (booleanArray != null)
+		{
+			for (int[] adjList : adjLists)
+			{
+				for (int v : adjList)
+				{
+					if (v >= booleanArray.length)
+					{
+						booleanArray = Arrays.copyOf(booleanArray, v + 1);
+					}
+
+					if ( ! booleanArray[v])
+					{
+
+						booleanArray[v] = true;
+						undeclared.add(v);
+					}
+				}
+
+				++tracking.progressStatus;
+			}
+		}
+		else
+		{
+			for (int[] adjList : adjLists)
+			{
+				for (int v : adjList)
+				{
+					if (known.get(v) != 1)
+					{
+						known.put(v, 1);
+						undeclared.add(v);
+					}
+				}
+
+				tracking.progressStatus++;
+			}
+		}
+
+		tracking.end("found " + undeclared.size() + " undeclared vertices.");
+		return undeclared;
+	}
+
+	public static void addUndeclaredVertices(Int2ObjectMap<int[]> adj)
+	{
+		IntSet undeclaredVertices = Utils.findUndeclaredVertices(adj);
+		LongProcess adding = new LongProcess(
+				"adding " + undeclaredVertices.size() + " vertices with no neighbors",
+				" vertex", undeclaredVertices.size());
+		IntIterator i = undeclaredVertices.iterator();
+
+		while (i.hasNext())
+		{
+			int v = i.nextInt();
+			adj.put(v, Utils.emptyArray);
+			adding.progressStatus++;
+		}
+
+		adding.end("ADJ-table now has " + adj.size() + " entries.");
+	}
 
 	public static void union(int[][] a, int[][] b, boolean prune)
 	{
@@ -36,8 +146,7 @@ public class Utils
 						b[u] = null;
 					}
 
-					if (u % 100 == 0)
-						computing.progressStatus.addAndGet(100);
+					computing.progressStatus++;
 				}
 			}
 		};
@@ -89,8 +198,7 @@ public class Utils
 
 			partialSums[i] = currentSum = trySum;
 
-			if (i % 1000 == 0)
-				lp.progressStatus.addAndGet(1000);
+			lp.progressStatus++;
 		}
 
 		lp.end();
@@ -171,7 +279,7 @@ public class Utils
 				for (int v = lowerBound; v < upperBound; ++v)
 				{
 					IntArrays.quickSort(adj[v]);
-					sorting.progressStatus.incrementAndGet();
+					++sorting.progressStatus;
 				}
 			}
 		};
@@ -438,23 +546,24 @@ public class Utils
 	public static long countArcs(int[][] adj)
 	{
 		AtomicLong r = new AtomicLong(0);
-	
+
 		new ParallelIntervalProcessing(adj.length)
 		{
 			@Override
 			protected void process(int _rank, int _lowerBound, int _upperBound)
 			{
 				int _n = 0;
-	
+
 				for (int _v = _lowerBound; _v < _upperBound; ++_v)
 				{
-					_n += adj[_v].length;
+					int[] N = adj[_v];
+					_n += N.length;
 				}
-	
+
 				r.addAndGet(_n);
 			}
 		};
-	
+
 		return r.get();
 	}
 }

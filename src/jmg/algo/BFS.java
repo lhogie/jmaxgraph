@@ -29,8 +29,7 @@ public class BFS
 
 		while (from != to)
 		{
-			if (from % 100 == 0)
-				lp.progressStatus.addAndGet(100);
+				++lp.progressStatus;
 
 			int v = q[from++];
 			int d = distances[v];
@@ -61,7 +60,7 @@ public class BFS
 		for (int distance = 0; ! inbox.isEmpty(); ++distance)
 		{
 			// inboxSizeHistory.add(inbox.size());
-			lp.progressStatus.addAndGet(inbox.size());
+			++lp.progressStatus;
 
 			// expect as many messages as previous iteration
 			IntList outbox = new IntArrayList(inbox.size());
@@ -92,11 +91,11 @@ public class BFS
 	public static void main(String[] args)
 	{
 		Digraph g = new Digraph();
-		g.out = GridGenerator.dgrid_outs(10000, 100, true, true, false, false);
-		int[] distances = bsp_seq(g.out, 0);
+		g.out.adj = GridGenerator.dgrid_outs(10000, 100, true, true, false, false);
+		int[] distances = bsp_seq(g.out.adj, 0);
 		// FastUtils.printAsMap(distances, " has distance ", System.out);
 		System.out.println("*****");
-		int[] distances2 = classic(g.out, 0);
+		int[] distances2 = classic(g.out.adj, 0);
 		Cout.debug(distances2);
 		// FastUtils.printAsMap(distances2, " has distance ", System.out);
 	}
@@ -107,7 +106,7 @@ public class BFS
 		@Override
 		public int[] process(Digraph g)
 		{
-			return BFS.classic(g.out, src);
+			return BFS.classic(g.out.adj, src);
 		}
 
 		@Override

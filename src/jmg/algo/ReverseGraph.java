@@ -11,14 +11,28 @@ import toools.thread.ParallelIntervalProcessing;
 
 public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 {
-	public static int[][] computeInverseADJ(int[][] adj, boolean pruneSrc)
+	static class TimeWasted
+	{
+		long allocating, reusing;
+
+		public String toString()
+		{
+			return "time wasted allocating= " + allocating + " reusing=" + reusing;
+		}
+	}
+
+	public static int[][] computeInverseADJ(int[][] adj, boolean freeMemOnTheFly)
 	{
 		int[] invDegree = computeReverseDegrees(adj);
 		int[][] r = new int[invDegree.length][];
 		int nbVertex = adj.length;
 		int[] pos = new int[nbVertex];
-		LongProcess computing = new LongProcess("computing inverse adjacencies",
+		LongProcess computing = new LongProcess(
+				"computing inverse adjacencies, freeing memory=" + freeMemOnTheFly,
 				nbVertex);
+
+		TimeWasted timeWastedInAllocations = new TimeWasted();
+		computing.temporaryResult = timeWastedInAllocations;
 
 		for (int v = 0; v < nbVertex; ++v)
 		{
@@ -27,18 +41,21 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 				int[] invAdjList = r[neighbor];
 
 				if (invAdjList == null)
+				{
+					long a = System.currentTimeMillis();
 					invAdjList = r[neighbor] = new int[invDegree[neighbor]];
+					timeWastedInAllocations.allocating += System.currentTimeMillis() - a;
+				}
 
 				invAdjList[pos[neighbor]++] = v;
 			}
 
-			if (pruneSrc)
+			if (freeMemOnTheFly)
 			{
 				adj[v] = null;
 			}
 
-			if (v % 100 == 0)
-				computing.progressStatus.addAndGet(100);
+			++computing.progressStatus;
 		}
 
 		// vertices that had no out-neighbors
@@ -50,7 +67,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 			}
 		}
 
-		computing.end();
+		computing.end("timeWastedInAllocations=" + timeWastedInAllocations);
 		return r;
 	}
 
@@ -63,7 +80,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 
 		LongProcess initIndex = new LongProcess("initializing indices", nbVertex);
 		int[] pos = new int[nbVertex];
-		initIndex.progressStatus.set(0);
+		initIndex.progressStatus = 0;
 
 		initIndex.end();
 		LongProcess computing = new LongProcess("computing inverse adjacencies",
@@ -87,8 +104,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 						adj[u] = null;
 					}
 
-					if (u % 100 == 0)
-						computing.progressStatus.addAndGet(100);
+					++computing.progressStatus;
 				}
 			}
 		};
@@ -124,7 +140,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		{
 			throw new IllegalStateException("ADJ ERROR " + nbError.get());
 		}
-		
+
 		computing.end();
 		return r;
 	}
@@ -144,8 +160,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 				{
 					r[u] = new int[degree[u]];
 
-					if (u % 100 == 0)
-						allocating.progressStatus.addAndGet(100);
+					++allocating.progressStatus;
 				}
 			}
 		};
@@ -167,8 +182,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 				++degree[v];
 			}
 
-			if (u % 100 == 0)
-				compute.progressStatus.addAndGet(100);
+			++compute.progressStatus;
 		}
 
 		compute.end();

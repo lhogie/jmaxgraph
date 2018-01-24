@@ -1,6 +1,6 @@
 package jmg.exp.thibaud;
 
-public class Count_Triangles_Result
+public class CountTriangles_Result
 {
 	public long threeTimesNbCyclicTriangles, nbTransitiveTriangles;
 	public long nbPotentialTriangles_computed, nbPotentialTriangles_incremented;

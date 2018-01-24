@@ -16,8 +16,7 @@ public class int_distribution implements TooolsPlugin<int[], Int2IntMap>
 
 		for (int n : m)
 		{
-			if (n % 100 == 0)
-				pm.progressStatus.addAndGet(100);
+			++pm.progressStatus;
 
 			distribution.put(n, distribution.get(n) + 1);
 		}

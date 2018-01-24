@@ -27,12 +27,15 @@ public class TextADJReader extends ADJReader
 
 	@Override
 	public Int2ObjectMap<int[]> readFile() throws IOException
-	{nbThreads=1;
+	{
+		// don't use multi-threading if the file is small
+		int nbT = from.getSize() < 1000000 ? 1 : nbThreads;
+
 		LongProcess reading = new LongProcess("reading ADJ from " + from, "B",
 				from.getSize());
-		Cout.info("using " + nbThreads + " threads");
-		Section[] sectionPosititions = findSection(from, nbThreads);
-		Int2ObjectMap<int[]>[] localAdjs = new Int2ObjectMap[nbThreads];
+		Cout.info("using " + nbT + " threads");
+		Section[] sectionPosititions = findSection(from, nbT);
+		Int2ObjectMap<int[]>[] localAdjs = new Int2ObjectMap[nbT];
 
 		if (hasNbVertices)
 		{
@@ -43,7 +46,7 @@ public class TextADJReader extends ADJReader
 			sc.close();
 		}
 
-		new MultiThreadProcessing(nbThreads)
+		new MultiThreadProcessing(nbT)
 		{
 			@Override
 			protected void runInParallel(int _rank, List<Thread> threads) throws Throwable
@@ -71,8 +74,7 @@ public class TextADJReader extends ADJReader
 				while (_scanner.hasNext())
 				{
 					long _nbByteReadNow = _scanner.getNbByteRead();
-					reading.progressStatus
-							.addAndGet(_nbByteReadNow - _nbBytesReadPreviously);
+					reading.progressStatus += _nbByteReadNow - _nbBytesReadPreviously;
 					_nbBytesReadPreviously = _nbByteReadNow;
 
 					int _src = Conversion.long2int(_scanner.nextLong());

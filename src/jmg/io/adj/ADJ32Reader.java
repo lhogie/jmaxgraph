@@ -33,7 +33,7 @@ public class ADJ32Reader extends ADJReader
 		for (int i = 0; i < nbVertex; ++i)
 		{
 			long _nbByteReadNow = _r.getNbByteRead();
-			lp.progressStatus.addAndGet(_nbByteReadNow - _nbBytesReadPreviously);
+			lp.progressStatus += _nbByteReadNow - _nbBytesReadPreviously;
 			_nbBytesReadPreviously = _nbByteReadNow;
 			// System.out.println(i);
 			int _src = Conversion.long2int(_r.nextInt());

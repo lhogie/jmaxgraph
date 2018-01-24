@@ -16,7 +16,11 @@ public class CountMultiArcs
 			@Override
 			protected void process(int rank, int lowerBound, int upperBound)
 			{
-				int[][] adj = g.getRefAdj();
+				int[][] adj = g.out == null ? g.in.adj : g.out.adj;
+
+				if (adj == null)
+					throw new IllegalStateException("there is no ADJ in the graph");
+
 				long _count = 0;
 
 				for (int u = lowerBound; u < upperBound; ++u)
@@ -41,8 +45,7 @@ public class CountMultiArcs
 						}
 					}
 
-					if (u % 100 == 0)
-						p.progressStatus.addAndGet(100);
+					++p.progressStatus;
 				}
 
 				synchronized (count)

@@ -4,8 +4,6 @@ import it.unimi.dsi.fastutil.ints.IntArrays;
 import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
-import jmg.io.DotWriter;
-import toools.io.Cout;
 import toools.progression.LongProcess;
 import toools.thread.ParallelIntervalProcessing;
 
@@ -13,10 +11,10 @@ public class Count_Triangles_Undirected
 {
 
 	public static class Plugin
-			implements TooolsPlugin<Digraph, Count_Triangles_Undirected_Result>
+			implements TooolsPlugin<Digraph, CountTriangles_Undirected_Result>
 	{
 		@Override
-		public Count_Triangles_Undirected_Result process(Digraph g)
+		public CountTriangles_Undirected_Result process(Digraph g)
 		{
 			return count(g);
 		}
@@ -26,14 +24,15 @@ public class Count_Triangles_Undirected
 		{
 		}
 	}
-	
-	public static Count_Triangles_Undirected_Result count(Digraph g)
+
+	public static CountTriangles_Undirected_Result count(Digraph g)
 	{
-		g.ensureBothDirections();
+		g.out.ensureDefined();
+		g.in.ensureDefined();
+
 		g.symmetrize();
 
-
-		Count_Triangles_Undirected_Result r = new Count_Triangles_Undirected_Result();
+		CountTriangles_Undirected_Result r = new CountTriangles_Undirected_Result();
 
 		LongProcess l = new LongProcess("tracking transitive triangles", g.getNbVertex());
 
@@ -50,7 +49,7 @@ public class Count_Triangles_Undirected
 
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					int[] Nu = g.out[u];
+					int[] Nu = g.out.adj[u];
 					int du = Nu.length;
 					nbPotentialTrianglesComputed += du * (du - 1) / 2;
 
@@ -66,18 +65,18 @@ public class Count_Triangles_Undirected
 						for (int j = startJ; j < du; ++j)
 						{
 							int w = Nu[j];
-							
+
 							// this one is wrong
 							++nbPotentialTrianglesIncremented;
 
-							if (IntArrays.binarySearch(g.out[v], w) >= 0)
+							if (IntArrays.binarySearch(g.out.adj[v], w) >= 0)
 							{
 								++nbTriangles;
 							}
 						}
 					}
 
-					l.progressStatus.incrementAndGet();
+					++l.progressStatus;
 
 					if (u % 1000 == 0)
 					{

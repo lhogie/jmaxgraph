@@ -3,6 +3,7 @@ package jmg.algo;
 import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
 import toools.math.MathsUtilities;
+import toools.progression.LongProcess;
 import toools.thread.ParallelIntervalProcessing;
 
 public class Degrees
@@ -20,11 +21,13 @@ public class Degrees
 		public void setup(PluginConfig p)
 		{
 		}
-		
+
 	}
 
+	
 	public static int[] computeDegrees(int[][] adj)
 	{
+		LongProcess computeDegrees = new LongProcess("computeDegrees", adj.length);
 		int[] r = new int[adj.length];
 
 		new ParallelIntervalProcessing(r.length)
@@ -38,7 +41,8 @@ public class Degrees
 				}
 			}
 		};
-
+		
+		computeDegrees.end();
 		return r;
 	}
 
@@ -46,4 +50,5 @@ public class Degrees
 	{
 		return MathsUtilities.max(computeDegrees(adj));
 	}
+
 }

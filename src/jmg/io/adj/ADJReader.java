@@ -5,14 +5,14 @@ import java.io.IOException;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import jmg.Digraph;
-import jmg.io.DatasetReaderPlugin;
+import jmg.Labelling;
+import jmg.io.jmg.DatasetReaderPlugin;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 
 public abstract class ADJReader extends DatasetReaderPlugin
 {
 	public RegularFile from;
-	
 
 	@Override
 	public Digraph read()
@@ -20,7 +20,10 @@ public abstract class ADJReader extends DatasetReaderPlugin
 		try
 		{
 			Int2ObjectMap<int[]> adj = readFile();
-			return Digraph.from(adj, addUndeclared, relabel, sort);
+			Digraph g =new Digraph();
+			g.labelling = new Labelling();
+			g.out.from(adj, addUndeclared, sort, g.labelling);
+			return g;
 		}
 		catch (IOException e)
 		{
@@ -49,7 +52,7 @@ public abstract class ADJReader extends DatasetReaderPlugin
 		for (Int2ObjectMap<E> a : adj)
 		{
 			bigMap.putAll(a);
-			merging.progressStatus.addAndGet(a.size());
+			merging.progressStatus += a.size();
 		}
 
 		merging.end(bigMap.size() + " vertices loaded");

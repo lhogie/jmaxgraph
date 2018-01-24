@@ -1,41 +1,46 @@
 package jmg.chain;
 
-import java.util.Arrays;
-
 import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
+import jmg.io.PrettyAdjPrinter;
 import toools.io.Cout;
 
 public class info implements TooolsPlugin<Digraph, Digraph>
 {
-	boolean outs, ins;
+	private boolean showOuts, shownIns;
+	private boolean maxOutDegree, maxInDegree;
 
 	@Override
 	public Digraph process(Digraph g)
 	{
-		Cout.info("nbVertex=" + g.getNbVertex() + ", nbEdges=" + g.countArcs());
+		g.ensureADJLoaded();
+		Cout.info("nbVertex=" + g.getNbVertex() + ", nbArcs=" + g.countArcs());
 
-		if (outs)
+		if (showOuts)
 		{
+			g.out.ensureDefined();
 			Cout.info("out-ADJ:");
-			int nbVertices = g.getNbVertex();
-
-			for (int u = 0; u < nbVertices; ++u)
-			{
-				Cout.info(u + " => " + Arrays.toString(g.out[u]));
-			}
+			Cout.info(PrettyAdjPrinter.f(g.out.adj));
 		}
 
-		if (ins)
+		if (shownIns)
 		{
+			g.in.ensureDefined();
 			Cout.info("in-ADJ:");
-			int nbVertices = g.getNbVertex();
+			Cout.info(PrettyAdjPrinter.f(g.in.adj));
+		}
 
-			for (int u = 0; u < nbVertices; ++u)
-			{
-				Cout.info(u + " => " + Arrays.toString(g.in[u]));
-			}
+		if (maxOutDegree)
+		{
+			g.out.ensureDefined();
+			Cout.info("max-out-degree=" + g.out.maxDegree());
+		}
+
+		if (maxInDegree)
+		{
+			g.in.ensureDefined();
+			Cout.info("max-in-degree=" + g.in.maxDegree());
 		}
 
 		return g;
@@ -44,8 +49,9 @@ public class info implements TooolsPlugin<Digraph, Digraph>
 	@Override
 	public void setup(PluginConfig p)
 	{
-		outs = p.containsAndRemove("out");
-		ins = p.containsAndRemove("in");
+		showOuts = p.containsAndRemove("out");
+		shownIns = p.containsAndRemove("in");
+		maxOutDegree = p.containsAndRemove("max-out-degree");
+		maxInDegree = p.containsAndRemove("max-in-degree");
 	}
-
 }

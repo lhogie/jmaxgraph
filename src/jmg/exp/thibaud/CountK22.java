@@ -27,10 +27,11 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 
 	public static CountK22_Result count(Digraph g)
 	{
-		g.ensureBothDirections();
+		g.out.ensureDefined();
+		g.in.ensureDefined();
 
 		CountK22_Result r = new CountK22_Result();
-		int maxDegree = Degrees.maxDegree(g.out);
+		int maxDegree = Degrees.maxDegree(g.out.adj);
 		Cout.info("max degree=" + maxDegree);
 		r.distri = new int[maxDegree + 1];
 
@@ -52,28 +53,28 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 				{
 					IntSet alreadyDone = new IntOpenHashSet();
 
-					for (int v : g.out[u])
+					for (int v : g.out.adj[u])
 					{
-						for (int w : g.in[v])
+						for (int w : g.in.adj[v])
 						{
 							if (u < w && ! alreadyDone.contains(w))
 							{
 								alreadyDone.add(w);
 								int nbCN = Utils.countElementsInCommon_dichotomic(
-										g.out[u], g.out[w]);
+										g.out.adj[u], g.out.adj[w]);
 
 								++_distri[nbCN];
 
 								int _nK22 = nbCN * (nbCN - 1) / 2;
-								int du = g.out[u].length;
-								int dw = g.out[w].length;
+								int du = g.out.adj[u].length;
+								int dw = g.out.adj[w].length;
 
-								if (g.exists(u, w))
+								if (g.arcExists(u, w))
 								{
 									--du;
 								}
 
-								if (g.exists(w, u))
+								if (g.arcExists(w, u))
 								{
 									--dw;
 								}
@@ -86,7 +87,7 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 						}
 					}
 
-					l.progressStatus.incrementAndGet();
+					++l.progressStatus;
 
 					if (u % 1000 == 0 && lastK22saved != _sum_nK22)
 					{

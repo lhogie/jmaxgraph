@@ -13,7 +13,7 @@ import toools.progression.LongProcess;
 public class DirectedGNP
 {
 
-	public static Digraph out(int nbVertex, double p, Random prng)
+	public static int[][] out(int nbVertex, double p, Random prng)
 	{
 		LongProcess lp = new LongProcess("generating GNP graph", nbVertex);
 		IntSet[] v_hash = new IntSet[nbVertex];
@@ -36,7 +36,7 @@ public class DirectedGNP
 				}
 			}
 
-			lp.progressStatus.incrementAndGet();
+			++lp.progressStatus;
 		}
 
 		int[][] v_array = new int[nbVertex][];
@@ -48,9 +48,7 @@ public class DirectedGNP
 
 		lp.end();
 		Utils.ensureSorted(v_array);
-		Digraph g = new Digraph();
-		g.out = v_array;
-		return g;
+		return v_array;
 	}
 
 	public static class Plugin implements TooolsPlugin<Void, Digraph>
@@ -62,7 +60,8 @@ public class DirectedGNP
 		@Override
 		public Digraph process(Void v)
 		{
-			Digraph g = out(nbVertex, p, r);
+			Digraph g = new Digraph();
+			g.out.adj = out(nbVertex, p, r);
 			return g;
 		}
 

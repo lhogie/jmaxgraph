@@ -21,13 +21,12 @@ public class CountLoops
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					if (Utils.contains(g.out[u], u))
+					if (Utils.contains(g.out.adj[u], u))
 					{
 						count.incrementAndGet();
 					}
 
-					if (u % 100 == 0)
-						p.progressStatus.addAndGet(100);
+					++p.progressStatus;
 				}
 			}
 		};

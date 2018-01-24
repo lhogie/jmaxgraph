@@ -28,7 +28,7 @@ public class EdgeListFileReader
 			try
 			{
 				Digraph g = new Digraph();
-				g.out = load(from);
+				g.out.adj = load(from);
 				return g;
 			}
 			catch (IOException e)
@@ -53,7 +53,7 @@ public class EdgeListFileReader
 
 		for (int v = 0; v < nbVertex; ++v)
 		{
-			lp.progressStatus.incrementAndGet();
+			++lp.progressStatus;
 
 			if (map.containsKey(v))
 			{
@@ -77,7 +77,7 @@ public class EdgeListFileReader
 
 		while (sc.hasNext())
 		{
-			lp.progressStatus.incrementAndGet();
+			++lp.progressStatus;
 			int a = sc.nextInt();
 			int b = sc.nextInt();
 			neighbor(a, r, nbEdge).add(b);
@@ -108,7 +108,7 @@ public class EdgeListFileReader
 	{
 		int[][] r = load(new RegularFile("/Users/lhogie/biggrph/datasets/acc2007_2.tsv"));
 		Digraph g = new Digraph();
-		g.out = r;
+		g.out.adj = r;
 
 		System.out.println(g.countArcs());
 	}

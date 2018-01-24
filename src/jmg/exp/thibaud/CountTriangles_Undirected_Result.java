@@ -1,6 +1,6 @@
 package jmg.exp.thibaud;
 
-class Count_Triangles_Undirected_Result
+class CountTriangles_Undirected_Result
 {
 	long nbTriangles;
 	long nbPotentialTrianglesComputed, nbPotentialTrianglesIncremented;

@@ -9,11 +9,12 @@ import toools.progression.LongProcess;
 
 public class TextADJWriter extends ADJWriter
 {
+
 	@Override
 	public long[] write(Digraph g, OutputStream os)
 	{
 		PrintStreamCounter out = new PrintStreamCounter(new PrintStream(os));
-		int nbVertex = g.out.length;
+		int nbVertex = g.out.adj.length;
 		LongProcess p = new LongProcess("writing text ADJ", nbVertex);
 		long[] index = new long[nbVertex];
 		int pos = 0;
@@ -23,12 +24,13 @@ public class TextADJWriter extends ADJWriter
 		for (int label = 0; label < nbVertex; ++label)
 		{
 			index[label] = pos;
-			pos += out.print(g.label2vertex == null ? label : g.label2vertex[label]);
+			pos += out
+					.print(g.labelling == null ? label : g.labelling.label2vertex[label]);
 			pos += out.print(' ');
 
-			int[] neighbors = g.out[label];
+			int[] neighbors = g.out.adj[label];
 			pos += out.print(neighbors.length);
-			
+
 			if (neighbors.length > 0)
 			{
 				pos += out.print(' ');
@@ -37,8 +39,8 @@ public class TextADJWriter extends ADJWriter
 				{
 					int n = neighbors[i];
 
-					if (g.label2vertex != null)
-						n = g.label2vertex[n];
+					if (g.labelling != null)
+						n = g.labelling.label2vertex[n];
 
 					pos += out.print(n);
 
@@ -50,7 +52,7 @@ public class TextADJWriter extends ADJWriter
 			}
 
 			pos += out.print('\n');
-			p.progressStatus.incrementAndGet();
+			++p.progressStatus;
 		}
 
 		out.flush();

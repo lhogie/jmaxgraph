@@ -8,14 +8,12 @@ import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
-import jmg.io.JMGReader;
-import toools.io.file.Directory;
+import jmg.io.jmg.JMGDirectory;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountK22
-		implements TooolsPlugin<Digraph, CountK22_Result>
+public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 {
 
 	@Override
@@ -26,7 +24,8 @@ public class CountK22
 
 	public static CountK22_Result count(Digraph g)
 	{
-		g.ensureBothDirections();
+		g.out.ensureDefined();
+		g.in.ensureDefined();
 
 		int nbVertices = g.getNbVertex();
 
@@ -42,11 +41,14 @@ public class CountK22
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					int din = g.in[u].length;
-					weigths[u] = (din * (din - 1)) / 2;
+					int din = g.in.adj[u].length;
 
-					if (u % 1000 == 0)
-						assigningWeights.progressStatus.addAndGet(1000);
+					if (din > 0)
+					{
+						weigths[u] = (din * (din - 1)) / 2;
+					}
+
+					++assigningWeights.progressStatus;
 				}
 			}
 		};
@@ -70,11 +72,11 @@ public class CountK22
 
 				while (true)
 				{
-					l.progressStatus.incrementAndGet();
+					++l.progressStatus;
 
 					Random prng = new Random();
 					int u = Utils.pick(partialSums, prng);
-					int[] in = g.in[u];
+					int[] in = g.in.adj[u];
 
 					if (in.length >= 2)
 					{
@@ -87,10 +89,21 @@ public class CountK22
 						}
 
 						int nbCommonNeighbors = Utils.countElementsInCommon_dichotomic(
-								g.out[v1], g.out[v2]) - 1;
+								g.out.adj[v1], g.out.adj[v2]) - 1;
 
-						_r.nbPotentialK22 += g.out[v1].length + g.out[v2].length
-								- nbCommonNeighbors - 1;
+						_r.nbPotentialK22 += g.out.adj[v1].length + g.out.adj[v2].length
+								- 2 - nbCommonNeighbors;
+
+						if (g.arcExists(v1, v2))
+						{
+							--_r.nbPotentialK22;
+						}
+
+						if (g.arcExists(v2, v1))
+						{
+							--_r.nbPotentialK22;
+						}
+
 						_r.nK22 += nbCommonNeighbors;
 					}
 
@@ -125,8 +138,8 @@ public class CountK22
 
 	public static void main(String[] args) throws IOException
 	{
-		Directory d = new Directory("$HOME/datasets/twitter.jmg");
-		Digraph g = JMGReader.readDirectory(d, 8, false);
+		JMGDirectory d = new JMGDirectory("$HOME/datasets/twitter.jmg");
+		Digraph g = d.readDirectory(8, false);
 		CountK22.count(g);
 	}
 }

@@ -9,11 +9,11 @@ public class CompleteGraph
 	static public Digraph doit(int nbVertices)
 	{
 		Digraph g = new Digraph();
-		g.out = new int[nbVertices][];
+		g.out.adj = new int[nbVertices][];
 		
 		for (int u = 0; u < nbVertices; ++u)
 		{
-			g.out[u] = new int[nbVertices - 1];
+			g.out.adj[u] = new int[nbVertices - 1];
 		}
 
 		for (int u = 0; u < nbVertices; ++u)
@@ -24,7 +24,7 @@ public class CompleteGraph
 			{
 				if (v != u)
 				{
-					g.out[u][i++] = v;
+					g.out.adj[u][i++] = v;
 				}
 			}
 		}
@@ -35,7 +35,7 @@ public class CompleteGraph
 	public static void main(String[] args)
 	{
 		Digraph g = doit(5);
-		Cout.debug(DotWriter.toString(g.out));
+		Cout.debug(DotWriter.toString(g.out.adj));
 	}
 
 }

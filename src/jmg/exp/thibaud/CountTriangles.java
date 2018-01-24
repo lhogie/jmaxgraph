@@ -9,11 +9,11 @@ import toools.progression.LongProcess;
 import toools.thread.ParallelIntervalProcessing;
 import toools.util.assertion.Assertions;
 
-public class Count_Triangles implements TooolsPlugin<Digraph, Count_Triangles_Result>
+public class CountTriangles implements TooolsPlugin<Digraph, CountTriangles_Result>
 {
 
 	@Override
-	public Count_Triangles_Result process(Digraph g)
+	public CountTriangles_Result process(Digraph g)
 	{
 		return count(g);
 	}
@@ -23,11 +23,12 @@ public class Count_Triangles implements TooolsPlugin<Digraph, Count_Triangles_Re
 	{
 	}
 
-	public static Count_Triangles_Result count(Digraph g)
+	public static CountTriangles_Result count(Digraph g)
 	{
-		g.ensureBothDirections();
+		g.out.ensureDefined();
+		g.in.ensureDefined();
 
-		Count_Triangles_Result r = new Count_Triangles_Result();
+		CountTriangles_Result r = new CountTriangles_Result();
 
 		LongProcess l = new LongProcess("tracking transitive triangles", g.getNbVertex());
 
@@ -45,28 +46,28 @@ public class Count_Triangles implements TooolsPlugin<Digraph, Count_Triangles_Re
 
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					int dinu = g.in[u].length;
-					int doutu = g.out[u].length;
+					int dinu = g.in.adj[u].length;
+					int doutu = g.out.adj[u].length;
 
 					// this counts each bidirectional-arc as two potential
 					// triangles
 					// it is corrected at the end (in the result object)
 					nbPotentialTriangles_computed += dinu * doutu;
 
-					for (int v : g.in[u])
+					for (int v : g.in.adj[u])
 					{
-						for (int w : g.out[u])
+						for (int w : g.out.adj[u])
 						{
 							if (v != w)
 							{
 								++nbPotentialTriangles_incremented;
 
-								if (IntArrays.binarySearch(g.out[v], w) >= 0)
+								if (IntArrays.binarySearch(g.out.adj[v], w) >= 0)
 								{
 									++nbTransitiveTriangles;
 								}
 
-								if (IntArrays.binarySearch(g.in[v], w) >= 0)
+								if (IntArrays.binarySearch(g.in.adj[v], w) >= 0)
 								{
 									++threeTimesNbCyclicTriangles;
 								}
@@ -78,7 +79,7 @@ public class Count_Triangles implements TooolsPlugin<Digraph, Count_Triangles_Re
 						}
 					}
 
-					l.progressStatus.incrementAndGet();
+					++l.progressStatus;
 
 					if (u % 1000 == 0)
 					{

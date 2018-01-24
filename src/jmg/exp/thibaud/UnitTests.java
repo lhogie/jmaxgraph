@@ -63,7 +63,7 @@ public class UnitTests
 		t.addLine(2, 0, 1);
 		Digraph g = t.toGraph();
 
-		Count_Triangles_Result r = Count_Triangles.count(g);
+		CountTriangles_Result r = CountTriangles.count(g);
 		assertEquals(6, r.nbTransitiveTriangles);
 		assertEquals(2, r.threeTimesNbCyclicTriangles / 3);
 		assertEquals(6, r.nbPotentialTriangles_incremented);
@@ -79,7 +79,7 @@ public class UnitTests
 		t.addLine(2, 0, 1, 3);
 		Digraph g = t.toGraph();
 
-		Count_Triangles_Result r = Count_Triangles.count(g);
+		CountTriangles_Result r = CountTriangles.count(g);
 		assertEquals(6, r.nbTransitiveTriangles);
 		assertEquals(2, r.threeTimesNbCyclicTriangles / 3);
 		assertEquals(8, r.nbPotentialTriangles_incremented);
@@ -95,7 +95,7 @@ public class UnitTests
 		t.addLine(2, 0);
 		Digraph g = t.toGraph();
 
-		Count_Triangles_Result r = Count_Triangles.count(g);
+		CountTriangles_Result r = CountTriangles.count(g);
 		assertEquals(0, r.nbTransitiveTriangles);
 		assertEquals(1, r.threeTimesNbCyclicTriangles / 3);
 		assertEquals(3, r.nbPotentialTriangles_computed);
@@ -110,7 +110,7 @@ public class UnitTests
 		t.addLine(1, 2, 3, 0);
 		Digraph g = t.toGraph();
 
-		Count_Triangles_Result r = Count_Triangles.count(g);
+		CountTriangles_Result r = CountTriangles.count(g);
 		assertEquals(2, r.nbTransitiveTriangles);
 		assertEquals(0, r.threeTimesNbCyclicTriangles / 3);
 		assertEquals(2, r.nbPotentialTriangles_computed);
@@ -125,7 +125,7 @@ public class UnitTests
 		t.addLine(1, 3, 4, 5, 6, 7, 0);
 		Digraph g = t.toGraph();
 
-		Count_Triangles_Result r = Count_Triangles.count(g);
+		CountTriangles_Result r = CountTriangles.count(g);
 		assertEquals(3, r.nbTransitiveTriangles);
 		assertEquals(0, r.threeTimesNbCyclicTriangles / 3);
 		assertEquals(4, r.nbPotentialTriangles_computed);
@@ -140,7 +140,7 @@ public class UnitTests
 		t.addLine(1, 2, 3);
 		Digraph g = t.toGraph();
 
-		Count_Triangles_Undirected_Result r = Count_Triangles_Undirected.count(g);
+		CountTriangles_Undirected_Result r = Count_Triangles_Undirected.count(g);
 		assertEquals(0, r.nbTriangles);
 		assertEquals(2, r.nbPotentialTrianglesComputed);
 		assertEquals(2, r.nbPotentialTrianglesIncremented);
@@ -154,7 +154,7 @@ public class UnitTests
 		t.addLine(1, 2);
 		t.addLine(2, 0, 3);
 		Digraph g = t.toGraph();
-		Count_Triangles_Undirected_Result r = Count_Triangles_Undirected.count(g);
+		CountTriangles_Undirected_Result r = Count_Triangles_Undirected.count(g);
 		Cout.debug(TextUtilities.box(r.toString()));
 		assertEquals(1, r.nbTriangles);
 //		assertEquals(5, r.nbPotentialTrianglesIncremented);

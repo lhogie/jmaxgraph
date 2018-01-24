@@ -1,4 +1,4 @@
-package jmg.io;
+package jmg.io.jmg;
 
 import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
