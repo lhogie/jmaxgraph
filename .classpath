@@ -9,5 +9,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/client-server"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jacaboo"/>
 	<classpathentry kind="lib" path="/libs/junit-4.5.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/joar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
