@@ -2,6 +2,7 @@ package jmg.algo;
 
 import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
 import toools.thread.ParallelIntervalProcessing;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 
 public class MaxDegree
 {
@@ -23,15 +24,15 @@ public class MaxDegree
 		return max;
 	}
 
-	public static int computeMaxDegree_par(int[][] adj)
+	public static int computeMaxDegree_par(int[][] adj, int nbThreads)
 	{
 		IntAVLTreeSet localMaximums = new IntAVLTreeSet();
 
-		new ParallelIntervalProcessing(adj.length)
+		new ParallelIntervalProcessing(adj.length, nbThreads, null)
 		{
 
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				int max = - 1;
 

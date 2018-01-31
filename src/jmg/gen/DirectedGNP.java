@@ -5,15 +5,15 @@ import java.util.Random;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
+import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
 
 public class DirectedGNP
 {
 
-	public static int[][] out(int nbVertex, double p, Random prng)
+	public static int[][] out(int nbVertex, double p, Random prng, int nbThreads)
 	{
 		LongProcess lp = new LongProcess("generating GNP graph", nbVertex);
 		IntSet[] v_hash = new IntSet[nbVertex];
@@ -36,7 +36,7 @@ public class DirectedGNP
 				}
 			}
 
-			++lp.progressStatus;
+			++lp.sensor.progressStatus;
 		}
 
 		int[][] v_array = new int[nbVertex][];
@@ -47,11 +47,11 @@ public class DirectedGNP
 		}
 
 		lp.end();
-		Utils.ensureSorted(v_array);
+		Utils.ensureSorted(v_array, nbThreads);
 		return v_array;
 	}
 
-	public static class Plugin implements TooolsPlugin<Void, Digraph>
+	public static class Plugin extends JMGPlugin<Void, Digraph>
 	{
 		public double p = 0.5;
 		public int nbVertex = 1000;
@@ -61,7 +61,9 @@ public class DirectedGNP
 		public Digraph process(Void v)
 		{
 			Digraph g = new Digraph();
-			g.out.adj = out(nbVertex, p, r);
+			g.out.adj = out(nbVertex, p, r, nbThreads);
+			g.nbVertices = g.out.adj.length;
+			g.properties.put("edge probability", p);
 			return g;
 		}
 
@@ -70,8 +72,9 @@ public class DirectedGNP
 		{
 			nbVertex = p.getInt("n");
 			this.p = p.getDouble("p");
-			
-			long seed = p.contains("seed") ? p.getInt("seed") :  System.currentTimeMillis();
+
+			long seed = p.contains("seed") ? p.getInt("seed")
+					: System.currentTimeMillis();
 			this.r = new Random(seed);
 
 		}

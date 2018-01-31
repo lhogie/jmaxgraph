@@ -2,20 +2,21 @@ package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.algo.CountBidirectionalArcs;
+import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 import toools.util.assertion.Assertions;
 
-public class CountTriangles implements TooolsPlugin<Digraph, CountTriangles_Result>
+public class CountTriangles extends JMGPlugin<Digraph, CountTriangles_Result>
 {
 
 	@Override
 	public CountTriangles_Result process(Digraph g)
 	{
-		return count(g);
+		return count(g, nbThreads);
 	}
 
 	@Override
@@ -23,10 +24,10 @@ public class CountTriangles implements TooolsPlugin<Digraph, CountTriangles_Resu
 	{
 	}
 
-	public static CountTriangles_Result count(Digraph g)
+	public static CountTriangles_Result count(Digraph g, int nbThreads)
 	{
-		g.out.ensureDefined();
-		g.in.ensureDefined();
+		g.out.ensureDefined(8);
+		g.in.ensureDefined(8);
 
 		CountTriangles_Result r = new CountTriangles_Result();
 
@@ -34,10 +35,10 @@ public class CountTriangles implements TooolsPlugin<Digraph, CountTriangles_Resu
 
 		l.temporaryResult = r;
 
-		new ParallelIntervalProcessing(g.getNbVertex())
+		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, l)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				long nbTransitiveTriangles = 0;
 				long threeTimesNbCyclicTriangles = 0;
@@ -79,7 +80,7 @@ public class CountTriangles implements TooolsPlugin<Digraph, CountTriangles_Resu
 						}
 					}
 
-					++l.progressStatus;
+					++s.progressStatus;
 
 					if (u % 1000 == 0)
 					{
@@ -114,7 +115,7 @@ public class CountTriangles implements TooolsPlugin<Digraph, CountTriangles_Resu
 		r.nbPotentialTriangles_computed = r.nbPotentialTriangles_computed
 				- 2 * r.nbOfBidiArcs;
 
-		Assertions.ensureEquals(r.nbOfBidiArcs, CountBidirectionalArcs.count(g));
+		Assertions.ensureEquals(r.nbOfBidiArcs, CountBidirectionalArcs.count(g, 1));
 		return r;
 	}
 

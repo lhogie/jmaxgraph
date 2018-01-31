@@ -5,15 +5,16 @@ import java.util.List;
 import java.util.Random;
 
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
+import jmg.chain.JMGPlugin;
 import jmg.io.jmg.JMGDirectory;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
+public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 {
 
 	@Override
@@ -22,10 +23,10 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 		return count(g);
 	}
 
-	public static CountK22_Result count(Digraph g)
+	public CountK22_Result count(Digraph g)
 	{
-		g.out.ensureDefined();
-		g.in.ensureDefined();
+		g.out.ensureDefined(nbThreads);
+		g.in.ensureDefined(nbThreads);
 
 		int nbVertices = g.getNbVertex();
 
@@ -34,10 +35,10 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 
 		int[] weigths = new int[nbVertices];
 
-		new ParallelIntervalProcessing(g.getNbVertex())
+		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, assigningWeights)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
@@ -48,7 +49,7 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 						weigths[u] = (din * (din - 1)) / 2;
 					}
 
-					++assigningWeights.progressStatus;
+					++s.progressStatus;
 				}
 			}
 		};
@@ -63,16 +64,17 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 		LongProcess l = new LongProcess("tracking K2,2 by Stephane", - 1);
 		l.temporaryResult = r;
 
-		new MultiThreadProcessing()
+		new MultiThreadProcessing(nbThreads, l)
 		{
 			@Override
-			protected void runInParallel(int rank, List<Thread> threads) throws Throwable
+			protected void runInParallel(ThreadSpecifics s, List<Thread> threads)
+					throws Throwable
 			{
 				CountK22_Result _r = new CountK22_Result();
 
 				while (true)
 				{
-					++l.progressStatus;
+					++s.progressStatus;
 
 					Random prng = new Random();
 					int u = Utils.pick(partialSums, prng);
@@ -139,7 +141,7 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 	public static void main(String[] args) throws IOException
 	{
 		JMGDirectory d = new JMGDirectory("$HOME/datasets/twitter.jmg");
-		Digraph g = d.readDirectory(8, false);
-		CountK22.count(g);
+		Digraph g = d.mapGraph(8, false);
+		new CountK22().count(g);
 	}
 }

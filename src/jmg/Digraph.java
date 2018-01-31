@@ -2,6 +2,7 @@ package jmg;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Properties;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -9,19 +10,20 @@ import jmg.algo.ReverseGraph;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.file.RegularFile;
 
-public class Digraph
+public class Digraph implements Serializable
 {
+	public Properties properties = new Properties();
 	public int nbVertices;
-	public final Direction out;
-	public final Direction in;
+	public final OUTs out;
+	public final INs in;
 	public boolean isMultiGraph = false;
 	public JMGDirectory dataset;
 	public Labelling labelling;
 
 	public Digraph()
 	{
-		out = new Direction();
-		in = new Direction();
+		out = new OUTs();
+		in = new INs();
 		out.opposite = in;
 		in.opposite = out;
 	}
@@ -84,11 +86,11 @@ public class Digraph
 		return nbVertices;
 	}
 
-	public void symmetrize()
+	public void symmetrize(int nbThreads)
 	{
-		in.ensureDefined();
-		out.ensureDefined();
-		Utils.union(out.adj, in.adj, true);
+		in.ensureDefined(nbThreads);
+		out.ensureDefined(nbThreads);
+		Utils.union(out.adj, in.adj, true, nbThreads);
 	}
 
 	public boolean arcExists(int u, int v)
@@ -123,15 +125,15 @@ public class Digraph
 		}
 	}
 
-	public long countArcs()
+	public long countArcs(int nbThreads)
 	{
 		if (out.adj != null)
 		{
-			return Utils.countArcs(out.adj);
+			return Utils.countArcs(out.adj, nbThreads);
 		}
 		else if (in.adj != null)
 		{
-			return Utils.countArcs(in.adj);
+			return Utils.countArcs(in.adj, nbThreads);
 		}
 		else
 		{
@@ -181,16 +183,10 @@ public class Digraph
 
 	public void writeProperties(RegularFile f) throws IOException
 	{
-		Properties p = new Properties();
-		p.put("nbVertices", "" + getNbVertex());
+		properties.put("nbVertices", "" + getNbVertex());
 		OutputStream pos = f.createWritingStream();
-		p.store(pos, "JMG property file");
+		properties.store(pos, "JMG property file");
 		pos.close();
-	}
-
-	public void ensureADJLoaded()
-	{
-		ensureADJLoaded(8);
 	}
 
 	public void ensureADJLoaded(int nbThreads)
@@ -199,7 +195,7 @@ public class Digraph
 		if (out.adj == null && in.adj == null)
 		{
 			// try to load OUTs or INs
-			for (Direction d : new Direction[] { out, in })
+			for (Adj d : new Adj[] { out, in })
 			{
 				if (d.file.exists())
 				{
@@ -210,6 +206,15 @@ public class Digraph
 
 			throw new JMGException("no ADJ can't be loaded");
 		}
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int h = 0;
+		h = 31 * h + out.hashCode();
+		h = 31 * h + in.hashCode();
+		return h;
 	}
 
 }

@@ -2,21 +2,22 @@ package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
+import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
 public class Count_Triangles_Undirected
 {
 
 	public static class Plugin
-			implements TooolsPlugin<Digraph, CountTriangles_Undirected_Result>
+			extends JMGPlugin<Digraph, CountTriangles_Undirected_Result>
 	{
 		@Override
 		public CountTriangles_Undirected_Result process(Digraph g)
 		{
-			return count(g);
+			return count(g, nbThreads);
 		}
 
 		@Override
@@ -25,12 +26,12 @@ public class Count_Triangles_Undirected
 		}
 	}
 
-	public static CountTriangles_Undirected_Result count(Digraph g)
+	public static CountTriangles_Undirected_Result count(Digraph g, int nbThreads)
 	{
-		g.out.ensureDefined();
-		g.in.ensureDefined();
+		g.out.ensureDefined(8);
+		g.in.ensureDefined(8);
 
-		g.symmetrize();
+		g.symmetrize(8);
 
 		CountTriangles_Undirected_Result r = new CountTriangles_Undirected_Result();
 
@@ -38,10 +39,10 @@ public class Count_Triangles_Undirected
 
 		l.temporaryResult = r;
 
-		new ParallelIntervalProcessing(g.getNbVertex())
+		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, l)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				long nbTriangles = 0;
 				long nbPotentialTrianglesComputed = 0;
@@ -76,7 +77,7 @@ public class Count_Triangles_Undirected
 						}
 					}
 
-					++l.progressStatus;
+					++s.progressStatus;
 
 					if (u % 1000 == 0)
 					{

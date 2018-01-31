@@ -16,12 +16,11 @@ import toools.collection.LazyArray;
 import toools.io.Cout;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
 public class Utils
 {
-	public static int nbThreads = Runtime.getRuntime().availableProcessors() * 2;
-
 	public static IntSet findUndeclaredVertices(Int2ObjectMap<int[]> adjTable)
 	{
 		boolean[] booleanArray = null;
@@ -50,7 +49,7 @@ public class Utils
 
 			for (int v : vertices)
 			{
-				++marking.progressStatus;
+				++marking.sensor.progressStatus;
 
 				if (booleanArray != null)
 					booleanArray[v] = true;
@@ -85,7 +84,7 @@ public class Utils
 					}
 				}
 
-				++tracking.progressStatus;
+				++tracking.sensor.progressStatus;
 			}
 		}
 		else
@@ -101,7 +100,7 @@ public class Utils
 					}
 				}
 
-				tracking.progressStatus++;
+				tracking.sensor.progressStatus++;
 			}
 		}
 
@@ -121,21 +120,21 @@ public class Utils
 		{
 			int v = i.nextInt();
 			adj.put(v, Utils.emptyArray);
-			adding.progressStatus++;
+			adding.sensor.progressStatus++;
 		}
 
 		adding.end("ADJ-table now has " + adj.size() + " entries.");
 	}
 
-	public static void union(int[][] a, int[][] b, boolean prune)
+	public static void union(int[][] a, int[][] b, boolean prune, int nbThreads)
 	{
 		int nbVertex = a.length;
 		LongProcess computing = new LongProcess("merging ADJ lists", nbVertex);
 
-		new ParallelIntervalProcessing(nbVertex)
+		new ParallelIntervalProcessing(nbVertex, nbThreads, computing)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
@@ -146,7 +145,7 @@ public class Utils
 						b[u] = null;
 					}
 
-					computing.progressStatus++;
+					s.progressStatus++;
 				}
 			}
 		};
@@ -198,7 +197,7 @@ public class Utils
 
 			partialSums[i] = currentSum = trySum;
 
-			lp.progressStatus++;
+			lp.sensor.progressStatus++;
 		}
 
 		lp.end();
@@ -266,20 +265,20 @@ public class Utils
 		return nbCommonElements;
 	}
 
-	public static void ensureSorted(int[][] adj)
+	public static void ensureSorted(int[][] adj, int nbThreads)
 	{
 		LongProcess sorting = new LongProcess("quicksorting all ADJlists in parallel",
 				" ADJ-list", adj.length);
 
-		new ParallelIntervalProcessing(adj.length)
+		new ParallelIntervalProcessing(adj.length, nbThreads, sorting)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int v = lowerBound; v < upperBound; ++v)
 				{
 					IntArrays.quickSort(adj[v]);
-					++sorting.progressStatus;
+					++sorting.sensor.progressStatus;
 				}
 			}
 		};
@@ -543,14 +542,14 @@ public class Utils
 		}
 	}
 
-	public static long countArcs(int[][] adj)
+	public static long countArcs(int[][] adj, int nbThreads)
 	{
 		AtomicLong r = new AtomicLong(0);
 
-		new ParallelIntervalProcessing(adj.length)
+		new ParallelIntervalProcessing(adj.length, nbThreads, null)
 		{
 			@Override
-			protected void process(int _rank, int _lowerBound, int _upperBound)
+			protected void process(ThreadSpecifics s, int _lowerBound, int _upperBound)
 			{
 				int _n = 0;
 

@@ -31,12 +31,12 @@ public class BigGrphReader
 
 		LongProcess pm = new LongProcess("loading files", totalNbEntry);
 
-		new MultiThreadProcessing(files.size())
+		new MultiThreadProcessing(files.size(), pm)
 		{
 			@Override
-			protected void runInParallel(int rank, List<Thread> threads) throws Throwable
+			protected void runInParallel(ThreadSpecifics s, List<Thread> threads) throws Throwable
 			{
-				loadBigrphFile(files.get(rank), g, getOffset(rank), label2vertex, pm);
+				loadBigrphFile(files.get(s.rank), g, getOffset(s.rank), label2vertex, pm);
 			}
 
 			private int getOffset(int rank)
@@ -88,7 +88,7 @@ public class BigGrphReader
 			int[] inNeighbors = new int[nbNeighbors];
 			g.out.adj[label] = inNeighbors;
 
-			++pm.progressStatus;
+			++pm.sensor.progressStatus;
 
 			is.read(b, 0, 1);
 			boolean is32bit = DataBinaryEncoding.readBoolean(b, 0);

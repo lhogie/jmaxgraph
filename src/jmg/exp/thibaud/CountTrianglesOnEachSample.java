@@ -15,16 +15,16 @@ public class CountTrianglesOnEachSample
 		{
 			JMGDirectory d = new JMGDirectory("$HOME/datasets/sample-0.01" + c + ".jmg");
 			Cout.result("Reading " + d);
-			Digraph g = d.readDirectory(8, false);
+			Digraph g = d.mapGraph(8, false);
 
 			Cout.result("CountK2_2_Thibaud on directed graph");
-			Cout.result(CountK22.count(g));
+			Cout.result(new CountK22().count(g));
 
 			Cout.result("Count_Triangles on directed graph");
-			Cout.result(CountTriangles.count(g));
+			Cout.result(CountTriangles.count(g, 1));
 
 			Cout.result("Count_Triangles on UNdirected graph");
-			Cout.result(Count_Triangles_Undirected.count(g));
+			Cout.result(Count_Triangles_Undirected.count(g, 1));
 		}
 	}
 }

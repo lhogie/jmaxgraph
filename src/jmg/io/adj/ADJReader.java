@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import jmg.Digraph;
 import jmg.Labelling;
-import jmg.io.jmg.DatasetReaderPlugin;
+import jmg.io.DatasetReaderPlugin;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 
@@ -20,9 +20,9 @@ public abstract class ADJReader extends DatasetReaderPlugin
 		try
 		{
 			Int2ObjectMap<int[]> adj = readFile();
-			Digraph g =new Digraph();
+			Digraph g = new Digraph();
 			g.labelling = new Labelling();
-			g.out.from(adj, addUndeclared, sort, g.labelling);
+			g.out.from(adj, addUndeclared, sort, g.labelling, nbThreads);
 			return g;
 		}
 		catch (IOException e)
@@ -52,7 +52,7 @@ public abstract class ADJReader extends DatasetReaderPlugin
 		for (Int2ObjectMap<E> a : adj)
 		{
 			bigMap.putAll(a);
-			merging.progressStatus += a.size();
+			merging.sensor.progressStatus += a.size();
 		}
 
 		merging.end(bigMap.size() + " vertices loaded");

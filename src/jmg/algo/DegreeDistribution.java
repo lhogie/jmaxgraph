@@ -15,7 +15,7 @@ public class DegreeDistribution
 
 		for (int[] neighbors : adj)
 		{
-			++pm.progressStatus;
+			++pm.sensor.progressStatus;
 
 			int degree = neighbors.length;
 

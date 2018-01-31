@@ -1,14 +1,13 @@
-package jmg.io.jmg;
+package jmg.io;
 
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
+import jmg.chain.JMGPlugin;
 
-public abstract class DatasetReaderPlugin implements TooolsPlugin<Void, Digraph>
+public abstract class DatasetReaderPlugin extends JMGPlugin<Void, Digraph>
 {
 
 	protected int bufSize = 65530 * 256;
-	protected int nbThreads = 8;
 	protected boolean addUndeclared = true;
 	protected boolean relabel = true;
 	protected boolean sort = true;
@@ -24,13 +23,10 @@ public abstract class DatasetReaderPlugin implements TooolsPlugin<Void, Digraph>
 	@Override
 	public void setup(PluginConfig parms)
 	{
+		super.setup(parms);
+		
 		if (parms.contains("bufSize"))
 			bufSize = parms.getInt("bufSize");
-
-		if (parms.contains("nbThreads"))
-		{
-			nbThreads = parms.getInt("nbThreads");
-		}
 
 		if (parms.containsAndRemove("noconsolidate"))
 		{

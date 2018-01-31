@@ -7,6 +7,7 @@ import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
 public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
@@ -55,7 +56,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 				adj[v] = null;
 			}
 
-			++computing.progressStatus;
+			++computing.sensor.progressStatus;
 		}
 
 		// vertices that had no out-neighbors
@@ -71,25 +72,23 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		return r;
 	}
 
-	public static int[][] computeInverseADJ_par(int[][] adj, boolean pruneSrc)
+	public static int[][] computeInverseADJ_par(int[][] adj, boolean pruneSrc,
+			int nbThreads)
 	{
 		int[] degrees = computeReverseDegrees(adj);
-		int[][] r = allocates(degrees);
+		int[][] r = allocates(degrees, nbThreads);
 
 		int nbVertex = adj.length;
 
-		LongProcess initIndex = new LongProcess("initializing indices", nbVertex);
 		int[] pos = new int[nbVertex];
-		initIndex.progressStatus = 0;
 
-		initIndex.end();
 		LongProcess computing = new LongProcess("computing inverse adjacencies",
 				nbVertex);
 
-		new ParallelIntervalProcessing(nbVertex)
+		new ParallelIntervalProcessing(nbVertex, nbThreads, computing)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
@@ -104,7 +103,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 						adj[u] = null;
 					}
 
-					++computing.progressStatus;
+					++s.progressStatus;
 				}
 			}
 		};
@@ -120,10 +119,10 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 
 		// check
 		AtomicLong nbError = new AtomicLong(0);
-		new ParallelIntervalProcessing(nbVertex)
+		new ParallelIntervalProcessing(nbVertex, nbThreads, null)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
@@ -145,22 +144,22 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		return r;
 	}
 
-	public static int[][] allocates(int[] degree)
+	public static int[][] allocates(int[] degree, int nbThreads)
 	{
 		LongProcess allocating = new LongProcess("preallocating out-adj", " array",
 				degree.length);
 		int[][] r = new int[degree.length][];
 
-		new ParallelIntervalProcessing(degree.length)
+		new ParallelIntervalProcessing(degree.length, nbThreads, allocating)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
 					r[u] = new int[degree[u]];
 
-					++allocating.progressStatus;
+					++s.progressStatus;
 				}
 			}
 		};
@@ -182,7 +181,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 				++degree[v];
 			}
 
-			++compute.progressStatus;
+			++compute.sensor.progressStatus;
 		}
 
 		compute.end();

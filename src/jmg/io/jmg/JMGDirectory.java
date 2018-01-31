@@ -7,9 +7,9 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import jmg.Digraph;
 import jmg.Vertex2LabelMap;
 import toools.io.IORuntimeException;
-import toools.io.NBSFile;
 import toools.io.file.Directory;
 import toools.io.file.RegularFile;
+import toools.io.file.nbs.NBSFile;
 import toools.progression.LongProcess;
 import toools.text.TextUtilities;
 import toools.util.Conversion;
@@ -19,12 +19,12 @@ public class JMGDirectory extends Directory
 	static
 	{
 		RegularFile.extension_class.put("nbs", NBSFile.class);
-		RegularFile.extension_class.put("edg", EDGFile.class);
+		RegularFile.extension_class.put("edg", ArcFile.class);
 	}
 
 	public int nbVertex;
 	public final NBSFile label2vertexFile;
-	public final EDGFile outFile, inFile;
+	public final ArcFile outFile, inFile;
 
 	public final RegularFile propertyFile;
 	public final Properties properties = new Properties();
@@ -56,14 +56,14 @@ public class JMGDirectory extends Directory
 		return nbVertex;
 	}
 
-	public EDGFile getOutFile()
+	public ArcFile getOutFile()
 	{
-		return new EDGFile(this, "out.edg");
+		return new ArcFile(this, "out.edg");
 	}
 
-	public EDGFile getInFile()
+	public ArcFile getInFile()
 	{
-		return new EDGFile(this, "in.edg");
+		return new ArcFile(this, "in.edg");
 	}
 
 	public NBSFile getDegreesFile()
@@ -93,11 +93,11 @@ public class JMGDirectory extends Directory
 		return properties;
 	}
 
-	public Digraph readDirectory(int nbThreads, boolean useLabels)
+	public Digraph mapGraph(int nbThreads, boolean useLabels)
 	{
 		try
 		{
-			LongProcess loading = new LongProcess("loading graph", - 1);
+			LongProcess loading = new LongProcess("creating (no loading here) graph from " + this, - 1);
 			Digraph g = new Digraph();
 			g.setDataset(this);
 			g.nbVertices = getNbVertex();

@@ -3,15 +3,16 @@ package jmg.exp.thibaud;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
 import jmg.algo.Degrees;
+import jmg.chain.JMGPlugin;
 import toools.io.Cout;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
+public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 {
 
 	@Override
@@ -25,10 +26,10 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 	{
 	}
 
-	public static CountK22_Result count(Digraph g)
+	public CountK22_Result count(Digraph g)
 	{
-		g.out.ensureDefined();
-		g.in.ensureDefined();
+		g.out.ensureDefined(nbThreads);
+		g.in.ensureDefined(nbThreads);
 
 		CountK22_Result r = new CountK22_Result();
 		int maxDegree = Degrees.maxDegree(g.out.adj);
@@ -39,10 +40,10 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 
 		l.temporaryResult = r;
 
-		new ParallelIntervalProcessing(g.getNbVertex())
+		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, l)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				long _sum_fourTimesNbK22pot = 0;
 				long _sum_nK22 = 0;
@@ -87,15 +88,15 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 						}
 					}
 
-					++l.progressStatus;
+					++s.progressStatus;
 
 					if (u % 1000 == 0 && lastK22saved != _sum_nK22)
 					{
 						synchronized (r)
 						{
-							r.fourTimesNbK22pot += _sum_fourTimesNbK22pot;
+							r.nbK22pot += _sum_fourTimesNbK22pot;
 							_sum_fourTimesNbK22pot = 0;
-							r.nK22 += _sum_nK22;
+							r.nbK22 += _sum_nK22;
 							lastK22saved = _sum_nK22;
 							_sum_nK22 = 0;
 
@@ -110,8 +111,8 @@ public class CountK22 implements TooolsPlugin<Digraph, CountK22_Result>
 
 				synchronized (r)
 				{
-					r.fourTimesNbK22pot += _sum_fourTimesNbK22pot;
-					r.nK22 += _sum_nK22;
+					r.nbK22pot += _sum_fourTimesNbK22pot;
+					r.nbK22 += _sum_nK22;
 
 					for (int i = 0; i < maxDegree; ++i)
 					{

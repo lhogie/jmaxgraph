@@ -3,9 +3,19 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
-\title{JMaxGraph\\ dealing with huge graphs in memory}
-\author{Luc Hogie}
+\title{JMaxGraph\\ on analysing with huge graphs}
+\author{Luc Hogie, Frédéric Giroire, Stéphane Perennes, Thibaud Trolliet}
 \begin{document}
+\maketitle
+
+JMaxGraph is a Java middleware for the analysis of large graphs. It was born out of the inability of common graph libraries
+to deal with large datasets. These limitations are the drawback of using object-oriented models which  have huge memory
+overheads and inefficient:
+\begin{itemize}
+\item  memory models: they usually rely on  --- whose the main drawback is to
+\item memory access strategies: most libraries rely on 
+\end{itemize}
+
 \section{Measure performance}
 On the NEF Inria cluster.
 \begin{itemize}
@@ -27,31 +37,50 @@ On NEF, using 8 threads, reading it takes 7min.
 \section{The binary ADJ file format}
 The same of text ADJ, but each number/vertex is represented by a sequence of 4 bytes.
 The size can be reduced up to 3.
+
 \section{The JMG file format}
-It is a directory
-\begin{description}
-\item[properties.txt] 
-\item[label2vertex.nbs] contains a sequence of vertex ID, each coded on 4 bytes. The index of the vertex is its label. The number of vertices in the graph is the size of this file divided by 4.
-\item[adj.edg] contains the adj
-\item[index.nbs] contains the adj
- \end{description}
+In the JMG format, the graph is described by several files in a directory.
+
 The JMG file format ensures that, after loading:
 \begin{enumerate}
-\item adjacency lists are ordered
-\item there is no vertex in ADJlists that is not in the key set
+\item adjacency lists are sorted
+\item there is no vertex in adjancency lists that is not in the vertex set.
 \end{enumerate}
 
-Takes 2-3min
 
-\section{Computing }
+\subsection{\texttt{properties.txt}}
+The \texttt{properties.txt} is an ASCII text file. It consists of a sequence of lines with all the same following synax:
+$$
+key=value
+$$
+The \# character indicates that a comment is starting, discarding the rest of the line.
+The \texttt{properties.txt}  is useful to describe properties for the graph.
 
-\subsection{Computing reverse degrees}
-17s on one thread
+When creating a graph for a JMG dataset, JMaxGraph scans the \texttt{properties.txt} file for the \textit{nbVertices} properties, which defines the vertex set as all consecutive vertices in $[0\  nbVertices]$.
 
-\subsection{Allocates}
+\subsection{Adjacency files}
+A JMG dataset is very likely to come with a description for the adjacencies of either IN or OUT directions. If if does not, you will only be able to work on the vertex set.
+The IN (resp. OUT) adjacency is expected to be found in a file \texttt{in.edg} (resp. \texttt{out.edg}). Such adjacency file comes with its index file, called \texttt{-index.nbs} (see  (see \ref{nbsfile}).
+For each vertex $u$, the index file has an entry which gives the position in the adjacency file at which the set of neighbors of $u$ are stored.
 
-\subsection{Building reverse ADJ}
-on one thread, by allocated on the fly, 6.1min.
+This set of neighbors is encoded at a byte sequence of length:
+$$l = index(u+1) - index(u)$$
+ Note that if $u$ is the vertex with the highest ID,  they does not exist such thing as $index(u+1))$. The length of the byte sequence describing its neighborhoods is then defined by:
+ $$l = size(indexFile) - index(u)$$
+Note also that the number neighbors cannot be computed out of this $l$, as every vertex may use words of different length to store their neighborhood.
+
+Then, starting at position $index(u)$, the byte sequence encoding the set of neighbors for vertex $u$ is organized like this:
+\begin{enumerate}
+\item 8 bytes encode the neighbor with lowest ID
+\item 1 byte encodes the number of bytes used to store each other neighbor, let us refer to it as $e$. The number of neighbors is then defined by $1 + \frac{l - 9}{e}$.
+\item each following neighbor $v_i$ of $u$ is encoded as the delta $d$ of its ID and the ID of the previous neighbor.
+The ID of the $i^{th} (with\ i > 0)$ neighbor is obtained by:
+$$v_i = v_{i-1} + d$$.
+\end{enumerate}
+
+\section{Encountered issues}
+\subsection{The loading is too long}
+
 
 
 

@@ -17,7 +17,7 @@ public class long_distribution implements TooolsPlugin<long[], Long2IntMap>
 
 		for (long n : m)
 		{
-			++pm.progressStatus;
+			++pm.sensor.progressStatus;
 
 			distribution.put(n, distribution.get(n) + 1);
 		}

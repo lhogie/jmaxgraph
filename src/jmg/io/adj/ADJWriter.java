@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java4unix.pluginchain.PluginConfig;
 import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
-import toools.io.NBSFile;
 import toools.io.file.RegularFile;
+import toools.io.file.nbs.NBSFile;
 
 public abstract class ADJWriter implements TooolsPlugin<Digraph, RegularFile>
 {

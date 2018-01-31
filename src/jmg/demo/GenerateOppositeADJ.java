@@ -15,7 +15,7 @@ public class GenerateOppositeADJ
 		SystemMonitor.defaultMonitor.start();
 
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Digraph g = d.readDirectory(8, false);
+		Digraph g = d.mapGraph(8, false);
 
 		if (g.out.file.exists() && ! g.in.file.exists())
 		{
@@ -33,6 +33,6 @@ public class GenerateOppositeADJ
 		{
 			Cout.info("Doing nothing");
 		}
-
 	}
+	
 }

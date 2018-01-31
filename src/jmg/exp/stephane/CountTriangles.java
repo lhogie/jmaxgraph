@@ -5,27 +5,28 @@ import java.util.List;
 import java.util.Random;
 
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
+import jmg.chain.JMGPlugin;
 import jmg.io.jmg.JMGDirectory;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountTriangles implements TooolsPlugin<Digraph, CountTriangleResult>
+public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
 {
 
 	@Override
 	public CountTriangleResult process(Digraph g)
 	{
-		return count(g);
+		return count(g, nbThreads);
 	}
 
-	public static CountTriangleResult count(Digraph g)
+	public static CountTriangleResult count(Digraph g, int nbThreads)
 	{
-		g.out.ensureDefined();
-		g.in.ensureDefined();
+		g.out.ensureDefined(8);
+		g.in.ensureDefined(8);
 
 		// g.symmetrize();
 
@@ -36,17 +37,17 @@ public class CountTriangles implements TooolsPlugin<Digraph, CountTriangleResult
 
 		int[] weigths = new int[nbVertices];
 
-		new ParallelIntervalProcessing(g.getNbVertex())
+		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, assigningWeights)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
 					int din = g.in.adj[u].length;
 					int dout = g.out.adj[u].length;
 					weigths[u] = din * dout;
-					++assigningWeights.progressStatus;
+					++s.progressStatus;
 				}
 			}
 		};
@@ -60,16 +61,17 @@ public class CountTriangles implements TooolsPlugin<Digraph, CountTriangleResult
 		LongProcess l = new LongProcess("tracking K2,2 by Stephane", - 1);
 		l.temporaryResult = r;
 
-		new MultiThreadProcessing()
+		new MultiThreadProcessing(nbThreads, l)
 		{
 			@Override
-			protected void runInParallel(int rank, List<Thread> threads) throws Throwable
+			protected void runInParallel(ThreadSpecifics s, List<Thread> threads)
+					throws Throwable
 			{
 				CountTriangleResult _r = new CountTriangleResult();
 
 				while (true)
 				{
-					++l.progressStatus;
+					++s.progressStatus;
 
 					Random prng = new Random();
 					int u = Utils.pick(partialSums, prng);
@@ -125,7 +127,7 @@ public class CountTriangles implements TooolsPlugin<Digraph, CountTriangleResult
 	public static void main(String[] args) throws IOException
 	{
 		JMGDirectory d = new JMGDirectory("$HOME/datasets/sample-0.001b.jmg");
-		Digraph g = d.readDirectory(8, false);
-		CountTriangles.count(g);
+		Digraph g = d.mapGraph(8, false);
+		CountTriangles.count(g, 1);
 	}
 }

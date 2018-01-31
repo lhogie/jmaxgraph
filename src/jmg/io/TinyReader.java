@@ -29,10 +29,12 @@ public class TinyReader
 
 		public Digraph toGraph()
 		{
-			Int2ObjectMap<int[]> adj = TinyReader.parse(toString());
 			Digraph g = new Digraph();
 			g.labelling = new Labelling();
-			g.out.from(adj, true, true, g.labelling);
+
+			Int2ObjectMap<int[]> adj = TinyReader.parse(toString());
+			g.out.from(adj, true, true, g.labelling, 1);
+			g.nbVertices = g.out.adj.length;
 			return g;
 		}
 	}

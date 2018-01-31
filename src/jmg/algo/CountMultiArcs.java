@@ -2,19 +2,20 @@ package jmg.algo;
 
 import jmg.Digraph;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
 public class CountMultiArcs
 {
-	public static long count(Digraph g)
+	public static long count(Digraph g, int nbThreads)
 	{
 		long[] count = new long[1];
 		LongProcess p = new LongProcess("count loops", g.getNbVertex());
 
-		new ParallelIntervalProcessing(g.getNbVertex())
+		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, p)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				int[][] adj = g.out == null ? g.in.adj : g.out.adj;
 
@@ -45,7 +46,7 @@ public class CountMultiArcs
 						}
 					}
 
-					++p.progressStatus;
+					++s.progressStatus;
 				}
 
 				synchronized (count)

@@ -3,24 +3,25 @@ package jmg.algo;
 import java.util.concurrent.atomic.AtomicLong;
 
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
+import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
 public class CountBidirectionalArcs
 {
-	public static long count(Digraph g)
+	public static long count(Digraph g, int nbThreads)
 	{
 		LongProcess p = new LongProcess("count bidirectional arcs", g.getNbVertex());
 		AtomicLong count = new AtomicLong(0);
 		p.temporaryResult = count;
 
-		new ParallelIntervalProcessing(g.getNbVertex())
+		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, p)
 		{
 
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
@@ -35,7 +36,7 @@ public class CountBidirectionalArcs
 						}
 					}
 
-					++p.progressStatus;
+					++s.progressStatus;
 				}
 			}
 		};
@@ -44,12 +45,12 @@ public class CountBidirectionalArcs
 		return count.get();
 	}
 
-	public static class Plugin implements TooolsPlugin<Digraph, Long>
+	public static class Plugin extends JMGPlugin<Digraph, Long>
 	{
 		@Override
 		public Long process(Digraph in)
 		{
-			return count(in);
+			return count(in, nbThreads);
 		}
 
 		@Override

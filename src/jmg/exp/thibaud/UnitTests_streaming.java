@@ -1,4 +1,4 @@
-package jmg.exp.nathann;
+package jmg.exp.thibaud;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,7 +9,7 @@ import org.junit.Test;
 import jmg.Digraph;
 import jmg.io.TinyReader;
 
-public class UnitTests
+public class UnitTests_streaming
 {
 
 	@Test
@@ -19,10 +19,13 @@ public class UnitTests
 		t.addLine(0, 2, 3, 4, 5);
 		t.addLine(1, 3, 4, 5, 6, 7);
 		Digraph g = t.toGraph();
+		g.in.ensureDefined(8);
 
-		CountK22_Result r = new CountK22_streaming().count(g);
-		assertEquals(3, r.nk22);
+		CountK22v2_Result r = new CountK22_streaming().count(g);
+		assertEquals(3, r.nbK22);
 		assertEquals(21, r.nbK22pot);
+
+	
 	}
 
 	@Test
@@ -33,8 +36,8 @@ public class UnitTests
 		t.addLine(1, 2, 3);
 		Digraph g = t.toGraph();
 
-		CountK22_Result r = new CountK22_streaming().count(g);
-		assertEquals(1, r.nk22);
+		CountK22v2_Result r = new CountK22_streaming().count(g);
+		assertEquals(1, r.nbK22);
 		assertEquals(4, r.nbK22pot);
 	}
 
@@ -47,8 +50,10 @@ public class UnitTests
 		t.addLine(2, 4, 5, 6, 7, 8);
 		Digraph g = t.toGraph();
 
-		CountK22_Result r = new CountK22_streaming().count(g);
-		assertEquals(9, r.nk22);
+		CountK22v2_Result r = new CountK22_streaming().count(g);
+		assertEquals(9, r.nbK22);
 		assertEquals(54, r.nbK22pot);
 	}
+
+
 }

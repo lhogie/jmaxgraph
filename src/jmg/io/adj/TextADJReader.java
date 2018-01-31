@@ -46,15 +46,15 @@ public class TextADJReader extends ADJReader
 			sc.close();
 		}
 
-		new MultiThreadProcessing(nbT)
+		new MultiThreadProcessing(nbT, reading)
 		{
 			@Override
-			protected void runInParallel(int _rank, List<Thread> threads) throws Throwable
+			protected void runInParallel(ThreadSpecifics s, List<Thread> threads) throws Throwable
 			{
 				Int2ObjectMap<int[]> _localAdj = new Int2ObjectOpenHashMap<>(
 						nbVerticesExpected / NB_THREADS_TO_USE);
-				localAdjs[_rank] = _localAdj;
-				Section b = sectionPosititions[_rank];
+				localAdjs[s.rank] = _localAdj;
+				Section b = sectionPosititions[s.rank];
 				InputStream _is = from.createReadingStream(0);
 
 				if (_is.skip(b.from) != b.from)
@@ -62,7 +62,7 @@ public class TextADJReader extends ADJReader
 
 				TextNumberReader _scanner = new TextNumberReader(_is, bufSize);
 
-				if (_rank == 0 && hasNbVertices)
+				if (s.rank == 0 && hasNbVertices)
 				{
 					// skip the number of vertices in the file
 					_scanner.nextLong();
@@ -74,7 +74,7 @@ public class TextADJReader extends ADJReader
 				while (_scanner.hasNext())
 				{
 					long _nbByteReadNow = _scanner.getNbByteRead();
-					reading.progressStatus += _nbByteReadNow - _nbBytesReadPreviously;
+					s.progressStatus += _nbByteReadNow - _nbBytesReadPreviously;
 					_nbBytesReadPreviously = _nbByteReadNow;
 
 					int _src = Conversion.long2int(_scanner.nextLong());
@@ -114,7 +114,7 @@ public class TextADJReader extends ADJReader
 					}
 				}
 
-				Cout.progress("thread " + _rank + " has read " + _localAdj.size()
+				Cout.progress("thread " + s.rank + " has read " + _localAdj.size()
 						+ " vertices and " + _nbEdge + " edges");
 			}
 		};

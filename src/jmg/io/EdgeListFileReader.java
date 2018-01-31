@@ -53,7 +53,7 @@ public class EdgeListFileReader
 
 		for (int v = 0; v < nbVertex; ++v)
 		{
-			++lp.progressStatus;
+			++lp.sensor.progressStatus;
 
 			if (map.containsKey(v))
 			{
@@ -77,7 +77,7 @@ public class EdgeListFileReader
 
 		while (sc.hasNext())
 		{
-			++lp.progressStatus;
+			++lp.sensor.progressStatus;
 			int a = sc.nextInt();
 			int b = sc.nextInt();
 			neighbor(a, r, nbEdge).add(b);
@@ -110,7 +110,7 @@ public class EdgeListFileReader
 		Digraph g = new Digraph();
 		g.out.adj = r;
 
-		System.out.println(g.countArcs());
+		System.out.println(g.countArcs(1));
 	}
 
 }

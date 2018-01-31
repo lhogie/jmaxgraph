@@ -19,7 +19,7 @@ public class CreateDigraphProgrammatically
 		for (int i = 0; i < 1000000; ++i)
 		{
 			g.addArc(0, r.nextInt());
-			++p.progressStatus;
+			++p.sensor.progressStatus;
 		}
 
 		p.end();

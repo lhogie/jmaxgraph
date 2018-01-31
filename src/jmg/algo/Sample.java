@@ -4,15 +4,16 @@ import java.util.Random;
 
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Labelling;
 import jmg.Vertex2LabelMap;
+import jmg.chain.JMGPlugin;
 import toools.io.Cout;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class Sample implements TooolsPlugin<Digraph, Digraph>
+public class Sample extends JMGPlugin<Digraph, Digraph>
 {
 	public double p = 0.5;
 	public long seed = System.currentTimeMillis();
@@ -34,33 +35,33 @@ public class Sample implements TooolsPlugin<Digraph, Digraph>
 		{
 			// free some memory before sample g.out
 			g.in.adj = null;
-			g.out.adj = sample(g.out.adj);
+			g.out.adj = sample(g.out.adj, nbThreads);
 			Cout.progress("Sampling completed, now needs to update IN ADJ");
 			g.in.adj = ReverseGraph.computeInverseADJ(g.out.adj, true);
 		}
 		else if (g.out.adj == null)
 		{
-			sampleGraph.in.adj = sample(g.in.adj);
+			sampleGraph.in.adj = sample(g.in.adj, nbThreads);
 		}
 		else if (g.in.adj == null)
 		{
-			sampleGraph.out.adj = sample(g.out.adj);
+			sampleGraph.out.adj = sample(g.out.adj, nbThreads);
 		}
 
 		return sampleGraph;
 	}
 
-	private int[][] sample(int[][] adj)
+	private int[][] sample(int[][] adj, int nbThreads)
 	{
 		LongProcess sampling = new LongProcess("sampling with p=" + p, adj.length);
 		int[][] r = new int[adj.length][];
 
-		new ParallelIntervalProcessing(adj.length)
+		new ParallelIntervalProcessing(adj.length, nbThreads, sampling)
 		{
 			@Override
-			protected void process(int rank, int lowerBound, int upperBound)
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
-				Random prng = new Random(rank + seed);
+				Random prng = new Random(s.rank + seed);
 
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
@@ -76,7 +77,7 @@ public class Sample implements TooolsPlugin<Digraph, Digraph>
 					}
 
 					r[u] = IntArrays.copy(retain, 0, nbRetained);
-					++sampling.progressStatus;
+					++s.progressStatus;
 				}
 			}
 		};

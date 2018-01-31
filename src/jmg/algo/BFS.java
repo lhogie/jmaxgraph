@@ -12,7 +12,7 @@ import jmg.gen.GridGenerator;
 import toools.io.Cout;
 import toools.progression.LongProcess;
 
-public class BFS 
+public class BFS
 {
 
 	public static int[] classic(int[][] adj, int src)
@@ -29,7 +29,7 @@ public class BFS
 
 		while (from != to)
 		{
-				++lp.progressStatus;
+			++lp.sensor.progressStatus;
 
 			int v = q[from++];
 			int d = distances[v];
@@ -60,7 +60,7 @@ public class BFS
 		for (int distance = 0; ! inbox.isEmpty(); ++distance)
 		{
 			// inboxSizeHistory.add(inbox.size());
-			++lp.progressStatus;
+			++lp.sensor.progressStatus;
 
 			// expect as many messages as previous iteration
 			IntList outbox = new IntArrayList(inbox.size());
@@ -91,7 +91,7 @@ public class BFS
 	public static void main(String[] args)
 	{
 		Digraph g = new Digraph();
-		g.out.adj = GridGenerator.dgrid_outs(10000, 100, true, true, false, false);
+		g.out.adj = GridGenerator.dgrid_outs(10000, 100, true, true, false, false, 1);
 		int[] distances = bsp_seq(g.out.adj, 0);
 		// FastUtils.printAsMap(distances, " has distance ", System.out);
 		System.out.println("*****");
@@ -99,6 +99,7 @@ public class BFS
 		Cout.debug(distances2);
 		// FastUtils.printAsMap(distances2, " has distance ", System.out);
 	}
+
 	public static class Plugin implements TooolsPlugin<Digraph, int[]>
 	{
 		private int src = 0;

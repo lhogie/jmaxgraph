@@ -41,7 +41,7 @@ public class ADJ32Writer extends ADJWriter
 				os.write(b);
 			}
 
-			++lp.progressStatus;
+			++lp.sensor.progressStatus;
 			pos += 8 + neighbors.length * 4;
 		}
 

@@ -1,46 +1,64 @@
 package jmg.chain;
 
 import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.io.PrettyAdjPrinter;
 import toools.io.Cout;
 
-public class info implements TooolsPlugin<Digraph, Digraph>
+public class info extends JMGPlugin<Digraph, Digraph>
 {
 	private boolean showOuts, shownIns;
+	private boolean hashCode, inhash, outhash;
 	private boolean maxOutDegree, maxInDegree;
 
 	@Override
 	public Digraph process(Digraph g)
 	{
-		g.ensureADJLoaded();
-		Cout.info("nbVertex=" + g.getNbVertex() + ", nbArcs=" + g.countArcs());
+		g.ensureADJLoaded(nbThreads);
+		Cout.info("nbVertex=" + g.getNbVertex() + ", nbArcs=" + g.countArcs(nbThreads));
 
 		if (showOuts)
 		{
-			g.out.ensureDefined();
+			g.out.ensureDefined(nbThreads);
 			Cout.info("out-ADJ:");
 			Cout.info(PrettyAdjPrinter.f(g.out.adj));
 		}
 
 		if (shownIns)
 		{
-			g.in.ensureDefined();
+			g.in.ensureDefined(nbThreads);
 			Cout.info("in-ADJ:");
 			Cout.info(PrettyAdjPrinter.f(g.in.adj));
 		}
 
 		if (maxOutDegree)
 		{
-			g.out.ensureDefined();
-			Cout.info("max-out-degree=" + g.out.maxDegree());
+			g.out.ensureDefined(nbThreads);
+			Cout.info("max-out-degree=" + g.out.maxDegree(nbThreads));
 		}
 
 		if (maxInDegree)
 		{
-			g.in.ensureDefined();
-			Cout.info("max-in-degree=" + g.in.maxDegree());
+			g.in.ensureDefined(nbThreads);
+			Cout.info("max-in-degree=" + g.in.maxDegree(nbThreads));
+		}
+
+		if (hashCode)
+		{
+			g.in.ensureDefined(nbThreads);
+			Cout.info("hash=" + g.hashCode());
+		}
+
+		if (inhash)
+		{
+			g.in.ensureDefined(nbThreads);
+			Cout.info("in-hash=" + g.in.hashCode());
+		}
+
+		if (outhash)
+		{
+			g.out.ensureDefined(nbThreads);
+			Cout.info("out-hash=" + g.out.hashCode());
 		}
 
 		return g;
@@ -49,9 +67,14 @@ public class info implements TooolsPlugin<Digraph, Digraph>
 	@Override
 	public void setup(PluginConfig p)
 	{
-		showOuts = p.containsAndRemove("out");
-		shownIns = p.containsAndRemove("in");
+		super.setup(p);
+		showOuts = p.containsAndRemove("outs");
+		shownIns = p.containsAndRemove("ins");
 		maxOutDegree = p.containsAndRemove("max-out-degree");
 		maxInDegree = p.containsAndRemove("max-in-degree");
+		hashCode = p.containsAndRemove("hash");
+		inhash = p.containsAndRemove("inhash");
+		outhash = p.containsAndRemove("outhash");
 	}
+
 }

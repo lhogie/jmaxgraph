@@ -19,7 +19,7 @@ public class Vertex2LabelMap extends LazyArray
 
 		for (int label = 0; label < nbLabels; ++label)
 		{
-			++pm.progressStatus;
+			++pm.sensor.progressStatus;
 
 			int v = label2vertex[label];
 			put(v, label);

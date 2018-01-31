@@ -5,23 +5,24 @@ import java.io.IOException;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import jmg.algo.Degrees;
 import jmg.algo.ReverseGraph;
-import jmg.io.jmg.EDGFile;
+import jmg.io.jmg.ArcFile;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class Direction
+public class Adj
 {
 	public int[][] adj;
-	public EDGFile file;
-	public Direction opposite;
+	public ArcFile file;
+	public Adj opposite;
 
-	public int[] degrees()
+	public int[] degrees(int nbThreads)
 	{
 		if (adj == null)
 			throw new JMGException("no ADJ defined");
 
-		return Degrees.computeDegrees(adj);
+		return Degrees.computeDegrees(adj, nbThreads);
 	}
 
 	public void load(int nbThreads)
@@ -41,14 +42,14 @@ public class Direction
 		file.writeADJ(adj);
 	}
 
-	public void ensureDefined()
+	public void ensureDefined(int nbThreads)
 	{
 		if (adj == null)
 		{
 			// it's on disk
 			if (file != null && file.exists())
 			{
-				load(8);
+				load(nbThreads);
 			}
 			else
 			{
@@ -56,14 +57,14 @@ public class Direction
 						&& (opposite.file == null || ! opposite.file.exists()))
 					throw new IllegalStateException();
 
-				opposite.ensureDefined();
+				opposite.ensureDefined(nbThreads);
 				computeFromOppositeDirection();
 			}
 		}
 	}
 
 	public void from(Int2ObjectMap<int[]> adj, boolean addUndeclared, boolean sort,
-			Labelling labelling)
+			Labelling labelling,  int nbThreads)
 	{
 		if (addUndeclared)
 		{
@@ -76,20 +77,20 @@ public class Direction
 			labelling.vertex2label = new Vertex2LabelMap(labelling.label2vertex);
 		}
 
-		load(adj, labelling);
+		load(adj, labelling, nbThreads);
 
 		if (sort)
 		{
-			ensureSorted();
+			ensureSorted(nbThreads);
 		}
 	}
 
-	public void ensureSorted()
+	public void ensureSorted(int nbThreads)
 	{
-		Utils.ensureSorted(adj);
+		Utils.ensureSorted(adj, nbThreads);
 	}
 
-	private void load(Int2ObjectMap<int[]> m, Labelling labelling)
+	private void load(Int2ObjectMap<int[]> m, Labelling labelling, int nbThreads)
 	{
 		int nbVertex = m.size();
 		adj = new int[nbVertex][];
@@ -99,7 +100,7 @@ public class Direction
 		for (int u = 0; u < nbVertex; ++u)
 		{
 			adj[u] = m.get(labelling == null ? u : labelling.label2vertex[u]);
-			++relabelSrc.progressStatus;
+			++relabelSrc.sensor.progressStatus;
 		}
 
 		relabelSrc.end();
@@ -108,11 +109,11 @@ public class Direction
 		{
 			LongProcess relabelADJ = new LongProcess("relabelling", " list", adj.length);
 
-			new ParallelIntervalProcessing(adj.length)
+			new ParallelIntervalProcessing(adj.length, nbThreads, relabelADJ)
 			{
 
 				@Override
-				protected void process(int rank, int lowerBound, int upperBound)
+				protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 				{
 					for (int v = lowerBound; v < upperBound; ++v)
 					{
@@ -128,7 +129,7 @@ public class Direction
 							_list[_neighborIndex] = neighborLabel;
 						}
 
-						++relabelADJ.progressStatus;
+						++relabelADJ.sensor.progressStatus;
 					}
 				}
 			};
@@ -137,9 +138,9 @@ public class Direction
 		}
 	}
 
-	public int maxDegree()
+	public int maxDegree(int nbThreads)
 	{
-		return MathsUtilities.max(degrees());
+		return MathsUtilities.max(degrees(nbThreads));
 	}
 
 }

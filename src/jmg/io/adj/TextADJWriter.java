@@ -52,7 +52,7 @@ public class TextADJWriter extends ADJWriter
 			}
 
 			pos += out.print('\n');
-			++p.progressStatus;
+			++p.sensor.progressStatus;
 		}
 
 		out.flush();

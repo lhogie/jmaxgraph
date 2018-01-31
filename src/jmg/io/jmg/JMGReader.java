@@ -2,6 +2,7 @@ package jmg.io.jmg;
 
 import java4unix.pluginchain.PluginConfig;
 import jmg.Digraph;
+import jmg.io.DatasetReaderPlugin;
 
 public class JMGReader
 {
@@ -13,7 +14,7 @@ public class JMGReader
 		@Override
 		public Digraph read()
 		{
-			return from.readDirectory(nbThreads, useLabels);
+			return from.mapGraph(nbThreads, useLabels);
 		}
 
 		@Override

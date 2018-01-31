@@ -18,8 +18,8 @@ import jmg.io.adj.TextADJWriter;
 import jmg.io.jmg.JMGDirectory;
 import jmg.io.jmg.JMGReader;
 import jmg.io.jmg.JMGWriter;
-import toools.io.NBSFile;
 import toools.io.file.RegularFile;
+import toools.io.file.nbs.NBSFile;
 
 public class JMGPlugins extends DefaultPlugins
 {
@@ -106,17 +106,13 @@ public class JMGPlugins extends DefaultPlugins
 				return w;
 			}
 		}
-		else if (name.equals("sgnp"))
+		else if (name.equals("gnp"))
 		{
 			return new DirectedGNP.Plugin();
 		}
 		else if (name.equals("info"))
 		{
 			return new info();
-		}
-		else if (name.equals("dgnp"))
-		{
-			return new DirectedGNP.Plugin();
 		}
 		else if (name.equals("grid"))
 		{
