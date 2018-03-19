@@ -1,6 +1,5 @@
 package jmg.io;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
 import java4unix.pluginchain.PluginConfig;
@@ -18,17 +17,10 @@ public class EdgeListFileWriter
 		@Override
 		public RegularFile process(Digraph g)
 		{
-			try
-			{
-				PrintStream ps = new PrintStream(to.createWritingStream());
-				write(g, ps);
-				ps.close();
-				return to;
-			}
-			catch (IOException e)
-			{
-				throw new IllegalStateException(e);
-			}
+			PrintStream ps = new PrintStream(to.createWritingStream());
+			write(g, ps);
+			ps.close();
+			return to;
 		}
 
 		@Override
@@ -37,7 +29,6 @@ public class EdgeListFileWriter
 		}
 	}
 
-	
 	public static void write(Digraph g, PrintStream out)
 	{
 		for (int l = 0; l < g.out.adj.length; ++l)
@@ -46,7 +37,7 @@ public class EdgeListFileWriter
 
 			for (int nl : g.out.adj[l])
 			{
-				int n =  g.labelling == null ? nl : g.labelling.label2vertex[nl];
+				int n = g.labelling == null ? nl : g.labelling.label2vertex[nl];
 				out.print(v);
 				out.print('\t');
 				out.print(n);

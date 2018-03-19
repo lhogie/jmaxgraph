@@ -14,7 +14,7 @@ public class CreateDigraphProgrammatically
 		g.out.adj[0] = new int[0];
 		Random r = new Random();
 
-		LongProcess p = new LongProcess("perfomance", 1000000);
+		LongProcess p = new LongProcess("perfomance", " arc", 1000000);
 
 		for (int i = 0; i < 1000000; ++i)
 		{

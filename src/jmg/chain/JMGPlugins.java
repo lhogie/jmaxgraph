@@ -13,7 +13,7 @@ import jmg.io.EdgeListFileReader;
 import jmg.io.EdgeListFileWriter;
 import jmg.io.adj.ADJ32Reader;
 import jmg.io.adj.ADJ32Writer;
-import jmg.io.adj.TextADJReader;
+import jmg.io.adj.TextADJFastReader;
 import jmg.io.adj.TextADJWriter;
 import jmg.io.jmg.JMGDirectory;
 import jmg.io.jmg.JMGReader;
@@ -50,7 +50,7 @@ public class JMGPlugins extends DefaultPlugins
 		{
 			if (bootstrap)
 			{
-				TextADJReader w = new TextADJReader();
+				TextADJFastReader w = new TextADJFastReader();
 				w.from = new RegularFile(name);
 				return w;
 			}

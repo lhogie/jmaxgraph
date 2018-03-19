@@ -14,8 +14,8 @@ public class info extends JMGPlugin<Digraph, Digraph>
 	@Override
 	public Digraph process(Digraph g)
 	{
-		g.ensureADJLoaded(nbThreads);
-		Cout.info("nbVertex=" + g.getNbVertex() + ", nbArcs=" + g.countArcs(nbThreads));
+		Cout.info("nbVertex=" + g.getNbVertices());
+			Cout.result("nbArcs=" + g.countArcs(nbThreads));
 
 		if (showOuts)
 		{

@@ -10,7 +10,6 @@ import toools.io.IORuntimeException;
 import toools.io.file.Directory;
 import toools.io.file.RegularFile;
 import toools.io.file.nbs.NBSFile;
-import toools.progression.LongProcess;
 import toools.text.TextUtilities;
 import toools.util.Conversion;
 
@@ -84,8 +83,12 @@ public class JMGDirectory extends Directory
 	@Override
 	public String toString()
 	{
-		return "JMG Dataset " + getPath() + " is "
-				+ TextUtilities.toHumanString(getSize()) + "B";
+		String s = "JMG Dataset " + getPath();
+
+		if (exists())
+			s += " is " + TextUtilities.toHumanString(getSize()) + "B";
+
+		return s;
 	}
 
 	public Properties getProperties()
@@ -95,32 +98,26 @@ public class JMGDirectory extends Directory
 
 	public Digraph mapGraph(int nbThreads, boolean useLabels)
 	{
-		try
+		if ( ! exists())
+			throw new IllegalStateException(getPath() + " does not exist");
+
+		Digraph g = new Digraph();
+		g.setDataset(this);
+		g.nbVertices = getNbVertex();
+
+		if (useLabels && label2vertexFile.exists())
 		{
-			LongProcess loading = new LongProcess("creating (no loading here) graph from " + this, - 1);
-			Digraph g = new Digraph();
-			g.setDataset(this);
-			g.nbVertices = getNbVertex();
+			g.labelling.label2vertex = Conversion
+					.toIntArray(label2vertexFile.readValues(nbThreads));
 
-			if (useLabels && label2vertexFile.exists())
-			{
-				g.labelling.label2vertex = Conversion
-						.toIntArray(label2vertexFile.readValues(nbThreads));
+			assert new IntOpenHashSet(g.labelling.label2vertex)
+					.size() == g.labelling.label2vertex.length : new IntOpenHashSet(
+							g.labelling.label2vertex).size() + " != "
+							+ g.labelling.label2vertex.length;
 
-				assert new IntOpenHashSet(g.labelling.label2vertex)
-						.size() == g.labelling.label2vertex.length : new IntOpenHashSet(
-								g.labelling.label2vertex).size() + " != "
-								+ g.labelling.label2vertex.length;
-
-				g.labelling.vertex2label = new Vertex2LabelMap(g.labelling.label2vertex);
-			}
-
-			loading.end();
-			return g;
+			g.labelling.vertex2label = new Vertex2LabelMap(g.labelling.label2vertex);
 		}
-		catch (IOException e)
-		{
-			throw new IllegalStateException(e);
-		}
+
+		return g;
 	}
 }

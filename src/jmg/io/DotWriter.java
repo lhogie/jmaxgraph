@@ -1,6 +1,5 @@
 package jmg.io;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -16,15 +15,10 @@ public class DotWriter implements TooolsPlugin<Digraph, RegularFile>
 	@Override
 	public RegularFile process(Digraph g)
 	{
-		try
-		{
-			to.setContent(toString().getBytes());
-			return to;
-		}
-		catch (IOException e)
-		{
-			throw new IllegalStateException(e);
-		}
+
+		to.setContent(toString().getBytes());
+		return to;
+
 	}
 
 	public static String toString(int[][] adj)

@@ -7,7 +7,7 @@ import java4unix.pluginchain.PluginConfig;
 import jmg.Digraph;
 import jmg.Utils;
 import jmg.chain.JMGPlugin;
-import jmg.io.jmg.EDGFileVertexIterator.EDGFileCursor;
+import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.IORuntimeException;
 import toools.progression.LongProcess;
@@ -57,24 +57,24 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 		CountK22v2_Result globalResult = new CountK22v2_Result();
 
 		LongProcess progressMonitor = new LongProcess("thibaud tracking K2,2",
-				g.getNbVertex());
+				" vertex", g.getNbVertices());
 
 		progressMonitor.temporaryResult = globalResult;
 
-		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, progressMonitor)
+		new ParallelIntervalProcessing(g.getNbVertices(), nbThreads, progressMonitor)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				long _sum_fractionalNbK22pot = 0;
 				long _sum_twoTimesfractionalNbK22 = 0;
-				Iterator<EDGFileCursor> vertexIterator = g.out.file.iterator(lowerBound,
+				Iterator<ArcFileCursor> vertexIterator = g.out.file.iterator(lowerBound,
 						upperBound, 1000, 256 * 256 * 256);
 
 				while (vertexIterator.hasNext())
 				{
 					globalResult.nbVertices.incrementAndGet();
-					EDGFileCursor u = vertexIterator.next();
+					ArcFileCursor u = vertexIterator.next();
 
 					for (int v : u.adj)
 					{

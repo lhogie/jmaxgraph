@@ -1,6 +1,6 @@
 package jmg;
 
-public class INs extends Adj
+public class INs extends Adjacency
 {
 	@Override
 	public int hashCode()

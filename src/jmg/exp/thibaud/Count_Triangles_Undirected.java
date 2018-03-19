@@ -35,11 +35,11 @@ public class Count_Triangles_Undirected
 
 		CountTriangles_Undirected_Result r = new CountTriangles_Undirected_Result();
 
-		LongProcess l = new LongProcess("tracking transitive triangles", g.getNbVertex());
+		LongProcess l = new LongProcess("tracking transitive triangles", " vertex", g.getNbVertices());
 
 		l.temporaryResult = r;
 
-		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, l)
+		new ParallelIntervalProcessing(g.getNbVertices(), nbThreads, l)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)

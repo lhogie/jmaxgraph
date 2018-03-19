@@ -30,7 +30,7 @@ public class Utils
 			LongProcess marking = new LongProcess(
 					"marking " + adjTable.keySet().size()
 							+ " declared vertices as 'present'",
-					adjTable.keySet().size());
+					"vertex", adjTable.keySet().size());
 
 			int[] vertices = adjTable.keySet().toIntArray();
 
@@ -129,7 +129,8 @@ public class Utils
 	public static void union(int[][] a, int[][] b, boolean prune, int nbThreads)
 	{
 		int nbVertex = a.length;
-		LongProcess computing = new LongProcess("merging ADJ lists", nbVertex);
+		LongProcess computing = new LongProcess("merging ADJ lists", " adjlist",
+				nbVertex);
 
 		new ParallelIntervalProcessing(nbVertex, nbThreads, computing)
 		{
@@ -172,69 +173,6 @@ public class Utils
 
 		r.append(']');
 		return r.toString();
-	}
-
-	/*
-	 * public static int pick(int[] weights, Random prng) { return
-	 * pick(partialSums(weights), prng); }
-	 */
-	public static long[] partialSums(int[] weights)
-	{
-		LongProcess lp = new LongProcess("computing partial sums", weights.length);
-		long[] partialSums = new long[weights.length];
-		long currentSum = 0;
-
-		for (int i = 0; i < weights.length; ++i)
-		{
-			if (weights[i] < 0)
-				throw new IllegalArgumentException("weight should be positive");
-
-			long trySum = currentSum + weights[i];
-
-			if (trySum < currentSum)
-				throw new IllegalArgumentException(
-						"long overflow while adding " + weights[i] + " to " + currentSum);
-
-			partialSums[i] = currentSum = trySum;
-
-			lp.sensor.progressStatus++;
-		}
-
-		lp.end();
-		return partialSums;
-	}
-
-	public static int pick(long[] partialSums, Random prng)
-	{
-		double r = prng.nextDouble() * partialSums[partialSums.length - 1];
-		return binarySearch(partialSums, r);
-	}
-
-	private static int binarySearch(long[] partialSums, double d)
-	{
-		int min = 0, max = partialSums.length - 1;
-
-		while (max - min > 1)
-		{
-			int middle = (max + min) / 2;
-
-			if (d <= partialSums[middle])
-			{
-				max = middle;
-			}
-			else if (d > partialSums[middle])
-			{
-				min = middle;
-			}
-		}
-
-		if (max == min)
-			return min;
-
-		if (d < partialSums[min])
-			return min;
-
-		return max;
 	}
 
 	public static int countElementsInCommon_dichotomic(int[] A, int[] B)
@@ -509,22 +447,6 @@ public class Utils
 		Cout.debug(remove(w, 12, true));
 	}
 
-	public static void main1(String[] args)
-	{
-		long[] w = new long[] { 2, 4, 6, 6, 7, 12 };
-
-		Random r = new Random();
-		int[] distribution = new int[6];
-		int n = 12000;
-
-		for (int i = 0; i < n; ++i)
-		{
-			++distribution[pick(w, r)];
-		}
-
-		Cout.debug(distribution);
-	}
-
 	public static void main2(String[] args)
 	{
 		Random r = new Random();
@@ -564,5 +486,33 @@ public class Utils
 		};
 
 		return r.get();
+	}
+
+	public static void relabel(int[][] r, int[] labels, int nbThreads)
+	{
+		LongProcess relabelling = new LongProcess("relabelling", "ADJ-list", r.length);
+
+		new ParallelIntervalProcessing(r.length, nbThreads,
+				relabelling)
+		{
+			@Override
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
+					throws Throwable
+			{
+				for (int u = lowerBound; u < upperBound; ++u)
+				{
+					int[] adjList = r[u];
+
+					for (int i = 0; i < adjList.length; ++i)
+					{
+						int neighbor = adjList[i];
+						adjList[i] = labels[neighbor];
+					}
+				}
+			}
+		};
+
+		relabelling.end();
+
 	}
 }

@@ -17,7 +17,7 @@ public class BFS
 
 	public static int[] classic(int[][] adj, int src)
 	{
-		LongProcess lp = new LongProcess("BFS (classic)", adj.length);
+		LongProcess lp = new LongProcess("BFS (classic)", " vertex", adj.length);
 		int[] distances = new int[adj.length];
 		Arrays.fill(distances, - 1);
 		// IntPriorityQueue q = new IntArrayFIFOQueue();
@@ -50,7 +50,7 @@ public class BFS
 
 	public static int[] bsp_seq(int[][] adj, int src)
 	{
-		LongProcess lp = new LongProcess("BFS (seq BSP)", - 1);
+		LongProcess lp = new LongProcess("BFS (seq BSP)", " iteration", - 1);
 		int[] distances = new int[adj.length];
 		Arrays.fill(distances, - 1);
 		IntList inbox = new IntArrayList();

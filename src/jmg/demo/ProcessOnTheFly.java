@@ -6,7 +6,7 @@ import java.util.Random;
 
 import jmg.Digraph;
 import jmg.gen.DirectedGNP;
-import jmg.io.jmg.EDGFileVertexIterator.EDGFileCursor;
+import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.Cout;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -24,24 +24,24 @@ public class ProcessOnTheFly
 		g.write(d);
 		g.setDataset(d);
 
-		new ParallelIntervalProcessing(g.getNbVertex(), 1, null)
+		new ParallelIntervalProcessing(g.getNbVertices(), 1, null)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 					throws IOException
 			{
-				Iterator<EDGFileCursor> i = g.out.file.iterator(lowerBound, upperBound,
+				Iterator<ArcFileCursor> i = g.out.file.iterator(lowerBound, upperBound,
 						100, 256 * 256 * 256);
 
 				while (i.hasNext())
 				{
-					EDGFileCursor r = i.next();
+					ArcFileCursor r = i.next();
 					Cout.result("Vertex " + r.vertex + " has degree " + r.adj.length);
 				}
 			}
 		};
 
-		for (EDGFileCursor c : g.out.file)
+		for (ArcFileCursor c : g.out.file)
 		{
 			Cout.result(c.vertex);
 		}

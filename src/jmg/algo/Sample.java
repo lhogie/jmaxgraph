@@ -53,7 +53,8 @@ public class Sample extends JMGPlugin<Digraph, Digraph>
 
 	private int[][] sample(int[][] adj, int nbThreads)
 	{
-		LongProcess sampling = new LongProcess("sampling with p=" + p, adj.length);
+		LongProcess sampling = new LongProcess("sampling with p=" + p, " adjlist",
+				adj.length);
 		int[][] r = new int[adj.length][];
 
 		new ParallelIntervalProcessing(adj.length, nbThreads, sampling)

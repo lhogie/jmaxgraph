@@ -49,7 +49,7 @@ public class EdgeListFileReader
 		int nbVertex = map.size();
 		int[][] adj = new int[nbVertex][];
 
-		LongProcess lp = new LongProcess("converting " + f, nbVertex);
+		LongProcess lp = new LongProcess("converting " + f, " arc", nbVertex);
 
 		for (int v = 0; v < nbVertex; ++v)
 		{
@@ -68,7 +68,7 @@ public class EdgeListFileReader
 
 	public static Int2ObjectMap<IntList> parse(RegularFile f) throws FileNotFoundException
 	{
-		LongProcess lp = new LongProcess("parsing " + f, - 1);
+		LongProcess lp = new LongProcess("parsing " + f, " number", - 1);
 		InputStream is = f.createReadingStream();
 		Scanner sc = new Scanner(is);
 		int expectedNbEdge = (int) (f.getSize() / 15);

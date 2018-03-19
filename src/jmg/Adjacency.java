@@ -6,16 +6,17 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import jmg.algo.Degrees;
 import jmg.algo.ReverseGraph;
 import jmg.io.jmg.ArcFile;
+import toools.io.Cout;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class Adj
+public class Adjacency
 {
 	public int[][] adj;
 	public ArcFile file;
-	public Adj opposite;
+	public Adjacency opposite;
 
 	public int[] degrees(int nbThreads)
 	{
@@ -46,16 +47,20 @@ public class Adj
 	{
 		if (adj == null)
 		{
+			Cout.debug(file);
+
 			// it's on disk
 			if (file != null && file.exists())
 			{
 				load(nbThreads);
 			}
+			// it's not but maybe it can be computed from the other direction
 			else
 			{
 				if (opposite.adj == null
 						&& (opposite.file == null || ! opposite.file.exists()))
-					throw new IllegalStateException();
+					throw new IllegalStateException(
+							"unable to load or compute this adjacency since no file or opposite adjacency is available");
 
 				opposite.ensureDefined(nbThreads);
 				computeFromOppositeDirection();
@@ -64,7 +69,7 @@ public class Adj
 	}
 
 	public void from(Int2ObjectMap<int[]> adj, boolean addUndeclared, boolean sort,
-			Labelling labelling,  int nbThreads)
+			Labelling labelling, int nbThreads)
 	{
 		if (addUndeclared)
 		{

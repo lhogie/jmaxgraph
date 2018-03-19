@@ -6,9 +6,9 @@ import java.util.Random;
 
 import java4unix.pluginchain.PluginConfig;
 import jmg.Digraph;
-import jmg.Utils;
 import jmg.chain.JMGPlugin;
 import jmg.io.jmg.JMGDirectory;
+import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -30,22 +30,22 @@ public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
 
 		// g.symmetrize();
 
-		int nbVertices = g.getNbVertex();
+		int nbVertices = g.getNbVertices();
 
-		LongProcess assigningWeights = new LongProcess("assigning weights",
-				g.getNbVertex());
+		LongProcess assigningWeights = new LongProcess("assigning weights", " vertex",
+				g.getNbVertices());
 
-		int[] weigths = new int[nbVertices];
+		long[] weigths = new long[nbVertices];
 
-		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, assigningWeights)
+		new ParallelIntervalProcessing(g.getNbVertices(), nbThreads, assigningWeights)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					int din = g.in.adj[u].length;
-					int dout = g.out.adj[u].length;
+					long din = g.in.adj[u].length;
+					long dout = g.out.adj[u].length;
 					weigths[u] = din * dout;
 					++s.progressStatus;
 				}
@@ -54,11 +54,11 @@ public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
 
 		assigningWeights.end();
 
-		long[] partialSums = Utils.partialSums(weigths);
+		long[] partialSums = MathsUtilities.partialSums(weigths);
 
 		CountTriangleResult r = new CountTriangleResult();
 
-		LongProcess l = new LongProcess("tracking K2,2 by Stephane", - 1);
+		LongProcess l = new LongProcess("tracking K2,2 by Stephane", " couple", - 1);
 		l.temporaryResult = r;
 
 		new MultiThreadProcessing(nbThreads, l)
@@ -74,7 +74,7 @@ public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
 					++s.progressStatus;
 
 					Random prng = new Random();
-					int u = Utils.pick(partialSums, prng);
+					int u = MathsUtilities.pick(partialSums, prng);
 					int[] in = g.in.adj[u];
 					int[] out = g.out.adj[u];
 

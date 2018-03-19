@@ -4,11 +4,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="/libs/fastutil-8.1.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/toools"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/java4unix"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/octojus"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/client-server"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/jacaboo"/>
 	<classpathentry kind="lib" path="/libs/junit-4.5.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/joar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/MapReduce"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/java4unix"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -10,9 +10,9 @@ public class CountMultiArcs
 	public static long count(Digraph g, int nbThreads)
 	{
 		long[] count = new long[1];
-		LongProcess p = new LongProcess("count loops", g.getNbVertex());
+		LongProcess p = new LongProcess("count loops", " elements", g.getNbVertices());
 
-		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, p)
+		new ParallelIntervalProcessing(g.getNbVertices(), nbThreads, p)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)

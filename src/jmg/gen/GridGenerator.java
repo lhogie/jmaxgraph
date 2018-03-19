@@ -8,7 +8,7 @@ import jmg.Digraph;
 import jmg.Utils;
 import jmg.chain.JMGPlugin;
 import jmg.io.DotWriter;
-import toools.NotYetImplementedException;
+import toools.exceptions.NotYetImplementedException;
 import toools.io.Cout;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;

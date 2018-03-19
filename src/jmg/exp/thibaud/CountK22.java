@@ -36,11 +36,11 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 		Cout.info("max degree=" + maxDegree);
 		r.distri = new int[maxDegree + 1];
 
-		LongProcess l = new LongProcess("tracking K2,2", g.getNbVertex());
+		LongProcess l = new LongProcess("tracking K2,2", " vertex", g.getNbVertices());
 
 		l.temporaryResult = r;
 
-		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, l)
+		new ParallelIntervalProcessing(g.getNbVertices(), nbThreads, l)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)

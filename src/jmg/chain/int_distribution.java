@@ -11,7 +11,7 @@ public class int_distribution implements TooolsPlugin<int[], Int2IntMap>
 {
 	public static Int2IntMap getDistribution(int[] m)
 	{
-		LongProcess pm = new LongProcess("computing distribution", m.length);
+		LongProcess pm = new LongProcess("computing distribution", " element", m.length);
 		Int2IntMap distribution = new Int2IntAVLTreeMap();
 
 		for (int n : m)

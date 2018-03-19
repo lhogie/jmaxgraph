@@ -1,6 +1,6 @@
 package jmg.io.jmg;
 
-public interface EDGListener
+public interface ArcFileListener
 {
 
 	boolean found(int u, int[] adj, int nbBytesRead);

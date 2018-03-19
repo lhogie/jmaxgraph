@@ -10,7 +10,7 @@ public class DegreeDistribution
 {
 	public static Int2ObjectMap<AtomicInteger> getDegreeDistribution(int[][] adj)
 	{
-		LongProcess pm = new LongProcess("computing degree distribution", adj.length);
+		LongProcess pm = new LongProcess("computing degree distribution", " vertex", adj.length);
 		Int2ObjectMap<AtomicInteger> degreeDistribution = new Int2ObjectAVLTreeMap<>();
 
 		for (int[] neighbors : adj)

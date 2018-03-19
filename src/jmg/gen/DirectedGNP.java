@@ -15,7 +15,7 @@ public class DirectedGNP
 
 	public static int[][] out(int nbVertex, double p, Random prng, int nbThreads)
 	{
-		LongProcess lp = new LongProcess("generating GNP graph", nbVertex);
+		LongProcess lp = new LongProcess("generating GNP graph", " adj-list", nbVertex);
 		IntSet[] v_hash = new IntSet[nbVertex];
 
 		for (int v = 0; v < nbVertex; ++v)
@@ -63,7 +63,7 @@ public class DirectedGNP
 			Digraph g = new Digraph();
 			g.out.adj = out(nbVertex, p, r, nbThreads);
 			g.nbVertices = g.out.adj.length;
-			g.properties.put("edge probability", p);
+			g.properties.put("edge probability", ""+p);
 			return g;
 		}
 

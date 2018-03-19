@@ -12,7 +12,7 @@ public class long_distribution implements TooolsPlugin<long[], Long2IntMap>
 {
 	public static Long2IntMap getDistribution(long[] m)
 	{
-		LongProcess pm = new LongProcess("computing distribution", m.length);
+		LongProcess pm = new LongProcess("computing distribution", " element", m.length);
 		Long2IntMap distribution = new Long2IntAVLTreeMap();
 
 		for (long n : m)

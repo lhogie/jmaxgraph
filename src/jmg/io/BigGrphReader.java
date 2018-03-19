@@ -29,7 +29,7 @@ public class BigGrphReader
 		int[] label2vertex = new int[totalNbEntry];
 		Arrays.fill(label2vertex, - 2);
 
-		LongProcess pm = new LongProcess("loading files", totalNbEntry);
+		LongProcess pm = new LongProcess("loading files", " entry", totalNbEntry);
 
 		new MultiThreadProcessing(files.size(), pm)
 		{

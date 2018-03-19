@@ -13,12 +13,12 @@ public class ADJ32Writer extends ADJWriter
 	@Override
 	public long[] write(Digraph g, OutputStream os) throws IOException
 	{
-		int nbVertex = g.getNbVertex();
+		int nbVertex = g.getNbVertices();
 		long pos = 4;
 		long[] index = new long[nbVertex];
 
 		// int segmentSize = nbVertex /
-		LongProcess lp = new LongProcess("writing binary ADJ", nbVertex);
+		LongProcess lp = new LongProcess("writing binary ADJ", " adjlist", nbVertex);
 		byte[] b = new byte[4];
 		Bits.putInt(b, 0, nbVertex);
 		os.write(b);

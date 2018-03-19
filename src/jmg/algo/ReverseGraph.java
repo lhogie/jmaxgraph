@@ -30,7 +30,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		int[] pos = new int[nbVertex];
 		LongProcess computing = new LongProcess(
 				"computing inverse adjacencies, freeing memory=" + freeMemOnTheFly,
-				nbVertex);
+				" vertex", nbVertex);
 
 		TimeWasted timeWastedInAllocations = new TimeWasted();
 		computing.temporaryResult = timeWastedInAllocations;
@@ -83,7 +83,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		int[] pos = new int[nbVertex];
 
 		LongProcess computing = new LongProcess("computing inverse adjacencies",
-				nbVertex);
+				" vertex", nbVertex);
 
 		new ParallelIntervalProcessing(nbVertex, nbThreads, computing)
 		{
@@ -170,7 +170,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 
 	public static int[] computeReverseDegrees(int[][] adj)
 	{
-		LongProcess compute = new LongProcess("computeReverseDegrees", adj.length);
+		LongProcess compute = new LongProcess("computeReverseDegrees", " vertex", adj.length);
 		int nbVertices = adj.length;
 		int[] degree = new int[nbVertices];
 

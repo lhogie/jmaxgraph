@@ -15,7 +15,7 @@ public class TextADJWriter extends ADJWriter
 	{
 		PrintStreamCounter out = new PrintStreamCounter(new PrintStream(os));
 		int nbVertex = g.out.adj.length;
-		LongProcess p = new LongProcess("writing text ADJ", nbVertex);
+		LongProcess p = new LongProcess("writing text ADJ", " adj-list", nbVertex);
 		long[] index = new long[nbVertex];
 		int pos = 0;
 		pos += out.print(nbVertex);

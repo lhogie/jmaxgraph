@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java4unix.pluginchain.PluginConfig;
 import jmg.Digraph;
 import jmg.Labelling;
 import jmg.io.DatasetReaderPlugin;
@@ -13,6 +14,25 @@ import toools.progression.LongProcess;
 public abstract class ADJReader extends DatasetReaderPlugin
 {
 	public RegularFile from;
+	public int nbVerticesExpected = -1;
+	public long nbArcsExpected = -1;
+
+	
+	@Override
+	public void setup(PluginConfig parms)
+	{
+		super.setup(parms);
+		nbVerticesExpected = parms.getInt("nbVertices");
+		nbArcsExpected = parms.getLong("nbArcs");
+
+		if (parms.contains("from"))
+			from = new RegularFile(parms.get("from"));
+
+		if (parms.containsAndRemove("noconsolidate"))
+		{
+			addUndeclared = relabel = sort = false;
+		}
+	}
 
 	@Override
 	public Digraph read()

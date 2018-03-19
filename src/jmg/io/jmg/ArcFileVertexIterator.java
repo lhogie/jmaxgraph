@@ -4,19 +4,19 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import toools.io.BinaryReader;
-import toools.io.Cout;
 import toools.io.FileIterator;
 import toools.io.IORuntimeException;
 import toools.io.file.nbs.NBSFileIterator;
 
-public class EDGFileVertexIterator
-		extends FileIterator<EDGFileVertexIterator.EDGFileCursor>
-		implements Iterator<EDGFileVertexIterator.EDGFileCursor>
+public class ArcFileVertexIterator
+		extends FileIterator<ArcFileVertexIterator.ArcFileCursor>
+		implements Iterator<ArcFileVertexIterator.ArcFileCursor>
 {
-	public class EDGFileCursor
+	public class ArcFileCursor
 	{
 		public int vertex;
 		public int[] adj;
+		public int count;
 		public long nbBytes;
 	}
 
@@ -26,11 +26,11 @@ public class EDGFileVertexIterator
 	private int vertex;
 	private final int endVertex;
 	private final long finalPos;
-	private final EDGFileCursor cursor = new EDGFileCursor();
+	private final ArcFileCursor cursor = new ArcFileCursor();
 	private final int[][] preallocatedArrays;
 	private final long nbVertices;
 
-	public EDGFileVertexIterator(ArcFile f, int startVertex, int endVertex,
+	public ArcFileVertexIterator(ArcFile f, int startVertex, int endVertex,
 			int nbPreallocatedArrays, int bufSize)
 	{
 		super(f);
@@ -52,8 +52,8 @@ public class EDGFileVertexIterator
 			}
 
 			this.indexIterator = new NBSFileIterator(f.getIndexFile(), startVertex);
-			is.skip(currentPos = indexIterator.nextLong());
-			this.reader = new BinaryReader(is, bufSize);
+			unbufferredInputStream.skip(currentPos = indexIterator.nextLong());
+			this.reader = new BinaryReader(unbufferredInputStream, bufSize);
 		}
 		catch (IOException e)
 		{
@@ -73,7 +73,7 @@ public class EDGFileVertexIterator
 		return vertex < endVertex;
 	}
 
-	public EDGFileCursor next()
+	public ArcFileCursor next()
 	{
 		long entryEndPos = indexIterator.hasNext() ? indexIterator.nextLong() : finalPos;
 

@@ -20,7 +20,7 @@ public class ADJ32Reader extends ADJReader
 		LongProcess lp = new LongProcess("reading from file", "B", from.getSize());
 		Cout.info("using " + nbThreads + " threads");
 
-		long _nbEdge = 0;
+		long _nbArcs = 0;
 
 		InputStream _is = from.createReadingStream(0);
 		BinaryReader _r = new BinaryReader(_is, 65536 * 256);
@@ -47,12 +47,11 @@ public class ADJ32Reader extends ADJReader
 			for (int ni = 0; ni < _nbNeighbors; ++ni)
 			{
 				_outNeighbors[ni] = _r.nextInt();
-				++_nbEdge;
+				++_nbArcs;
 			}
 		}
 
-		Cout.progress(_localAdj.size() + " vertices loaded");
-		lp.end();
+		lp.end(_localAdj.size() + " vertices and "+ _nbArcs + " arcs loaded");
 		return _localAdj;
 	}
 

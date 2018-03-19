@@ -6,11 +6,10 @@ import java.io.OutputStream;
 import java.util.Iterator;
 
 import jmg.Utils;
-import jmg.io.jmg.EDGFileVertexIterator.EDGFileCursor;
+import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.IndexFile.Bounds;
 import toools.io.BinaryReader;
 import toools.io.Bits;
-import toools.io.Cout;
 import toools.io.IORuntimeException;
 import toools.io.Utilities;
 import toools.io.file.Directory;
@@ -22,7 +21,7 @@ import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.util.Conversion;
 
 public class ArcFile extends RegularFile
-		implements Iterable<EDGFileVertexIterator.EDGFileCursor>
+		implements Iterable<ArcFileVertexIterator.ArcFileCursor>
 {
 	private long[] index;
 
@@ -44,6 +43,11 @@ public class ArcFile extends RegularFile
 	public IndexFile getIndexFile()
 	{
 		return new IndexFile(getParent(), getNameWithoutExtension() + "-index.nbs", this);
+	}
+
+	public NBSFile getDegreeFile()
+	{
+		return new NBSFile(getParent(), getNameWithoutExtension() + "-degrees.nbs");
 	}
 
 	public static class Entry
@@ -73,7 +77,6 @@ public class ArcFile extends RegularFile
 			}
 			else
 			{
-
 				InputStream is = createReadingStream();
 				is.skip(r.bounds.start);
 				BinaryReader reader = new BinaryReader(is, 65536);
@@ -91,14 +94,7 @@ public class ArcFile extends RegularFile
 
 	public void loadIndex(int nbThreads)
 	{
-		try
-		{
-			this.index = getIndexFile().readValues(nbThreads);
-		}
-		catch (IOException e)
-		{
-			throw new IORuntimeException(e);
-		}
+		this.index = getIndexFile().readValues(nbThreads);
 	}
 
 	synchronized long[] getIndex(int nbThreads)
@@ -129,7 +125,6 @@ public class ArcFile extends RegularFile
 		{
 			index[u] = pos;
 
-			// write the number of neighbors
 			int[] neighbors = adj[u];
 
 			if (neighbors.length > 0)
@@ -169,11 +164,59 @@ public class ArcFile extends RegularFile
 		saving.end();
 	}
 
-	private static int maxgap(int[] a)
+	static byte[] buf = new byte[8];
+
+	public long writeADJ(int u, int[] neighbors, OutputStream os, long[] index)
+			throws IOException
+	{
+		// tracks the index for each entry
+		long nbBytes = 0;
+
+		index[u] = nbBytes;
+
+		if (neighbors.length > 0)
+		{
+			// writes the first neighbor
+			Bits.putLong(buf, 0, neighbors[0]);
+			int previous = neighbors[0];
+			os.write(buf, 0, 8);
+			nbBytes += 8;
+
+			if (neighbors.length > 1)
+			{
+				// write the encoding for the other neighbors
+				int encoding = Utilities.getNbBytesRequireToEncode(maxgap(neighbors));
+				Bits.putLong(buf, 0, encoding, 1);
+				os.write(buf, 0, 1);
+				nbBytes += 1;
+
+				// write other neighbors
+				for (int i = 1; i < neighbors.length; ++i)
+				{
+					int v = neighbors[i];
+					int delta = v - previous;
+					Bits.putLong(buf, 0, delta, encoding);
+					os.write(buf, 0, encoding);
+					nbBytes += encoding;
+					previous = v;
+				}
+			}
+		}
+
+		return nbBytes;
+	}
+
+	public static int maxgap(int[] a)
+	{
+		return maxgap(a, 0, a.length);
+	}
+
+	public static int maxgap(int[] a, int start, int len)
 	{
 		int r = 0;
+		int end = start + len;
 
-		for (int i = 1; i < a.length; ++i)
+		for (int i = start + 1; i < end; ++i)
 		{
 			int diff = a[i] - a[i - 1];
 			assert diff >= 0;
@@ -186,15 +229,15 @@ public class ArcFile extends RegularFile
 	}
 
 	@Override
-	public Iterator<EDGFileCursor> iterator()
+	public Iterator<ArcFileCursor> iterator()
 	{
 		return iterator(0, getNbEntries(), 0, 65536 * 256);
 	}
 
-	public EDGFileVertexIterator iterator(int from, int to, int nbPreallocatedArrays,
+	public ArcFileVertexIterator iterator(int from, int to, int nbPreallocatedArrays,
 			int bufSize)
 	{
-		return new EDGFileVertexIterator(this, from, to, nbPreallocatedArrays, bufSize);
+		return new ArcFileVertexIterator(this, from, to, nbPreallocatedArrays, bufSize);
 	}
 
 	public int getNbEntries()
@@ -204,27 +247,27 @@ public class ArcFile extends RegularFile
 
 	public static interface VertexListener
 	{
-		void vertexFound(EDGFileCursor c);
+		void vertexFound(ArcFileCursor c);
 	}
 
 	public int[][] readADJ(int nbThreads)
 	{
 		LongProcess lp = new LongProcess(
-				"loading " + this + " using " + nbThreads + " threads", "B", getSize());
+				"loading " + this + " using " + nbThreads + " threads", " arc", getSize());
 
 		int nbVertex = getNbEntries();
 		int[][] adj = new int[nbVertex][];
 
-		new EDGParallelProcessor(this, 0, nbThreads, lp)
+		new ArcFileParallelProcessor(this, 0, nbVertex, 0, nbThreads, lp)
 		{
 			@Override
-			protected void process(ThreadSpecifics s, Iterator<EDGFileCursor> iterator)
+			protected void process(ThreadSpecifics s, Iterator<ArcFileCursor> iterator)
 			{
 				while (iterator.hasNext())
 				{
-					EDGFileCursor c = iterator.next();
+					ArcFileCursor c = iterator.next();
 					adj[c.vertex] = c.adj;
-					s.progressStatus += c.nbBytes;
+					s.progressStatus += c.adj.length;
 				}
 			}
 		};
@@ -244,13 +287,14 @@ public class ArcFile extends RegularFile
 		int[][] r = new int[nbVertex][];
 		int[] pos = new int[nbVertex];
 		int[] invDegree = computeReverseDegrees(true);
-		Iterator<EDGFileCursor> i = iterator();
+		Iterator<ArcFileCursor> i = iterator();
 
-		LongProcess lp = new LongProcess("computing opposite ADJ on the fly", nbVertex);
+		LongProcess lp = new LongProcess("computing opposite ADJ on the fly", " vertex",
+				nbVertex);
 
 		while (i.hasNext())
 		{
-			EDGFileCursor c = i.next();
+			ArcFileCursor c = i.next();
 
 			for (int neighbor : c.adj)
 			{
@@ -286,8 +330,8 @@ public class ArcFile extends RegularFile
 		int[] degrees = new int[nbVertices];
 
 		LongProcess lp = new LongProcess("computing inverse degrees from " + this,
-				nbVertices);
-		Iterator<EDGFileCursor> i = iterator();
+				" adj-list", nbVertices);
+		Iterator<ArcFileCursor> i = iterator();
 
 		while (i.hasNext())
 		{
@@ -314,16 +358,16 @@ public class ArcFile extends RegularFile
 	{
 		int nbVertices = getNbEntries();
 		int[] degrees = new int[nbVertices];
-		LongProcess lp = new LongProcess("compute degrees", getSize());
+		LongProcess lp = new LongProcess("compute degrees", " vertex", getSize());
 
-		new EDGParallelProcessor(this, 1000, nbThreads, lp)
+		new ArcFileParallelProcessor(this, 0, getNbEntries(), 1000, nbThreads, lp)
 		{
 			@Override
-			protected void process(ThreadSpecifics s, Iterator<EDGFileCursor> iterator)
+			protected void process(ThreadSpecifics s, Iterator<ArcFileCursor> iterator)
 			{
 				while (iterator.hasNext())
 				{
-					EDGFileCursor c = iterator.next();
+					ArcFileCursor c = iterator.next();
 					degrees[c.vertex] = c.adj.length;
 					++s.progressStatus;
 				}
@@ -374,7 +418,7 @@ public class ArcFile extends RegularFile
 
 				int[] neighbors = nbNeighbor < preallocatedArrays.length
 						? preallocatedArrays[nbNeighbor]
-						: new int[nbNeighbor];
+						: null;//new int[nbNeighbor];
 
 				neighbors[0] = firstNeighbor;
 				int previous = firstNeighbor;
@@ -383,7 +427,7 @@ public class ArcFile extends RegularFile
 				{
 					long delta = reader.next(encoding);
 					long neighbor = previous + delta;
-					previous = neighbors[i] = Conversion.long2int(neighbor);
+					previous = neighbors[i] = 0;//Conversion.long2int(neighbor);
 				}
 
 				return neighbors;

@@ -9,19 +9,19 @@ import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 
-public class Run extends PluginChain
+public class run extends PluginChain
 {
 	private int nbThreads;
 
-	public Run(RegularFile launcher)
+	public run(RegularFile launcher)
 	{
 		super(launcher);
 		getVMOptions().add("-Xmx200G");
 		addOption("--nbThreads", null, "[0-9]+",
 				Runtime.getRuntime().availableProcessors() * 2,
 				"number of threads used for parallel processing");
-		addOption("--systemMonitor", "-m", "[0-9]+", "-1",
-				"period of the system monitor, in second");
+		addOption("--systemMonitor", "-m", "[0-9]+", "10000",
+				"period of the system monitor, in millisecond");
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class Run extends PluginChain
 
 		MultiThreadProcessing.NB_THREADS_TO_USE = Integer
 				.valueOf(getOptionValue(cmdLine, "--nbThreads"));
-		LongProcess fullProcess = new LongProcess("full process", - 1);
+		LongProcess fullProcess = new LongProcess("full process", " element", - 1);
 		super.runScript(cmdLine);
 		fullProcess.end();
 		return 0;
@@ -73,7 +73,7 @@ public class Run extends PluginChain
 
 	public static void main(String[] args) throws Throwable
 	{
-		new Run(null).run(args);
+		new run(null).run(args);
 	}
 
 	@Override

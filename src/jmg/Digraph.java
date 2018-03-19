@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
+import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import jmg.algo.ReverseGraph;
 import jmg.io.jmg.JMGDirectory;
@@ -26,6 +27,48 @@ public class Digraph implements Serializable
 		in = new INs();
 		out.opposite = in;
 		in.opposite = out;
+	}
+
+	public void removeVertices(int[] vertices, int nbThreads)
+	{
+		for (int u : vertices)
+			if (out.adj != null && out.adj[u].length > 0)
+				throw new IllegalStateException("vertex " + u + " is connected");
+
+		IntArrays.quickSort(vertices);
+
+		int nbVertices = getNbVertices();
+		int[] labels = new int[nbVertices];
+		int shift = 0;
+		int i = 0;
+
+		for (int u = 0; u < labels.length; ++u)
+		{
+			if (u == vertices[i])
+			{
+				++shift;
+				++i;
+				labels[u] = - 1;
+			}
+			else
+			{
+				labels[u] = u - shift;
+			}
+		}
+
+		int[][] r = new int[nbVertices - shift][];
+
+		for (int u = 0; u < labels.length; ++u)
+		{
+			int l = labels[u];
+
+			if (l != - 1)
+			{
+				r[l] = out.adj[u];
+			}
+		}
+
+		Utils.relabel(r, labels, nbThreads);
 	}
 
 	public void setOuts(int u, int... N)
@@ -81,7 +124,7 @@ public class Digraph implements Serializable
 		}
 	}
 
-	public int getNbVertex()
+	public int getNbVertices()
 	{
 		return nbVertices;
 	}
@@ -144,7 +187,7 @@ public class Digraph implements Serializable
 	@Override
 	public String toString()
 	{
-		return "graph: " + getNbVertex() + " vertices";
+		return "graph: " + getNbVertices() + " vertices";
 	}
 
 	public void setDataset(JMGDirectory newDataset)
@@ -183,7 +226,7 @@ public class Digraph implements Serializable
 
 	public void writeProperties(RegularFile f) throws IOException
 	{
-		properties.put("nbVertices", "" + getNbVertex());
+		properties.put("nbVertices", "" + getNbVertices());
 		OutputStream pos = f.createWritingStream();
 		properties.store(pos, "JMG property file");
 		pos.close();
@@ -195,7 +238,7 @@ public class Digraph implements Serializable
 		if (out.adj == null && in.adj == null)
 		{
 			// try to load OUTs or INs
-			for (Adj d : new Adj[] { out, in })
+			for (Adjacency d : new Adjacency[] { out, in })
 			{
 				if (d.file.exists())
 				{

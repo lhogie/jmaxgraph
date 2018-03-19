@@ -15,7 +15,7 @@ public class Vertex2LabelMap extends LazyArray
 		super(128, - 1);
 
 		int nbLabels = label2vertex.length;
-		LongProcess pm = new LongProcess("creating (vertex => label) map", nbLabels);
+		LongProcess pm = new LongProcess("creating (vertex => label) map", " vertex", nbLabels);
 
 		for (int label = 0; label < nbLabels; ++label)
 		{

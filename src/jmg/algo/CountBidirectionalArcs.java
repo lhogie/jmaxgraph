@@ -13,11 +13,12 @@ public class CountBidirectionalArcs
 {
 	public static long count(Digraph g, int nbThreads)
 	{
-		LongProcess p = new LongProcess("count bidirectional arcs", g.getNbVertex());
+		LongProcess p = new LongProcess("count bidirectional arcs", " vertex",
+				g.getNbVertices());
 		AtomicLong count = new AtomicLong(0);
 		p.temporaryResult = count;
 
-		new ParallelIntervalProcessing(g.getNbVertex(), nbThreads, p)
+		new ParallelIntervalProcessing(g.getNbVertices(), nbThreads, p)
 		{
 
 			@Override

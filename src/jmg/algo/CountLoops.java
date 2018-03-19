@@ -13,9 +13,9 @@ public class CountLoops
 	public static long count(Digraph g, int nbVertex)
 	{
 		AtomicLong count = new AtomicLong(0);
-		LongProcess p = new LongProcess("count loops", g.getNbVertex());
+		LongProcess p = new LongProcess("count loops", " elements", g.getNbVertices());
 
-		new ParallelIntervalProcessing(g.getNbVertex(), nbVertex, p)
+		new ParallelIntervalProcessing(g.getNbVertices(), nbVertex, p)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)

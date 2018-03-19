@@ -1,6 +1,6 @@
 package jmg;
 
-public class OUTs extends Adj
+public class OUTs extends Adjacency
 {
 	@Override
 	public int hashCode()

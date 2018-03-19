@@ -29,7 +29,7 @@ public class Degrees
 
 	public static int[] computeDegrees(int[][] adj, int nbThreads)
 	{
-		LongProcess computeDegrees = new LongProcess("computeDegrees", adj.length);
+		LongProcess computeDegrees = new LongProcess("computeDegrees", " vertex", adj.length);
 		int[] r = new int[adj.length];
 
 		new ParallelIntervalProcessing(r.length, nbThreads, computeDegrees)

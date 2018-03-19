@@ -20,10 +20,13 @@ public abstract class DatasetReaderPlugin extends JMGPlugin<Void, Digraph>
 
 	public abstract Digraph read();
 
+
 	@Override
 	public void setup(PluginConfig parms)
 	{
 		super.setup(parms);
+		
+
 		
 		if (parms.contains("bufSize"))
 			bufSize = parms.getInt("bufSize");
