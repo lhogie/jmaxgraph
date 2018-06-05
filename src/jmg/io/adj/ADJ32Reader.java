@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Utils;
 import toools.io.BinaryReader;
 import toools.io.Cout;

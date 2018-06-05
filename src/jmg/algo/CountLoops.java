@@ -22,7 +22,7 @@ public class CountLoops
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					if (Utils.contains(g.out.adj[u], u))
+					if (Utils.contains(g.out.mem.b[u], u))
 					{
 						count.incrementAndGet();
 					}

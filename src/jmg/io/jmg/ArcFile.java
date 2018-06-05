@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
+import java.util.Random;
 
+import it.unimi.dsi.fastutil.ints.IntArrays;
 import jmg.Utils;
 import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.IndexFile.Bounds;
@@ -250,13 +252,15 @@ public class ArcFile extends RegularFile
 		void vertexFound(ArcFileCursor c);
 	}
 
-	public int[][] readADJ(int nbThreads)
+	public int[][] readADJ(double p, long seed, int nbThreads)
 	{
 		LongProcess lp = new LongProcess(
-				"loading " + this + " using " + nbThreads + " threads", " arc", getSize());
+				"loading " + this + " using " + nbThreads + " threads", " arc",
+				getSize());
 
 		int nbVertex = getNbEntries();
 		int[][] adj = new int[nbVertex][];
+		Random prng = new Random(seed);
 
 		new ArcFileParallelProcessor(this, 0, nbVertex, 0, nbThreads, lp)
 		{
@@ -266,7 +270,41 @@ public class ArcFile extends RegularFile
 				while (iterator.hasNext())
 				{
 					ArcFileCursor c = iterator.next();
-					adj[c.vertex] = c.adj;
+
+					// no sampling
+					if (p == 1)
+					{
+						adj[c.vertex] = c.adj;
+					}
+					else
+					{
+						int[] retain = new int[c.adj.length];
+						int nbRetained = 0;
+
+						for (int v : c.adj)
+						{
+							if (prng.nextDouble() < p)
+							{
+								retain[nbRetained++] = v;
+							}
+						}
+
+						// if none is retained
+						if (nbRetained == 0)
+						{
+							adj[c.vertex] = IntArrays.EMPTY_ARRAY;
+						}
+						// if all are retained
+						else if (nbRetained == c.adj.length)
+						{
+							adj[c.vertex] = c.adj;
+						}
+						else
+						{
+							adj[c.vertex] = IntArrays.copy(retain, 0, nbRetained);
+						}
+					}
+					
 					s.progressStatus += c.adj.length;
 				}
 			}
@@ -418,7 +456,7 @@ public class ArcFile extends RegularFile
 
 				int[] neighbors = nbNeighbor < preallocatedArrays.length
 						? preallocatedArrays[nbNeighbor]
-						: null;//new int[nbNeighbor];
+						: new int[nbNeighbor];
 
 				neighbors[0] = firstNeighbor;
 				int previous = firstNeighbor;
@@ -427,11 +465,25 @@ public class ArcFile extends RegularFile
 				{
 					long delta = reader.next(encoding);
 					long neighbor = previous + delta;
-					previous = neighbors[i] = 0;//Conversion.long2int(neighbor);
+					previous = neighbors[i] = Conversion.long2int(neighbor);
 				}
 
 				return neighbors;
 			}
+		}
+	}
+
+	public int[] getDegrees(int nbThreads)
+	{
+		NBSFile df = getDegreeFile();
+
+		if (df.exists())
+		{
+			return df.readValuesAsInts(nbThreads);
+		}
+		else
+		{
+			return computeDegrees(true, nbThreads);
 		}
 	}
 

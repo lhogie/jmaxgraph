@@ -3,8 +3,8 @@ package jmg.io;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import jmg.Digraph;
 import toools.io.file.RegularFile;
 

@@ -18,8 +18,8 @@ public class ProcessOnTheFly
 	{
 		Cout.debug("start");
 		Digraph g = new Digraph();
-		g.out.adj = DirectedGNP.out(1000, 0.1, new Random(), 1);
-		g.nbVertices = g.out.adj.length;
+		g.out.mem = DirectedGNP.out(1000, 0.1, new Random(), 1);
+		g.nbVertices = g.out.mem.b.length;
 		JMGDirectory d = new JMGDirectory("$HOME/datasets/demo.jmg");
 		g.write(d);
 		g.setDataset(d);
@@ -30,8 +30,8 @@ public class ProcessOnTheFly
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 					throws IOException
 			{
-				Iterator<ArcFileCursor> i = g.out.file.iterator(lowerBound, upperBound,
-						100, 256 * 256 * 256);
+				Iterator<ArcFileCursor> i = g.out.disk.file.iterator(lowerBound,
+						upperBound, 100, 256 * 256 * 256);
 
 				while (i.hasNext())
 				{
@@ -41,7 +41,7 @@ public class ProcessOnTheFly
 			}
 		};
 
-		for (ArcFileCursor c : g.out.file)
+		for (ArcFileCursor c : g.out.disk.file)
 		{
 			Cout.result(c.vertex);
 		}

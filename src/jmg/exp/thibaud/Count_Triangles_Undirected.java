@@ -1,7 +1,7 @@
 package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntArrays;
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
@@ -50,7 +50,7 @@ public class Count_Triangles_Undirected
 
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					int[] Nu = g.out.adj[u];
+					int[] Nu = g.out.mem.b[u];
 					int du = Nu.length;
 					nbPotentialTrianglesComputed += du * (du - 1) / 2;
 
@@ -70,7 +70,7 @@ public class Count_Triangles_Undirected
 							// this one is wrong
 							++nbPotentialTrianglesIncremented;
 
-							if (IntArrays.binarySearch(g.out.adj[v], w) >= 0)
+							if (IntArrays.binarySearch(g.out.mem.b[v], w) >= 0)
 							{
 								++nbTriangles;
 							}

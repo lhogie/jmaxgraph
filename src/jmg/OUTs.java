@@ -1,22 +1,26 @@
 package jmg;
 
-public class OUTs extends Adjacency
+public class OUTs extends Direction
 {
+	
 	@Override
 	public int hashCode()
 	{
-		int h = 0;
+		int hash = 0;
 
-		for (int src = 0; src < adj.length; ++src)
+		if (mem.b != null)
 		{
-			for (int dest : adj[src])
+			for (int src = 0; src < mem.b.length; ++src)
 			{
-				int coupleHash = 31 + src;
-				coupleHash = coupleHash * 31 + dest;
-				h += coupleHash;
+				for (int dest : mem.b[src])
+				{
+					int coupleHash = 31 + src;
+					coupleHash = coupleHash * 31 + dest;
+					hash += coupleHash;
+				}
 			}
 		}
 
-		return h;
+		return hash;
 	}
 }

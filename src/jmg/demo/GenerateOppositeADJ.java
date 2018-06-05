@@ -17,22 +17,22 @@ public class GenerateOppositeADJ
 		JMGDirectory d = new JMGDirectory(args[0]);
 		Digraph g = d.mapGraph(8, false);
 
-		if (g.out.file.exists() && ! g.in.file.exists())
+		if (g.out.disk.file.exists() && ! g.in.disk.file.exists())
 		{
 			Cout.info("Generating IN adj");
-			g.in.adj = g.out.file.readAndComputeOppositeADJ(8);
-			g.in.save();
+			g.in.mem.b = g.out.disk.file.readAndComputeOppositeADJ(8);
+			g.in.disk.save(g.in.mem.b);
 		}
-		else if (g.in.file.exists() && ! g.out.file.exists())
+		else if (g.in.disk.file.exists() && ! g.out.disk.file.exists())
 		{
 			Cout.info("Generating OUT adj");
-			g.out.adj = g.in.file.readAndComputeOppositeADJ(8);
-			g.out.save();
+			g.out.mem.b = g.in.disk.file.readAndComputeOppositeADJ(8);
+			g.out.disk.save(g.out.mem.b);
 		}
 		else
 		{
 			Cout.info("Doing nothing");
 		}
 	}
-	
+
 }

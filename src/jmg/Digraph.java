@@ -5,20 +5,20 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
-import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import jmg.algo.ReverseGraph;
 import jmg.io.jmg.JMGDirectory;
+import toools.io.Cout;
 import toools.io.file.RegularFile;
 
 public class Digraph implements Serializable
 {
 	public Properties properties = new Properties();
 	public int nbVertices;
-	public final OUTs out;
-	public final INs in;
+	public final Direction out;
+	public final Direction in;
 	public boolean isMultiGraph = false;
-	public JMGDirectory dataset;
+	public JMGDirectory jmgDirectory;
 	public Labelling labelling;
 
 	public Digraph()
@@ -29,98 +29,75 @@ public class Digraph implements Serializable
 		in.opposite = out;
 	}
 
-	public void removeVertices(int[] vertices, int nbThreads)
+	public Direction getDirection(Direction.NAME d)
 	{
-		for (int u : vertices)
-			if (out.adj != null && out.adj[u].length > 0)
-				throw new IllegalStateException("vertex " + u + " is connected");
-
-		IntArrays.quickSort(vertices);
-
-		int nbVertices = getNbVertices();
-		int[] labels = new int[nbVertices];
-		int shift = 0;
-		int i = 0;
-
-		for (int u = 0; u < labels.length; ++u)
+		if (d == Direction.NAME.IN)
 		{
-			if (u == vertices[i])
-			{
-				++shift;
-				++i;
-				labels[u] = - 1;
-			}
-			else
-			{
-				labels[u] = u - shift;
-			}
+			return in;
+		}
+		else if (d == Direction.NAME.OUT)
+		{
+			return out;
 		}
 
-		int[][] r = new int[nbVertices - shift][];
-
-		for (int u = 0; u < labels.length; ++u)
-		{
-			int l = labels[u];
-
-			if (l != - 1)
-			{
-				r[l] = out.adj[u];
-			}
-		}
-
-		Utils.relabel(r, labels, nbThreads);
+		throw new IllegalStateException("unknown ADJ type: " + d);
 	}
 
-	public void setOuts(int u, int... N)
+	public Direction getDefinedDirection()
 	{
-		if (u != out.adj.length)
-			throw new IllegalArgumentException();
-
-		int[][] newOut = new int[out.adj.length + 1][];
-		System.arraycopy(out, 0, newOut, 0, out.adj.length);
-		newOut[u] = N;
-		this.out.adj = newOut;
-	}
-
-	public void addArc(int u, int v)
-	{
-		if (out.adj != null)
+		if (out.disk.isDefined())
 		{
-			out.adj[u] = Utils.insert(out.adj[u], v, isMultiGraph);
+			return out;
 		}
-
-		if (in.adj != null)
+		else if (in.disk.isDefined())
 		{
-			in.adj[v] = Utils.insert(in.adj[v], u, isMultiGraph);
+			return in;
+		}
+		else
+		{
+			return null;
 		}
 	}
 
-	public void addArcs(int u, int... V)
+	public void addArc_slow(int u, int v)
 	{
-		if (out.adj != null)
+		if (out.mem != null)
 		{
-			out.adj[u] = Utils.union(out.adj[u], V);
+			out.mem.b[u] = Utils.insert(out.mem.b[u], v, isMultiGraph);
 		}
 
-		if (in.adj != null)
+		if (in.mem != null)
+		{
+			in.mem.b[v] = Utils.insert(in.mem.b[v], u, isMultiGraph);
+		}
+	}
+
+	public void addArcs_slow(int u, int... V)
+	{
+		if (out.mem.b != null)
+		{
+			out.mem.b[u] = Utils.union(out.mem.b[u], V);
+		}
+
+		if (in.mem.b != null)
 		{
 			for (int v : V)
 			{
-				Utils.insert(in.adj[v], u, isMultiGraph);
+				Utils.insert(in.mem.b[v], u, isMultiGraph);
 			}
 		}
 	}
 
-	public void removeArc(int u, int v)
+	public void removeArc_slow(int u, int v)
 	{
-		if (out.adj != null)
+		if (out.mem.b != null)
 		{
-			out.adj[u] = Utils.remove(out.adj[u], v, ! isMultiGraph);
+			out.mem.b[u] = Utils.remove(out.mem.b[u], v, ! isMultiGraph);
 		}
 
-		if (in.adj != null)
+		if (in.mem.b != null)
 		{
-			in.adj[v] = Utils.remove(in.adj[v], u, ! isMultiGraph);
+			in.mem.b[v] = Utils.remove(in.mem.b[v], u, ! isMultiGraph);
 		}
 	}
 
@@ -133,18 +110,19 @@ public class Digraph implements Serializable
 	{
 		in.ensureDefined(nbThreads);
 		out.ensureDefined(nbThreads);
-		Utils.union(out.adj, in.adj, true, nbThreads);
+		int[][] undirectedAdj = Utils.union(out.mem.b, in.mem.b, true, nbThreads);
+		out.mem.b = in.mem.b = undirectedAdj;
 	}
 
 	public boolean arcExists(int u, int v)
 	{
-		if (out.adj != null)
+		if (out.mem.b != null)
 		{
-			return Utils.contains(out.adj[u], v);
+			return Utils.contains(out.mem.b[u], v);
 		}
-		else if (in.adj != null)
+		else if (in.mem.b != null)
 		{
-			return Utils.contains(in.adj[v], u);
+			return Utils.contains(in.mem.b[v], u);
 		}
 
 		throw new IllegalStateException("no ADJ");
@@ -152,36 +130,34 @@ public class Digraph implements Serializable
 
 	public void reverse()
 	{
-		if (in.adj == null && out.adj == null)
+		if (in.mem.b == null && out.mem.b == null)
 		{
 			throw new IllegalStateException("no ADJ defined");
 		}
-		else if (in.adj == null)
+		else if (in.mem.b == null)
 		{
-			in.adj = ReverseGraph.computeInverseADJ(out.adj, true);
-			out.adj = null;
+			in.mem.b = ReverseGraph.computeInverseADJ(out.mem.b, true);
+			out.mem.b = null;
 		}
-		else if (out.adj == null)
+		else if (out.mem.b == null)
 		{
-			out.adj = ReverseGraph.computeInverseADJ(in.adj, true);
-			in.adj = null;
+			out.mem.b = ReverseGraph.computeInverseADJ(in.mem.b, true);
+			in.mem.b = null;
 		}
 	}
 
 	public long countArcs(int nbThreads)
 	{
-		if (out.adj != null)
+		if (out.mem.isDefined())
 		{
-			return Utils.countArcs(out.adj, nbThreads);
+			return out.mem.countArcs(nbThreads);
 		}
-		else if (in.adj != null)
+		else if (in.mem.isDefined())
 		{
-			return Utils.countArcs(in.adj, nbThreads);
+			return in.mem.countArcs(nbThreads);
 		}
-		else
-		{
-			return 0;
-		}
+
+		throw new IllegalStateException("no adj loaded");
 	}
 
 	@Override
@@ -190,11 +166,19 @@ public class Digraph implements Serializable
 		return "graph: " + getNbVertices() + " vertices";
 	}
 
-	public void setDataset(JMGDirectory newDataset)
+	public void setDataset(JMGDirectory jmgDirectory)
 	{
-		this.dataset = newDataset;
-		in.file = dataset.inFile;
-		out.file = dataset.outFile;
+		this.jmgDirectory = jmgDirectory;
+
+		if (jmgDirectory.inFile.exists())
+		{
+			in.disk.file = jmgDirectory.inFile;
+		}
+
+		if (jmgDirectory.outFile.exists())
+		{
+			out.disk.file = jmgDirectory.outFile;
+		}
 	}
 
 	public void write(JMGDirectory d) throws IOException
@@ -213,14 +197,15 @@ public class Digraph implements Serializable
 					l -> labelling.label2vertex[l], 4);
 		}
 
-		if (out.adj != null)
+		if (out.mem != null)
 		{
-			d.getOutFile().writeADJ(out.adj);
+			Cout.debugSuperVisible("dlsjlj");
+			d.getOutFile().writeADJ(out.mem.b);
 		}
 
-		if (in.adj != null)
+		if (in.mem != null)
 		{
-			d.getInFile().writeADJ(in.adj);
+			d.getInFile().writeADJ(in.mem.b);
 		}
 	}
 
@@ -232,15 +217,20 @@ public class Digraph implements Serializable
 		pos.close();
 	}
 
+	public boolean noADJLoaded()
+	{
+		return out.mem.b == null && in.mem.b == null;
+	}
+
 	public void ensureADJLoaded(int nbThreads)
 	{
 		// if no ADJ is loaded
-		if (out.adj == null && in.adj == null)
+		if (out.mem.b == null && in.mem.b == null)
 		{
 			// try to load OUTs or INs
-			for (Adjacency d : new Adjacency[] { out, in })
+			for (Direction d : new Direction[] { out, in })
 			{
-				if (d.file.exists())
+				if (d.disk.file.exists())
 				{
 					d.load(nbThreads);
 					return;

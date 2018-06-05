@@ -1,6 +1,6 @@
 package jmg.io;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.chain.JMGPlugin;
 

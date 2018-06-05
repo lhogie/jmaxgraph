@@ -11,8 +11,8 @@ public class GenerateGridAndSaveIt
 	public static void main(String[] args) throws IOException
 	{
 		Digraph g = new Digraph();
-		g.out.adj = GridGenerator.dgrid_outs(100, 100, true, true, false, false, 2);
-		g.nbVertices = g.out.adj.length;
+		g.out.mem.b = GridGenerator.dgrid_outs(100, 100, true, true, false, false, 2);
+		g.nbVertices = g.out.mem.b.length;
 		JMGDirectory d = new JMGDirectory("$HOME/tmp/grid100x100.jmg");
 		g.write(d);
 	}

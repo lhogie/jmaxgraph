@@ -9,8 +9,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import jmg.Digraph;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
@@ -28,7 +28,7 @@ public class EdgeListFileReader
 			try
 			{
 				Digraph g = new Digraph();
-				g.out.adj = load(from);
+				g.out.mem.b = load(from);
 				return g;
 			}
 			catch (IOException e)
@@ -108,7 +108,7 @@ public class EdgeListFileReader
 	{
 		int[][] r = load(new RegularFile("/Users/lhogie/biggrph/datasets/acc2007_2.tsv"));
 		Digraph g = new Digraph();
-		g.out.adj = r;
+		g.out.mem.b = r;
 
 		System.out.println(g.countArcs(1));
 	}

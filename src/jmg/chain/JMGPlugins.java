@@ -1,8 +1,8 @@
 package jmg.chain;
 
-import java4unix.pluginchain.DefaultPlugins;
-import java4unix.pluginchain.NBSReader;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.DefaultPlugins;
+import j4u.chain.NBSReader;
+import j4u.chain.TooolsPlugin;
 import jmg.algo.BFS;
 import jmg.algo.Degrees;
 import jmg.algo.ReverseGraph;
@@ -46,7 +46,7 @@ public class JMGPlugins extends DefaultPlugins
 				return w;
 			}
 		}
-		else if (name.endsWith(".adj"))
+		else if (name.endsWith(".ram.adj"))
 		{
 			if (bootstrap)
 			{
@@ -61,7 +61,7 @@ public class JMGPlugins extends DefaultPlugins
 				return w;
 			}
 		}
-		else if (name.endsWith(".adj32"))
+		else if (name.endsWith(".ram.adj32"))
 		{
 			if (bootstrap)
 			{
@@ -106,6 +106,18 @@ public class JMGPlugins extends DefaultPlugins
 				return w;
 			}
 		}
+		else if (name.equals("loadadj"))
+		{
+			return new load_edges();
+		}
+		else if (name.equals("saveadj"))
+		{
+			return new save_edges();
+		}
+		else if (name.equals("sample"))
+		{
+			return new load_edges();
+		}
 		else if (name.equals("gnp"))
 		{
 			return new DirectedGNP.Plugin();
@@ -121,6 +133,10 @@ public class JMGPlugins extends DefaultPlugins
 		else if (name.equals("reverse"))
 		{
 			return new ReverseGraph();
+		}
+		else if (name.equals("getadj"))
+		{
+			return new getadj();
 		}
 		else if (name.equals("bfs"))
 		{

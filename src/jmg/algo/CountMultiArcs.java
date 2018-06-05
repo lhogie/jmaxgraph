@@ -17,7 +17,7 @@ public class CountMultiArcs
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
-				int[][] adj = g.out == null ? g.in.adj : g.out.adj;
+				int[][] adj = g.out == null ? g.in.mem.b : g.out.mem.b;
 
 				if (adj == null)
 					throw new IllegalStateException("there is no ADJ in the graph");

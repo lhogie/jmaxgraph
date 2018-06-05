@@ -1,7 +1,7 @@
 package jmg.chain;
 
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import toools.thread.MultiThreadProcessing;
 
 public abstract class JMGPlugin<IN, OUT> implements TooolsPlugin<IN, OUT>
@@ -17,5 +17,4 @@ public abstract class JMGPlugin<IN, OUT> implements TooolsPlugin<IN, OUT>
 			nbThreads = p.getInt("nbThreads");
 		}
 	}
-
 }

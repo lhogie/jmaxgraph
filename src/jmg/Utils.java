@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntIterator;
+import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
@@ -21,6 +22,25 @@ import toools.thread.ParallelIntervalProcessing;
 
 public class Utils
 {
+
+	// vertex labels.get(u) will be renamed u
+	public static int[][] relabel(int[][] in, IntList labels, int nbThreads)
+	{
+		int[] labels2 = new int[in.length];
+		Arrays.fill(labels2, -1);
+
+		int[][] out = new int[labels.size()][];
+
+		for (int u = 0; u < out.length; ++u)
+		{
+			labels2[labels.getInt(u)] = u;
+			out[u] = in[labels.getInt(u)];
+		}
+
+		Utils.relabel(out, labels2, nbThreads);
+		return out;
+	}
+
 	public static IntSet findUndeclaredVertices(Int2ObjectMap<int[]> adjTable)
 	{
 		boolean[] booleanArray = null;
@@ -126,8 +146,10 @@ public class Utils
 		adding.end("ADJ-table now has " + adj.size() + " entries.");
 	}
 
-	public static void union(int[][] a, int[][] b, boolean prune, int nbThreads)
+	public static int[][] union(int[][] a, int[][] b, boolean prune, int nbThreads)
 	{
+		int[][] r = new int[a.length][];
+		
 		int nbVertex = a.length;
 		LongProcess computing = new LongProcess("merging ADJ lists", " adjlist",
 				nbVertex);
@@ -139,11 +161,11 @@ public class Utils
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					a[u] = Utils.union(a[u], b[u]);
+					r[u] = Utils.union(a[u], b[u]);
 
 					if (prune)
 					{
-						b[u] = null;
+						a[u] = b[u] = null;
 					}
 
 					s.progressStatus++;
@@ -152,6 +174,7 @@ public class Utils
 		};
 
 		computing.end();
+		return r;
 	}
 
 	public static String toPythonMap(int[] a)
@@ -338,6 +361,7 @@ public class Utils
 
 			if (ri != R.length)
 				throw new IllegalStateException(ri + " " + R.length);
+			
 			return R;
 		}
 		catch (java.lang.ArrayIndexOutOfBoundsException e)
@@ -492,8 +516,7 @@ public class Utils
 	{
 		LongProcess relabelling = new LongProcess("relabelling", "ADJ-list", r.length);
 
-		new ParallelIntervalProcessing(r.length, nbThreads,
-				relabelling)
+		new ParallelIntervalProcessing(r.length, nbThreads, relabelling)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
@@ -513,6 +536,5 @@ public class Utils
 		};
 
 		relabelling.end();
-
 	}
 }

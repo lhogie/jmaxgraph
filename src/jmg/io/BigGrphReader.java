@@ -25,7 +25,7 @@ public class BigGrphReader
 		Cout.result("total number of vertices in " + files.size() + " files: "
 				+ totalNbEntry);
 		Digraph g = new Digraph();
-		g.out.adj = new int[totalNbEntry][];
+		g.out.mem.b = new int[totalNbEntry][];
 		int[] label2vertex = new int[totalNbEntry];
 		Arrays.fill(label2vertex, - 2);
 
@@ -86,7 +86,7 @@ public class BigGrphReader
 			is.read(b, 0, 4);
 			int nbNeighbors = DataBinaryEncoding.readInt(b, 0);
 			int[] inNeighbors = new int[nbNeighbors];
-			g.out.adj[label] = inNeighbors;
+			g.out.mem.b[label] = inNeighbors;
 
 			++pm.sensor.progressStatus;
 

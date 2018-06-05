@@ -2,7 +2,7 @@ package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.Utils;
 import jmg.algo.Degrees;
@@ -32,7 +32,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 		g.in.ensureDefined(nbThreads);
 
 		CountK22_Result r = new CountK22_Result();
-		int maxDegree = Degrees.maxDegree(g.out.adj);
+		int maxDegree = Degrees.maxDegree(g.out.mem.b);
 		Cout.info("max degree=" + maxDegree);
 		r.distri = new int[maxDegree + 1];
 
@@ -54,21 +54,21 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 				{
 					IntSet alreadyDone = new IntOpenHashSet();
 
-					for (int v : g.out.adj[u])
+					for (int v : g.out.mem.b[u])
 					{
-						for (int w : g.in.adj[v])
+						for (int w : g.in.mem.b[v])
 						{
 							if (u < w && ! alreadyDone.contains(w))
 							{
 								alreadyDone.add(w);
 								int nbCN = Utils.countElementsInCommon_dichotomic(
-										g.out.adj[u], g.out.adj[w]);
+										g.out.mem.b[u], g.out.mem.b[w]);
 
 								++_distri[nbCN];
 
 								int _nK22 = nbCN * (nbCN - 1) / 2;
-								int du = g.out.adj[u].length;
-								int dw = g.out.adj[w].length;
+								int du = g.out.mem.b[u].length;
+								int dw = g.out.mem.b[w].length;
 
 								if (g.arcExists(u, w))
 								{

@@ -3,7 +3,7 @@ package jmg.gen;
 import java.io.IOException;
 import java.util.Arrays;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.Utils;
 import jmg.chain.JMGPlugin;
@@ -28,7 +28,7 @@ public class GridGenerator extends JMGPlugin<Void, Digraph>
 	public Digraph process(Void v)
 	{
 		Digraph g = new Digraph();
-		g.out.adj = dgrid_outs(nbRows, nbColumns, horizontal, vertical, diags, tore,
+		g.out.mem.b = dgrid_outs(nbRows, nbColumns, horizontal, vertical, diags, tore,
 				nbThreads);
 		g.properties.put("number of columns", nbColumns);
 		g.properties.put("number of rows", nbRows);
@@ -112,10 +112,10 @@ public class GridGenerator extends JMGPlugin<Void, Digraph>
 	{
 		int[][] adj = GridGenerator.dgrid_outs(3, 30, true, true, true, false, 1);
 		Digraph g = new Digraph();
-		g.out.adj = adj;
-		g.nbVertices = g.out.adj.length;
+		g.out.mem.b = adj;
+		g.nbVertices = g.out.mem.b.length;
 		g.symmetrize(8);
-		Cout.debug(DotWriter.toString(g.in.adj));
+		Cout.debug(DotWriter.toString(g.in.mem.b));
 	}
 
 	@Override

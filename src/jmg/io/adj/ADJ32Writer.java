@@ -25,7 +25,7 @@ public class ADJ32Writer extends ADJWriter
 
 		for (int v = 0; v < nbVertex; ++v)
 		{
-			int[] neighbors = g.out.adj[v];
+			int[] neighbors = g.out.mem.b[v];
 
 			index[v] = pos;
 			Bits.putInt(b, 0, g.labelling == null ? v : g.labelling.label2vertex[v]);

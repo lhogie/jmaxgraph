@@ -1,17 +1,17 @@
 package jmg;
 
-public class INs extends Adjacency
+public class INs extends Direction
 {
 	@Override
 	public int hashCode()
 	{
 		int hash = 0;
 
-		if (adj != null)
+		if (mem.b != null)
 		{
-			for (int dest = 0; dest < adj.length; ++dest)
+			for (int dest = 0; dest < mem.b.length; ++dest)
 			{
-				for (int src : adj[dest])
+				for (int src : mem.b[dest])
 				{
 					int coupleHash = 31 + src;
 					coupleHash = coupleHash * 31 + dest;

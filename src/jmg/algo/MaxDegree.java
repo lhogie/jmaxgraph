@@ -1,8 +1,10 @@
 package jmg.algo;
 
-import it.unimi.dsi.fastutil.ints.IntAVLTreeSet;
-import toools.thread.ParallelIntervalProcessing;
+import java.util.Collections;
+import java.util.Vector;
+
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
+import toools.thread.ParallelIntervalProcessing;
 
 public class MaxDegree
 {
@@ -26,19 +28,19 @@ public class MaxDegree
 
 	public static int computeMaxDegree_par(int[][] adj, int nbThreads)
 	{
-		IntAVLTreeSet localMaximums = new IntAVLTreeSet();
+		Vector<Integer> degrees = new Vector<>();
 
 		new ParallelIntervalProcessing(adj.length, nbThreads, null)
 		{
-
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
 				int max = - 1;
+				int degree;
 
-				for (int v = 0; v < upperBound; ++v)
+				for (int v = lowerBound; v < upperBound; ++v)
 				{
-					int degree = adj[v].length;
+					degree = adj[v].length;
 
 					if (degree > max)
 					{
@@ -46,14 +48,11 @@ public class MaxDegree
 					}
 				}
 
-				synchronized (localMaximums)
-				{
-					localMaximums.add(max);
-				}
+				degrees.set(s.rank, max);
 			}
 		};
 
-		return localMaximums.lastInt();
+		return Collections.max(degrees);
 	}
 
 }

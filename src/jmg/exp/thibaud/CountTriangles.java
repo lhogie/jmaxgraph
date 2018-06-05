@@ -1,7 +1,7 @@
 package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntArrays;
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.algo.CountBidirectionalArcs;
 import jmg.chain.JMGPlugin;
@@ -47,28 +47,28 @@ public class CountTriangles extends JMGPlugin<Digraph, CountTriangles_Result>
 
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					int dinu = g.in.adj[u].length;
-					int doutu = g.out.adj[u].length;
+					int dinu = g.in.mem.b[u].length;
+					int doutu = g.out.mem.b[u].length;
 
 					// this counts each bidirectional-arc as two potential
 					// triangles
 					// it is corrected at the end (in the result object)
 					nbPotentialTriangles_computed += dinu * doutu;
 
-					for (int v : g.in.adj[u])
+					for (int v : g.in.mem.b[u])
 					{
-						for (int w : g.out.adj[u])
+						for (int w : g.out.mem.b[u])
 						{
 							if (v != w)
 							{
 								++nbPotentialTriangles_incremented;
 
-								if (IntArrays.binarySearch(g.out.adj[v], w) >= 0)
+								if (IntArrays.binarySearch(g.out.mem.b[v], w) >= 0)
 								{
 									++nbTransitiveTriangles;
 								}
 
-								if (IntArrays.binarySearch(g.in.adj[v], w) >= 0)
+								if (IntArrays.binarySearch(g.in.mem.b[v], w) >= 0)
 								{
 									++threeTimesNbCyclicTriangles;
 								}

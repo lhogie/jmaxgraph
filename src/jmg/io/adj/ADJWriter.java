@@ -3,8 +3,8 @@ package jmg.io.adj;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import jmg.Digraph;
 import toools.io.file.RegularFile;
 import toools.io.file.nbs.NBSFile;

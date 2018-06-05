@@ -1,54 +1,65 @@
 package jmg.gen;
 
+import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
-import jmg.Utils;
+import jmg.InMemoryAdj;
 import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
+import toools.thread.MultiThreadProcessing.ThreadSpecifics;
+import toools.thread.ParallelIntervalProcessing;
 
 public class DirectedGNP
 {
 
-	public static int[][] out(int nbVertex, double p, Random prng, int nbThreads)
+	public static InMemoryAdj out(int nbVertex, double p, Random prng, int nbThreads)
 	{
 		LongProcess lp = new LongProcess("generating GNP graph", " adj-list", nbVertex);
-		IntSet[] v_hash = new IntSet[nbVertex];
 
-		for (int v = 0; v < nbVertex; ++v)
-		{
-			v_hash[v] = new IntOpenHashSet();
-		}
+		int[][] r = new int[nbVertex][];
 
-		for (int u = 0; u < nbVertex; ++u)
+		new ParallelIntervalProcessing(nbVertex, nbThreads, lp)
 		{
-			for (int v = 0; v < nbVertex; ++v)
+
+			@Override
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
+					throws Throwable
 			{
-				if (u != v)
+				ThreadLocalRandom random = ThreadLocalRandom.current();
+				int[] tmp = new int[(int) (nbVertex * p) + 1];
+
+				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					if (prng.nextDouble() < p)
+					int nbNeighbors = 0;
+
+					for (int v = 0; v < nbVertex; ++v)
 					{
-						v_hash[u].add(v);
+						if (u != v)
+						{
+							if (random.nextDouble() < p)
+							{
+								// if the tmp array is too small, double it
+								if (tmp.length == nbNeighbors)
+								{
+									tmp = new int[tmp.length * 2];
+								}
+
+								tmp[nbNeighbors++] = v;
+							}
+						}
 					}
+
+					r[u] = Arrays.copyOf(tmp, nbNeighbors);
+					s.progressStatus++;
 				}
 			}
-
-			++lp.sensor.progressStatus;
-		}
-
-		int[][] v_array = new int[nbVertex][];
-
-		for (int u = 0; u < nbVertex; ++u)
-		{
-			v_array[u] = v_hash[u].toIntArray();
-		}
+		};
 
 		lp.end();
-		Utils.ensureSorted(v_array, nbThreads);
-		return v_array;
+		return new InMemoryAdj(r);
 	}
 
 	public static class Plugin extends JMGPlugin<Void, Digraph>
@@ -61,15 +72,16 @@ public class DirectedGNP
 		public Digraph process(Void v)
 		{
 			Digraph g = new Digraph();
-			g.out.adj = out(nbVertex, p, r, nbThreads);
-			g.nbVertices = g.out.adj.length;
-			g.properties.put("edge probability", ""+p);
+			g.out.mem = out(nbVertex, p, r, nbThreads);
+			g.nbVertices = g.out.mem.b.length;
+			g.properties.put("edge probability", "" + p);
 			return g;
 		}
 
 		@Override
 		public void setup(PluginConfig p)
 		{
+			super.setup(p);
 			nbVertex = p.getInt("n");
 			this.p = p.getDouble("p");
 
@@ -79,5 +91,4 @@ public class DirectedGNP
 
 		}
 	}
-
 }

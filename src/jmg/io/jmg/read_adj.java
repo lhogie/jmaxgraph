@@ -27,7 +27,7 @@ public class read_adj
 				Cout.result(e);
 
 				// Cout.debugSuperVisible(new EDGFileVertexIterator(f, u, u+1,
-				// 0, 50).next().adj);
+				// 0, 50).next().ram.adj);
 			}
 		}
 

@@ -2,7 +2,7 @@ package jmg.algo;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
@@ -26,7 +26,7 @@ public class CountBidirectionalArcs
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					for (int v : g.out.adj[u])
+					for (int v : g.out.mem.b[u])
 					{
 						if (v < u)
 						{

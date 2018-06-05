@@ -1,6 +1,6 @@
 package jmg.algo;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.chain.JMGPlugin;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;

@@ -2,8 +2,8 @@ package jmg.io;
 
 import java.io.PrintStream;
 
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import jmg.Digraph;
 import toools.io.file.RegularFile;
 
@@ -31,11 +31,11 @@ public class EdgeListFileWriter
 
 	public static void write(Digraph g, PrintStream out)
 	{
-		for (int l = 0; l < g.out.adj.length; ++l)
+		for (int l = 0; l < g.out.mem.b.length; ++l)
 		{
 			int v = g.labelling == null ? l : g.labelling.label2vertex[l];
 
-			for (int nl : g.out.adj[l])
+			for (int nl : g.out.mem.b[l])
 			{
 				int n = g.labelling == null ? nl : g.labelling.label2vertex[nl];
 				out.print(v);

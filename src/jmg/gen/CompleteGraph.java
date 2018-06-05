@@ -10,11 +10,11 @@ public class CompleteGraph
 	static public Digraph doit(int nbVertices, int nbThreads)
 	{
 		Digraph g = new Digraph();
-		g.out.adj = new int[nbVertices][];
+		g.out.mem.b = new int[nbVertices][];
 
 		for (int u = 0; u < nbVertices; ++u)
 		{
-			g.out.adj[u] = new int[nbVertices - 1];
+			g.out.mem.b[u] = new int[nbVertices - 1];
 		}
 
 		for (int u = 0; u < nbVertices; ++u)
@@ -25,20 +25,20 @@ public class CompleteGraph
 			{
 				if (v != u)
 				{
-					g.out.adj[u][i++] = v;
+					g.out.mem.b[u][i++] = v;
 				}
 			}
 		}
 
-		Utils.ensureSorted(g.out.adj, nbThreads);
-		g.nbVertices = g.out.adj.length;
+		Utils.ensureSorted(g.out.mem.b, nbThreads);
+		g.nbVertices = g.out.mem.b.length;
 		return g;
 	}
 
 	public static void main(String[] args)
 	{
 		Digraph g = doit(5, 1);
-		Cout.debug(DotWriter.toString(g.out.adj));
+		Cout.debug(DotWriter.toString(g.out.mem.b));
 	}
 
 }

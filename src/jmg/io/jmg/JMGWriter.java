@@ -2,8 +2,8 @@ package jmg.io.jmg;
 
 import java.io.IOException;
 
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import jmg.Digraph;
 
 public class JMGWriter

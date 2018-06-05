@@ -18,7 +18,7 @@ public class JMGDirectory extends Directory
 	static
 	{
 		RegularFile.extension_class.put("nbs", NBSFile.class);
-		RegularFile.extension_class.put("edg", ArcFile.class);
+		RegularFile.extension_class.put("arc", ArcFile.class);
 	}
 
 	public int nbVertex;
@@ -57,12 +57,12 @@ public class JMGDirectory extends Directory
 
 	public ArcFile getOutFile()
 	{
-		return new ArcFile(this, "out.edg");
+		return new ArcFile(this, "out.arc");
 	}
 
 	public ArcFile getInFile()
 	{
-		return new ArcFile(this, "in.edg");
+		return new ArcFile(this, "in.arc");
 	}
 
 	public NBSFile getDegreesFile()

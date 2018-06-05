@@ -1,15 +1,15 @@
 package jmg.chain;
 
-import java4unix.CommandLine;
-import java4unix.License;
-import java4unix.pluginchain.PluginChain;
-import java4unix.pluginchain.PluginFactory;
+import j4u.CommandLine;
+import j4u.License;
+import j4u.chain.Run;
+import j4u.chain.PluginFactory;
 import toools.SystemMonitor;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 
-public class run extends PluginChain
+public class run extends Run
 {
 	private int nbThreads;
 

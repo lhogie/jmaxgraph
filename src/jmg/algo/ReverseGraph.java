@@ -2,8 +2,8 @@ package jmg.algo;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import jmg.Digraph;
 import jmg.Utils;
 import toools.progression.LongProcess;

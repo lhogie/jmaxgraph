@@ -5,22 +5,35 @@ import java.util.Arrays;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntList;
-import java4unix.pluginchain.PluginConfig;
-import java4unix.pluginchain.TooolsPlugin;
+import j4u.chain.PluginConfig;
+import j4u.chain.TooolsPlugin;
 import jmg.Digraph;
+import jmg.Direction;
 import jmg.gen.GridGenerator;
 import toools.io.Cout;
 import toools.progression.LongProcess;
 
 public class BFS
 {
+	public static class BFSResult
+	{
+		int[] visitOrder;
+		int[] distances;
 
-	public static int[] classic(int[][] adj, int src)
+		@Override
+		public String toString()
+		{
+			return "BFS [visitOrder=" + Arrays.toString(visitOrder) + ", distances="
+					+ Arrays.toString(distances) + "]";
+		}
+
+	}
+
+	public static BFSResult classic(int[][] adj, int src)
 	{
 		LongProcess lp = new LongProcess("BFS (classic)", " vertex", adj.length);
 		int[] distances = new int[adj.length];
 		Arrays.fill(distances, - 1);
-		// IntPriorityQueue q = new IntArrayFIFOQueue();
 		int[] q = new int[adj.length];
 		int from = 0;
 		int to = 1;
@@ -45,7 +58,11 @@ public class BFS
 		}
 
 		lp.end();
-		return distances;
+
+		BFSResult r = new BFSResult();
+		r.visitOrder = q;
+		r.distances = distances;
+		return r;
 	}
 
 	public static int[] bsp_seq(int[][] adj, int src)
@@ -91,30 +108,29 @@ public class BFS
 	public static void main(String[] args)
 	{
 		Digraph g = new Digraph();
-		g.out.adj = GridGenerator.dgrid_outs(10000, 100, true, true, false, false, 1);
-		int[] distances = bsp_seq(g.out.adj, 0);
+		g.out.mem.b = GridGenerator.dgrid_outs(10000, 100, true, true, false, false, 1);
+		int[] distances = bsp_seq(g.out.mem.b, 0);
 		// FastUtils.printAsMap(distances, " has distance ", System.out);
 		System.out.println("*****");
-		int[] distances2 = classic(g.out.adj, 0);
+		int[] distances2 = classic(g.out.mem.b, 0).distances;
 		Cout.debug(distances2);
 		// FastUtils.printAsMap(distances2, " has distance ", System.out);
 	}
 
-	public static class Plugin implements TooolsPlugin<Digraph, int[]>
+	public static class Plugin implements TooolsPlugin<Direction, BFSResult>
 	{
-		private int src = 0;
+		private int src;
 
 		@Override
-		public int[] process(Digraph g)
+		public BFSResult process(Direction d)
 		{
-			return BFS.classic(g.out.adj, src);
+			return BFS.classic(d.mem.b, src);
 		}
 
 		@Override
 		public void setup(PluginConfig p)
 		{
-			if (p.contains("src"))
-				src = p.getInt("src");
+			src = p.getInt("src");
 		}
 	}
 

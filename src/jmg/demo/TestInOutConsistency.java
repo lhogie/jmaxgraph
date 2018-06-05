@@ -25,11 +25,11 @@ public class TestInOutConsistency
 		{
 			if (r.nextBoolean())
 			{
-				test(r, g.getNbVertices(), g.in.file, g.out.file, true);
+				test(r, g.getNbVertices(), g.in.disk.file, g.out.disk.file, true);
 			}
 			else
 			{
-				test(r, g.getNbVertices(), g.out.file, g.in.file, true);
+				test(r, g.getNbVertices(), g.out.disk.file, g.in.disk.file, true);
 
 			}
 		}

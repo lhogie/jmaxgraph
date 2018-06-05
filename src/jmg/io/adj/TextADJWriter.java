@@ -14,7 +14,7 @@ public class TextADJWriter extends ADJWriter
 	public long[] write(Digraph g, OutputStream os)
 	{
 		PrintStreamCounter out = new PrintStreamCounter(new PrintStream(os));
-		int nbVertex = g.out.adj.length;
+		int nbVertex = g.out.mem.b.length;
 		LongProcess p = new LongProcess("writing text ADJ", " adj-list", nbVertex);
 		long[] index = new long[nbVertex];
 		int pos = 0;
@@ -28,7 +28,7 @@ public class TextADJWriter extends ADJWriter
 					.print(g.labelling == null ? label : g.labelling.label2vertex[label]);
 			pos += out.print(' ');
 
-			int[] neighbors = g.out.adj[label];
+			int[] neighbors = g.out.mem.b[label];
 			pos += out.print(neighbors.length);
 
 			if (neighbors.length > 0)

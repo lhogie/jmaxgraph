@@ -33,8 +33,8 @@ public class TinyReader
 			g.labelling = new Labelling();
 
 			Int2ObjectMap<int[]> adj = TinyReader.parse(toString());
-			g.out.from(adj, true, true, g.labelling, 1);
-			g.nbVertices = g.out.adj.length;
+			g.out.mem.from(adj, true, true, g.labelling, 1);
+			g.nbVertices = g.out.mem.b.length;
 			return g;
 		}
 	}

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.chain.JMGPlugin;
 import jmg.io.jmg.JMGDirectory;
@@ -44,8 +44,8 @@ public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					long din = g.in.adj[u].length;
-					long dout = g.out.adj[u].length;
+					long din = g.in.mem.b[u].length;
+					long dout = g.out.mem.b[u].length;
 					weigths[u] = din * dout;
 					++s.progressStatus;
 				}
@@ -75,8 +75,8 @@ public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
 
 					Random prng = new Random();
 					int u = MathsUtilities.pick(partialSums, prng);
-					int[] in = g.in.adj[u];
-					int[] out = g.out.adj[u];
+					int[] in = g.in.mem.b[u];
+					int[] out = g.out.mem.b[u];
 
 					int v1 = in[prng.nextInt(in.length)];
 					int v2 = out[prng.nextInt(out.length)];

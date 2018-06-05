@@ -17,10 +17,10 @@ public class K22AndTransitiveTrianglesCounter
 	static long[][] inDegreeInduced;
 	static boolean[][] preceedsX;
 
-	public static synchronized LocalCount count(Digraph g, int startVertex,
-			int endVertex, int nbThreads)
+	public static synchronized LocalCount count(Digraph g, int startVertex, int endVertex,
+			int nbThreads)
 	{
-		if (g.dataset == null)
+		if (g.jmgDirectory == null)
 		{
 			JMGDirectory d = new JMGDirectory("$HOME/tmp/flsjklkj");
 
@@ -73,10 +73,11 @@ public class K22AndTransitiveTrianglesCounter
 				+ startVertex + " to " + endVertex, " vertex", range);
 		lp.temporaryResult = r;
 
-		if (g.in.file == null)
+		if (g.in.disk.file == null)
 			throw new IllegalStateException();
 
-		new ArcFileParallelProcessor(g.in.file, startVertex, endVertex, 0, nbThreads, lp)
+		new ArcFileParallelProcessor(g.in.disk.file, startVertex, endVertex, 0, nbThreads,
+				lp)
 		{
 			@Override
 			protected void process(ThreadSpecifics s, Iterator<ArcFileCursor> iterator)
@@ -87,7 +88,7 @@ public class K22AndTransitiveTrianglesCounter
 				long sumNbPotK22 = 0;
 				long[] _inDegreeInduced = inDegreeInduced[s.rank];
 				boolean[] _preceedsX = preceedsX[s.rank];
-				int[][] outAdjTable = g.out.adj;
+				int[][] outAdjTable = g.out.mem.b;
 
 				int nbVerticesComputedSinceLastReport = 0;
 
@@ -100,7 +101,7 @@ public class K22AndTransitiveTrianglesCounter
 					r.nbK22sPerVertex_times2[x.vertex - startVertex] = 0;
 
 					long dinx = x.adj.length;
-					long nbTrianglesForX = dinx * g.out.adj[x.vertex].length;
+					long nbTrianglesForX = dinx * g.out.mem.b[x.vertex].length;
 					nbTtransitiveTrianglesPot += nbTrianglesForX;
 					r.nbTrianglesPotPerVertex[x.vertex - startVertex] = nbTrianglesForX;
 

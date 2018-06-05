@@ -1,6 +1,6 @@
 package jmg.chain;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.io.PrettyAdjPrinter;
 import toools.io.Cout;
@@ -14,33 +14,40 @@ public class info extends JMGPlugin<Digraph, Digraph>
 	@Override
 	public Digraph process(Digraph g)
 	{
+		if (g == null)
+		{
+			Cout.info("object is null");
+			return g;
+		}
+
 		Cout.info("nbVertex=" + g.getNbVertices());
-			Cout.result("nbArcs=" + g.countArcs(nbThreads));
+		
+		Cout.result("nbArcs=" + g.countArcs(nbThreads));
 
 		if (showOuts)
 		{
 			g.out.ensureDefined(nbThreads);
 			Cout.info("out-ADJ:");
-			Cout.info(PrettyAdjPrinter.f(g.out.adj));
+			Cout.info(PrettyAdjPrinter.f(g.out.mem.b));
 		}
 
 		if (shownIns)
 		{
 			g.in.ensureDefined(nbThreads);
 			Cout.info("in-ADJ:");
-			Cout.info(PrettyAdjPrinter.f(g.in.adj));
+			Cout.info(PrettyAdjPrinter.f(g.in.mem.b));
 		}
 
 		if (maxOutDegree)
 		{
 			g.out.ensureDefined(nbThreads);
-			Cout.info("max-out-degree=" + g.out.maxDegree(nbThreads));
+			Cout.info("max-out-degree=" + g.out.mem.maxDegree(nbThreads));
 		}
 
 		if (maxInDegree)
 		{
 			g.in.ensureDefined(nbThreads);
-			Cout.info("max-in-degree=" + g.in.maxDegree(nbThreads));
+			Cout.info("max-in-degree=" + g.in.mem.maxDegree(nbThreads));
 		}
 
 		if (hashCode)

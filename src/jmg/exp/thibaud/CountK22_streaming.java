@@ -3,7 +3,7 @@ package jmg.exp.thibaud;
 import java.io.IOException;
 import java.util.Iterator;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.Utils;
 import jmg.chain.JMGPlugin;
@@ -30,7 +30,7 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 
 	public CountK22v2_Result count(Digraph g)
 	{
-		if (g.dataset == null)
+		if (g.jmgDirectory == null)
 		{
 			JMGDirectory d = new JMGDirectory("$HOME/tmp/flsjklkj");
 
@@ -68,7 +68,7 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 			{
 				long _sum_fractionalNbK22pot = 0;
 				long _sum_twoTimesfractionalNbK22 = 0;
-				Iterator<ArcFileCursor> vertexIterator = g.out.file.iterator(lowerBound,
+				Iterator<ArcFileCursor> vertexIterator = g.out.disk.file.iterator(lowerBound,
 						upperBound, 1000, 256 * 256 * 256);
 
 				while (vertexIterator.hasNext())
@@ -83,18 +83,18 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 							if (v < w)
 							{
 								int nbCN = Utils.countElementsInCommon_dichotomic(
-										g.in.adj[v], g.in.adj[w]);
+										g.in.mem.b[v], g.in.mem.b[w]);
 
 								int _twotimesfractionalNbK22 = (nbCN - 1);
-								int dv = g.in.adj[v].length;
-								int dw = g.in.adj[w].length;
+								int dv = g.in.mem.b[v].length;
+								int dw = g.in.mem.b[w].length;
 
-								if (Utils.contains(g.in.adj[w], v))
+								if (Utils.contains(g.in.mem.b[w], v))
 								{
 									--dv;
 								}
 
-								if (Utils.contains(g.in.adj[v], w))
+								if (Utils.contains(g.in.mem.b[v], w))
 								{
 									--dw;
 								}

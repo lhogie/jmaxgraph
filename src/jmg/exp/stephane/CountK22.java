@@ -3,7 +3,7 @@ package jmg.exp.stephane;
 import java.io.IOException;
 import java.util.Random;
 
-import java4unix.pluginchain.PluginConfig;
+import j4u.chain.PluginConfig;
 import jmg.Digraph;
 import jmg.Utils;
 import jmg.chain.JMGPlugin;
@@ -50,7 +50,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					long din = g.in.adj[u].length;
+					long din = g.in.mem.b[u].length;
 
 					if (din > 0)
 					{
@@ -81,7 +81,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 		{
 			picking.sensor.progressStatus = iteration;
 			int u = MathsUtilities.pick(partialSums, prng);
-			int[] in = g.in.adj[u];
+			int[] in = g.in.mem.b[u];
 
 			if (in.length >= 2)
 			{
@@ -104,7 +104,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 
 		picking.end();
 
-		g.in.adj = null;
+		g.in.mem.b = null;
 		System.gc();
 		g.out.ensureDefined(nbThreads);
 
@@ -119,8 +119,8 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 			int v1 = v1s[iteration];
 			int v2 = v2s[iteration];
 
-			int[] adjV1 = g.out.adj[v1];
-			int[] adjV2 = g.out.adj[v2];
+			int[] adjV1 = g.out.mem.b[v1];
+			int[] adjV2 = g.out.mem.b[v2];
 
 			int nbCommonNeighbors = Utils.countElementsInCommon_dichotomic(adjV1, adjV2)
 					- 1;
