@@ -53,4 +53,9 @@ public class Degrees
 		return MathsUtilities.max(computeDegrees(adj, nbThreads));
 	}
 
+	public static double avgDegree(int[][] adj)
+	{
+		return MathsUtilities.avg(computeDegrees(adj, nbThreads));
+	}
+
 }

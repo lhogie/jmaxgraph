@@ -255,6 +255,7 @@ public class InMemoryAdj extends Adjacency
 		return b[u];
 	}
 
+	@Override
 	public long countArcs(int nbThreads)
 	{
 		if (nbArcs != - 1)
