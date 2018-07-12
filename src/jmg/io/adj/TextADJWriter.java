@@ -3,7 +3,7 @@ package jmg.io.adj;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-import jmg.Digraph;
+import jmg.Graph;
 import toools.io.PrintStreamCounter;
 import toools.progression.LongProcess;
 
@@ -11,7 +11,7 @@ public class TextADJWriter extends ADJWriter
 {
 
 	@Override
-	public long[] write(Digraph g, OutputStream os)
+	public long[] write(Graph g, OutputStream os)
 	{
 		PrintStreamCounter out = new PrintStreamCounter(new PrintStream(os));
 		int nbVertex = g.out.mem.b.length;

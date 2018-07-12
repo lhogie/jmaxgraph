@@ -9,25 +9,25 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
+import jmg.Graph;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 import toools.util.Conversion;
 
 public class EdgeListFileReader
 {
-	public static class Plugin implements TooolsPlugin<Void, Digraph>
+	public static class Plugin implements TooolsPlugin<Void, Graph>
 	{
 		public RegularFile from;
 
 		@Override
-		public Digraph process(Void v)
+		public Graph process(Void v)
 		{
 			try
 			{
-				Digraph g = new Digraph();
+				Graph g = new Graph();
 				g.out.mem.b = load(from);
 				return g;
 			}
@@ -38,7 +38,7 @@ public class EdgeListFileReader
 		}
 
 		@Override
-		public void setup(PluginConfig parms)
+		public void setParameters(PluginParms parms)
 		{
 		}
 	}
@@ -107,10 +107,10 @@ public class EdgeListFileReader
 	public static void main(String[] args) throws FileNotFoundException
 	{
 		int[][] r = load(new RegularFile("/Users/lhogie/biggrph/datasets/acc2007_2.tsv"));
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.out.mem.b = r;
 
-		System.out.println(g.countArcs(1));
+		System.out.println(g.getNbArcs(1));
 	}
 
 }

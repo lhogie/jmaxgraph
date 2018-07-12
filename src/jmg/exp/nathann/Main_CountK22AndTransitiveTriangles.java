@@ -1,25 +1,32 @@
 package jmg.exp.nathann;
 
-import jmg.Digraph;
-import jmg.io.jmg.JMGDirectory;
-import toools.io.Cout;
+import j4u.chain.PluginParms;
+import jmg.Graph;
+import jmg.chain.JMGPlugin;
+import toools.io.file.Directory;
 
-public class Main_CountK22AndTransitiveTriangles
+public class Main_CountK22AndTransitiveTriangles extends JMGPlugin<Graph, GlobalCount>
 {
-	public static void main(String[] args)
-	{
-		JMGDirectory dataset = new JMGDirectory(args[0]);
-		Digraph g = dataset.mapGraph(1, false);
+	private int nbJobs = 500;
+	private boolean waitUntilCompletion;
+	private boolean processLocally;
 
+	@Override
+	public GlobalCount process(Graph g)
+	{
 		CountingK22AndTransitiveTrianglesProblem problem = new CountingK22AndTransitiveTrianglesProblem(
 				g, true, - 1);
 
-		int nbJobs = Integer.valueOf(args[1]);
+		GlobalCount r = problem.map(new Directory(g.jmgDirectory, "k22"), nbJobs,
+				waitUntilCompletion, processLocally);
+		return r;
+	}
 
-		GlobalCount r = problem
-				.map(args[2], nbJobs);
-		Cout.result(r);
-		//r.save();
-
+	@Override
+	public void setParameters(PluginParms p)
+	{
+		super.setParameters(p);
+		this.waitUntilCompletion = p.getBoolean("waitUntilCompletion");
+		this.processLocally = p.getBoolean("processLocally");
 	}
 }

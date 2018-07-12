@@ -1,17 +1,17 @@
 package jmg.exp.nathann;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmr.FSMapReduce;
 import jmr.Job;
 import jmr.Problem;
 
 public class CountingK22AndTransitiveTrianglesProblem extends Problem<CountK22WorkerOutput, GlobalCount>
 {
-	private final Digraph g;
+	private final Graph g;
 	private final boolean countK22;
 	private final int nbThreads;
 
-	public CountingK22AndTransitiveTrianglesProblem(Digraph g, boolean countK22,
+	public CountingK22AndTransitiveTrianglesProblem(Graph g, boolean countK22,
 			int nbThreads)
 	{
 		this.g = g;

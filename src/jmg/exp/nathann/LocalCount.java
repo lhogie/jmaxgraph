@@ -1,8 +1,10 @@
 package jmg.exp.nathann;
 
-public class LocalCount
+import java.io.Serializable;
+
+public class LocalCount implements Serializable, JSONable
 {
-	public int startVertex, endVertex;
+	public final int startVertex, endVertex;
 	public long nbK22s_times2 = 0;
 	public long nbK22sPot;
 	public long nbTransitiveTriangles;
@@ -13,22 +15,36 @@ public class LocalCount
 	public long[] nbTrianglesPerVertex;
 	public long[] nbTrianglesPotPerVertex;
 
+	public LocalCount(int startVertex, int endVertex)
+	{
+		this.startVertex = startVertex;
+		this.endVertex = endVertex;
+	}
+
 	@Override
 	public String toString()
 	{
-		String s = "";
-		s += " - from " + startVertex + " to " + endVertex;
-		s += "\n - nbK22=" + nk22();
-		s += "\n - nbK22pot=" + nbK22sPot;
-		s += "\n - CK=" + (4d * nk22() / nbK22sPot);
-		s += "\n - nbTransitiveTriangles=" + nbTransitiveTriangles;
-		s += "\n - nbCyclicTriangles=" + (nbCyclicTriangles_times3 / 3);
-		s += "\n - nbTrianglesPot=" + nbTrianglesPot;
-		return s;
+		return toJSONElement().toString();
 	}
 
 	public long nk22()
 	{
 		return nbK22s_times2 / 2;
+	}
+
+	@Override
+	public JSONMap toJSONElement()
+	{
+		JSONMap m = new JSONMap();
+		m.add("from", startVertex);
+		m.add("to", endVertex);
+		m.add("nbK22", nk22());
+		m.add("nbK22pot", nbK22sPot);
+		m.add("CK", (4d * nk22() / nbK22sPot));
+		m.add("nbTransitiveTriangles", nbTransitiveTriangles);
+		m.add("nbCyclicTriangles", (nbCyclicTriangles_times3 / 3));
+		m.add("nbTrianglesPot", startVertex);
+		m.add("from", nbTrianglesPot);
+		return m;
 	}
 }

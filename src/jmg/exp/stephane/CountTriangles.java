@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.chain.JMGPlugin;
 import jmg.io.jmg.JMGDirectory;
 import toools.math.MathsUtilities;
@@ -14,19 +14,19 @@ import toools.thread.MultiThreadProcessing;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
+public class CountTriangles extends JMGPlugin<Graph, CountTriangleResult>
 {
 
 	@Override
-	public CountTriangleResult process(Digraph g)
+	public CountTriangleResult process(Graph g)
 	{
 		return count(g, nbThreads);
 	}
 
-	public static CountTriangleResult count(Digraph g, int nbThreads)
+	public static CountTriangleResult count(Graph g, int nbThreads)
 	{
-		g.out.ensureDefined(8);
-		g.in.ensureDefined(8);
+		g.out.ensureLoaded(8);
+		g.in.ensureLoaded(8);
 
 		// g.symmetrize();
 
@@ -120,14 +120,14 @@ public class CountTriangles extends JMGPlugin<Digraph, CountTriangleResult>
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 	}
 
 	public static void main(String[] args) throws IOException
 	{
 		JMGDirectory d = new JMGDirectory("$HOME/datasets/sample-0.001b.jmg");
-		Digraph g = d.mapGraph(8, false);
+		Graph g = d.mapGraph(8, false);
 		CountTriangles.count(g, 1);
 	}
 }

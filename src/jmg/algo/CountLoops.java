@@ -2,15 +2,15 @@ package jmg.algo;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import jmg.Digraph;
-import jmg.Utils;
+import jmg.Graph;
+import jmg.JmgUtils;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
 public class CountLoops
 {
-	public static long count(Digraph g, int nbVertex)
+	public static long count(Graph g, int nbVertex)
 	{
 		AtomicLong count = new AtomicLong(0);
 		LongProcess p = new LongProcess("count loops", " elements", g.getNbVertices());
@@ -22,7 +22,7 @@ public class CountLoops
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					if (Utils.contains(g.out.mem.b[u], u))
+					if (JmgUtils.contains(g.out.mem.b[u], u))
 					{
 						count.incrementAndGet();
 					}

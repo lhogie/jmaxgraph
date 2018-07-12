@@ -1,10 +1,10 @@
 package jmg.io;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.chain.JMGPlugin;
 
-public abstract class DatasetReaderPlugin extends JMGPlugin<Void, Digraph>
+public abstract class DatasetReaderPlugin extends JMGPlugin<Void, Graph>
 {
 
 	protected int bufSize = 65530 * 256;
@@ -13,20 +13,18 @@ public abstract class DatasetReaderPlugin extends JMGPlugin<Void, Digraph>
 	protected boolean sort = true;
 
 	@Override
-	public Digraph process(Void g)
+	public Graph process(Void g)
 	{
 		return read();
 	}
 
-	public abstract Digraph read();
+	public abstract Graph read();
 
 
 	@Override
-	public void setup(PluginConfig parms)
+	public void setParameters(PluginParms parms)
 	{
-		super.setup(parms);
-		
-
+		super.setParameters(parms);
 		
 		if (parms.contains("bufSize"))
 			bufSize = parms.getInt("bufSize");

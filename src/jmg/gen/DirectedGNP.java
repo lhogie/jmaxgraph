@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
-import jmg.InMemoryAdj;
+import j4u.chain.PluginParms;
+import jmg.Graph;
+import jmg.MatrixAdj;
 import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -15,7 +15,7 @@ import toools.thread.ParallelIntervalProcessing;
 public class DirectedGNP
 {
 
-	public static InMemoryAdj out(int nbVertex, double p, Random prng, int nbThreads)
+	public static MatrixAdj out(int nbVertex, double p, Random prng, int nbThreads)
 	{
 		LongProcess lp = new LongProcess("generating GNP graph", " adj-list", nbVertex);
 
@@ -59,29 +59,28 @@ public class DirectedGNP
 		};
 
 		lp.end();
-		return new InMemoryAdj(r);
+		return new MatrixAdj(r);
 	}
 
-	public static class Plugin extends JMGPlugin<Void, Digraph>
+	public static class Plugin extends JMGPlugin<Void, Graph>
 	{
 		public double p = 0.5;
 		public int nbVertex = 1000;
 		public Random r = new Random();
 
 		@Override
-		public Digraph process(Void v)
+		public Graph process(Void v)
 		{
-			Digraph g = new Digraph();
+			Graph g = new Graph();
 			g.out.mem = out(nbVertex, p, r, nbThreads);
-			g.nbVertices = g.out.mem.b.length;
 			g.properties.put("edge probability", "" + p);
 			return g;
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
-			super.setup(p);
+			super.setParameters(p);
 			nbVertex = p.getInt("n");
 			this.p = p.getDouble("p");
 

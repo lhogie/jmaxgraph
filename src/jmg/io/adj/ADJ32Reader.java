@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import j4u.chain.PluginConfig;
-import jmg.Utils;
+import j4u.chain.PluginParms;
+import jmg.JmgUtils;
 import toools.io.BinaryReader;
 import toools.io.Cout;
 import toools.progression.LongProcess;
@@ -39,7 +39,7 @@ public class ADJ32Reader extends ADJReader
 			int _src = Conversion.long2int(_r.nextInt());
 			int _nbNeighbors = _r.nextInt();
 
-			int[] _outNeighbors = _nbNeighbors == 0 ? Utils.emptyArray
+			int[] _outNeighbors = _nbNeighbors == 0 ? JmgUtils.emptyArray
 					: new int[_nbNeighbors];
 
 			_localAdj.put(_src, _outNeighbors);
@@ -56,7 +56,7 @@ public class ADJ32Reader extends ADJReader
 	}
 
 	@Override
-	public void setup(PluginConfig parms)
+	public void setParameters(PluginParms parms)
 	{
 
 	}

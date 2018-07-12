@@ -2,20 +2,20 @@ package jmg.io;
 
 import java.io.PrintStream;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
+import jmg.Graph;
 import toools.io.file.RegularFile;
 
 public class EdgeListFileWriter
 {
 
-	public static class Plugin implements TooolsPlugin<Digraph, RegularFile>
+	public static class Plugin implements TooolsPlugin<Graph, RegularFile>
 	{
 		public RegularFile to;
 
 		@Override
-		public RegularFile process(Digraph g)
+		public RegularFile process(Graph g)
 		{
 			PrintStream ps = new PrintStream(to.createWritingStream());
 			write(g, ps);
@@ -24,12 +24,12 @@ public class EdgeListFileWriter
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
 		}
 	}
 
-	public static void write(Digraph g, PrintStream out)
+	public static void write(Graph g, PrintStream out)
 	{
 		for (int l = 0; l < g.out.mem.b.length; ++l)
 		{

@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import jmg.Digraph;
+import jmg.Graph;
+import jmg.VertexCursor;
 import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.ArcFileWriter;
 import jmg.io.jmg.JMGDirectory;
@@ -21,12 +22,12 @@ public class GenerateUndirectedGraph2
 		}
 		
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Digraph g = d.mapGraph(8, false);
-		Digraph h = new Digraph();
+		Graph g = d.mapGraph(8, false);
+		Graph h = new Graph();
 		h.out.mem.b = new int[g.getNbVertices()][];
 
-		Iterator<ArcFileCursor> outIterator = g.out.disk.file.iterator();
-		Iterator<ArcFileCursor> inIterator = g.in.disk.file.iterator();
+		Iterator<VertexCursor> outIterator = g.out.disk.iterator();
+		Iterator<VertexCursor> inIterator = g.in.disk.iterator();
 
 		IntArrayList r = new IntArrayList();
 
@@ -41,8 +42,8 @@ public class GenerateUndirectedGraph2
 		for (int u = 0; u < nbVertices; ++u)
 		{
 			lp.sensor.progressStatus++;
-			ArcFileCursor outC = outIterator.next();
-			ArcFileCursor inC = inIterator.next();
+			VertexCursor outC = outIterator.next();
+			VertexCursor inC = inIterator.next();
 
 			if (outC.vertex != u)
 				throw new IllegalStateException();

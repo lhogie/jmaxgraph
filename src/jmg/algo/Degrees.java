@@ -1,6 +1,6 @@
 package jmg.algo;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import jmg.chain.JMGPlugin;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
@@ -19,7 +19,7 @@ public class Degrees
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
 		}
 
@@ -29,7 +29,8 @@ public class Degrees
 
 	public static int[] computeDegrees(int[][] adj, int nbThreads)
 	{
-		LongProcess computeDegrees = new LongProcess("computeDegrees", " vertex", adj.length);
+		LongProcess computeDegrees = new LongProcess("computeDegrees", " vertex",
+				adj.length);
 		int[] r = new int[adj.length];
 
 		new ParallelIntervalProcessing(r.length, nbThreads, computeDegrees)
@@ -56,6 +57,11 @@ public class Degrees
 	public static double avgDegree(int[][] adj)
 	{
 		return MathsUtilities.avg(computeDegrees(adj, nbThreads));
+	}
+
+	public static double stdDev(int[][] adj)
+	{
+		return MathsUtilities.stdDev(computeDegrees(adj, nbThreads));
 	}
 
 }

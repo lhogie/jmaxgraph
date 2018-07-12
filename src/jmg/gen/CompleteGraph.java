@@ -1,15 +1,15 @@
 package jmg.gen;
 
-import jmg.Digraph;
-import jmg.Utils;
+import jmg.Graph;
+import jmg.JmgUtils;
 import jmg.io.DotWriter;
 import toools.io.Cout;
 
 public class CompleteGraph
 {
-	static public Digraph doit(int nbVertices, int nbThreads)
+	static public Graph doit(int nbVertices, int nbThreads)
 	{
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.out.mem.b = new int[nbVertices][];
 
 		for (int u = 0; u < nbVertices; ++u)
@@ -30,14 +30,13 @@ public class CompleteGraph
 			}
 		}
 
-		Utils.ensureSorted(g.out.mem.b, nbThreads);
-		g.nbVertices = g.out.mem.b.length;
+		JmgUtils.ensureSorted(g.out.mem.b, nbThreads);
 		return g;
 	}
 
 	public static void main(String[] args)
 	{
-		Digraph g = doit(5, 1);
+		Graph g = doit(5, 1);
 		Cout.debug(DotWriter.toString(g.out.mem.b));
 	}
 

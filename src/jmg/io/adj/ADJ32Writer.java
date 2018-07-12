@@ -3,7 +3,7 @@ package jmg.io.adj;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import jmg.Digraph;
+import jmg.Graph;
 import toools.io.Bits;
 import toools.progression.LongProcess;
 
@@ -11,7 +11,7 @@ public class ADJ32Writer extends ADJWriter
 {
 
 	@Override
-	public long[] write(Digraph g, OutputStream os) throws IOException
+	public long[] write(Graph g, OutputStream os) throws IOException
 	{
 		int nbVertex = g.getNbVertices();
 		long pos = 4;

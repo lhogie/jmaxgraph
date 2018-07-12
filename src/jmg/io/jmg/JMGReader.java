@@ -1,7 +1,7 @@
 package jmg.io.jmg;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.io.DatasetReaderPlugin;
 
 public class JMGReader
@@ -12,15 +12,15 @@ public class JMGReader
 		public boolean useLabels;
 
 		@Override
-		public Digraph read()
+		public Graph read()
 		{
 			return from.mapGraph(nbThreads, useLabels);
 		}
 
 		@Override
-		public void setup(PluginConfig parms)
+		public void setParameters(PluginParms parms)
 		{
-			super.setup(parms);
+			super.setParameters(parms);
 
 			if (parms.contains("useLabels"))
 			{

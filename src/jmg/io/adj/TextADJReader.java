@@ -2,10 +2,12 @@ package jmg.io.adj;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import toools.io.Utilities;
+import toools.io.Utilities.ReadLong;
 import toools.io.file.RegularFile;
 
 public abstract class TextADJReader extends ADJReader
@@ -14,8 +16,13 @@ public abstract class TextADJReader extends ADJReader
 
 	protected static class Section
 	{
-		long fromPosition;
+		final long fromPosition;
 		long endVertex = - 1;
+
+		public Section(long pos)
+		{
+			fromPosition = pos;
+		}
 
 		@Override
 		public String toString()
@@ -25,46 +32,44 @@ public abstract class TextADJReader extends ADJReader
 		}
 	}
 
-	protected Section[] findSection(RegularFile f, int nbSection) throws IOException
+	protected Section[] findSections(RegularFile f, int nbSections) throws IOException
 	{
-		final long sectionLength = f.getSize() / nbSection;
-		Section[] sectionBounds = new Section[nbSection];
+		long len = f.getSize();
+		final long sectionLength = f.getSize() / nbSections;
+		List<Section> sectionBounds = new ArrayList<>();
+		InputStream is = f.createReadingStream();
+		long pos = 0;
+		long nextSectionPos = 0;
 
-		for (int i = 0; i < nbSection; ++i)
+		while (true)
 		{
-			sectionBounds[i] = new Section();
-			sectionBounds[i].fromPosition = i * sectionLength;
-		}
+			Section s = new Section(nextSectionPos);
+			sectionBounds.add(s);
 
-		for (int sectionIndex = 0; sectionIndex < nbSection - 1; ++sectionIndex)
-		{
-			InputStream is = f.createReadingStream();
-			Section section = sectionBounds[sectionIndex];
+			Utilities.skip(is, sectionLength);
+			pos += sectionLength;
 
-			if (is.skip(section.fromPosition + sectionLength) != section.fromPosition
-					+ sectionLength)
-				throw new IllegalStateException();
+			pos += Utilities.skipUntilEndOfLine(is);
 
-			int skip = Utilities.skipUntilEndOfLine(is);
-
-			// if we're not building the last section bounds
-			if (sectionIndex < nbSection - 1)
+			// if EOF
+			if (pos >= len)
 			{
-				section.endVertex = new Scanner(is).nextLong();
-				sectionBounds[sectionIndex + 1].fromPosition = section.fromPosition
-						+ sectionLength + skip;
+				return sectionBounds.toArray(new Section[0]);
 			}
-
-			is.close();
+			else
+			{
+				nextSectionPos = pos;
+				ReadLong endVertex = Utilities.readLong(is);
+				s.endVertex = endVertex.v;
+				pos += endVertex.n;
+			}
 		}
-
-		return sectionBounds;
 	}
 
 	@Override
-	public void setup(PluginConfig parms)
+	public void setParameters(PluginParms parms)
 	{
-		super.setup(parms);
+		super.setParameters(parms);
 		hasNbVertices = parms.getBoolean("hasNbVertices");
 	}
 

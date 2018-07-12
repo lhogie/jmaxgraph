@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.Labelling;
 import jmg.io.DatasetReaderPlugin;
 import toools.io.file.RegularFile;
@@ -18,11 +18,11 @@ public abstract class ADJReader extends DatasetReaderPlugin
 	public long nbArcsExpected = - 1;
 
 	@Override
-	public void setup(PluginConfig parms)
+	public void setParameters(PluginParms parms)
 	{
-		super.setup(parms);
-		nbVerticesExpected = parms.getInt("nbVertices");
-		nbArcsExpected = parms.getLong("nbArcs");
+		super.setParameters(parms);
+		nbVerticesExpected = parms.contains("nbVertices") ? parms.getInt("nbVertices") : -1;
+		nbArcsExpected = parms.contains("nbArcs") ? parms.getLong("nbArcs") : -1;
 
 		if (parms.contains("from"))
 			from = new RegularFile(parms.get("from"));
@@ -34,12 +34,12 @@ public abstract class ADJReader extends DatasetReaderPlugin
 	}
 
 	@Override
-	public Digraph read()
+	public Graph read()
 	{
 		try
 		{
 			Int2ObjectMap<int[]> adj = readFile();
-			Digraph g = new Digraph();
+			Graph g = new Graph();
 			g.labelling = new Labelling();
 			g.out.mem.from(adj, addUndeclared, sort, g.labelling, nbThreads);
 			return g;

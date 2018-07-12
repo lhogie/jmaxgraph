@@ -3,19 +3,19 @@ package jmg.io.adj;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
+import jmg.Graph;
 import toools.io.file.RegularFile;
 import toools.io.file.nbs.NBSFile;
 
-public abstract class ADJWriter implements TooolsPlugin<Digraph, RegularFile>
+public abstract class ADJWriter implements TooolsPlugin<Graph, RegularFile>
 {
 	public RegularFile to;
 	public boolean writeIndex = true;
 
 	@Override
-	public RegularFile process(Digraph g)
+	public RegularFile process(Graph g)
 	{
 		try
 		{
@@ -28,7 +28,7 @@ public abstract class ADJWriter implements TooolsPlugin<Digraph, RegularFile>
 		}
 	}
 
-	public void write(Digraph g, RegularFile to, boolean writeIndex) throws IOException
+	public void write(Graph g, RegularFile to, boolean writeIndex) throws IOException
 	{
 		OutputStream os = to.createWritingStream(false);
 		long[] index = write(g, os);
@@ -48,11 +48,11 @@ public abstract class ADJWriter implements TooolsPlugin<Digraph, RegularFile>
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 		if (p.contains("index"))
 			writeIndex = p.getBoolean("index");
 	}
 
-	protected abstract long[] write(Digraph g, OutputStream os) throws IOException;
+	protected abstract long[] write(Graph g, OutputStream os) throws IOException;
 }

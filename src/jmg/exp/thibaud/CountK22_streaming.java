@@ -3,9 +3,10 @@ package jmg.exp.thibaud;
 import java.io.IOException;
 import java.util.Iterator;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
-import jmg.Utils;
+import j4u.chain.PluginParms;
+import jmg.Graph;
+import jmg.JmgUtils;
+import jmg.VertexCursor;
 import jmg.chain.JMGPlugin;
 import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.JMGDirectory;
@@ -14,21 +15,21 @@ import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
+public class CountK22_streaming extends JMGPlugin<Graph, CountK22v2_Result>
 {
 
 	@Override
-	public CountK22v2_Result process(Digraph g)
+	public CountK22v2_Result process(Graph g)
 	{
 		return count(g);
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 	}
 
-	public CountK22v2_Result count(Digraph g)
+	public CountK22v2_Result count(Graph g)
 	{
 		if (g.jmgDirectory == null)
 		{
@@ -37,8 +38,8 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 			if (d.exists())
 				d.deleteRecursively();
 
-			g.out.ensureDefined(nbThreads);
-			g.in.ensureDefined(nbThreads);
+			g.out.ensureLoaded(nbThreads);
+			g.in.ensureLoaded(nbThreads);
 
 			try
 			{
@@ -52,7 +53,7 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 			g.setDataset(d);
 		}
 
-		g.in.ensureDefined(nbThreads);
+		g.in.ensureLoaded(nbThreads);
 
 		CountK22v2_Result globalResult = new CountK22v2_Result();
 
@@ -68,13 +69,13 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 			{
 				long _sum_fractionalNbK22pot = 0;
 				long _sum_twoTimesfractionalNbK22 = 0;
-				Iterator<ArcFileCursor> vertexIterator = g.out.disk.file.iterator(lowerBound,
+				Iterator<VertexCursor> vertexIterator = g.out.disk.iterator(lowerBound,
 						upperBound, 1000, 256 * 256 * 256);
 
 				while (vertexIterator.hasNext())
 				{
 					globalResult.nbVertices.incrementAndGet();
-					ArcFileCursor u = vertexIterator.next();
+					VertexCursor u = vertexIterator.next();
 
 					for (int v : u.adj)
 					{
@@ -82,19 +83,19 @@ public class CountK22_streaming extends JMGPlugin<Digraph, CountK22v2_Result>
 						{
 							if (v < w)
 							{
-								int nbCN = Utils.countElementsInCommon_dichotomic(
+								int nbCN = JmgUtils.countElementsInCommon_dichotomic(
 										g.in.mem.b[v], g.in.mem.b[w]);
 
 								int _twotimesfractionalNbK22 = (nbCN - 1);
 								int dv = g.in.mem.b[v].length;
 								int dw = g.in.mem.b[w].length;
 
-								if (Utils.contains(g.in.mem.b[w], v))
+								if (JmgUtils.contains(g.in.mem.b[w], v))
 								{
 									--dv;
 								}
 
-								if (Utils.contains(g.in.mem.b[v], w))
+								if (JmgUtils.contains(g.in.mem.b[v], w))
 								{
 									--dw;
 								}

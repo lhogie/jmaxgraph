@@ -1,16 +1,16 @@
 package jmg.chain;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.Direction;
 
-public class getadj implements TooolsPlugin<Digraph, Direction>
+public class getadj implements TooolsPlugin<Graph, Direction>
 {
 	public String type;
 
 	@Override
-	public Direction process(Digraph g)
+	public Direction process(Graph g)
 	{
 		if (type.equals("out"))
 		{
@@ -25,7 +25,7 @@ public class getadj implements TooolsPlugin<Digraph, Direction>
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 		this.type = p.get("type");
 	}

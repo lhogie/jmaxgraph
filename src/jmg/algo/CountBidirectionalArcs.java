@@ -2,8 +2,8 @@ package jmg.algo;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -11,10 +11,10 @@ import toools.thread.ParallelIntervalProcessing;
 
 public class CountBidirectionalArcs
 {
-	public static long count(Digraph g, int nbThreads)
+	public static long count(Graph g, int nbThreads)
 	{
 		LongProcess p = new LongProcess("count bidirectional arcs", " vertex",
-				g.getNbVertices());
+				g.getNbVertices(nbThreads));
 		AtomicLong count = new AtomicLong(0);
 		p.temporaryResult = count;
 
@@ -46,16 +46,16 @@ public class CountBidirectionalArcs
 		return count.get();
 	}
 
-	public static class Plugin extends JMGPlugin<Digraph, Long>
+	public static class Plugin extends JMGPlugin<Graph, Long>
 	{
 		@Override
-		public Long process(Digraph in)
+		public Long process(Graph in)
 		{
 			return count(in, nbThreads);
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
 		}
 

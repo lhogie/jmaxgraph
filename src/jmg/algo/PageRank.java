@@ -3,8 +3,8 @@ package jmg.algo;
 import java.util.List;
 import java.util.Random;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.chain.JMGPlugin;
 import toools.io.Cout;
 import toools.math.MathsUtilities;
@@ -13,28 +13,28 @@ import toools.thread.MultiThreadProcessing;
 
 public class PageRank
 {
-	public static class PG extends JMGPlugin<Digraph, int[]>
+	public static class PG extends JMGPlugin<Graph, int[]>
 	{
 		int walkLength, nbParallelWalks;
 
 		@Override
-		public int[] process(Digraph in)
+		public int[] process(Graph in)
 		{
 			return f(in, new Random(), walkLength, nbParallelWalks);
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
-			super.setup(p);
+			super.setParameters(p);
 			this.walkLength = p.getInt("wl");
 			this.nbParallelWalks = p.getInt("n");
 		}
 	}
 
-	public static int[] f(Digraph g, Random r, int walkLength, int nbThreads)
+	public static int[] f(Graph g, Random r, int walkLength, int nbThreads)
 	{
-		g.out.ensureDefined(nbThreads);
+		g.out.ensureLoaded(nbThreads);
 		int nbVertices = g.getNbVertices();
 		final int[] ranks = new int[nbVertices];
 		LongProcess lp = new LongProcess("page ranking", " iteration", walkLength);

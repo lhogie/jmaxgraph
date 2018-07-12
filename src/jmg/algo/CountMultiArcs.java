@@ -1,13 +1,13 @@
 package jmg.algo;
 
-import jmg.Digraph;
+import jmg.Graph;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
 public class CountMultiArcs
 {
-	public static long count(Digraph g, int nbThreads)
+	public static long count(Graph g, int nbThreads)
 	{
 		long[] count = new long[1];
 		LongProcess p = new LongProcess("count loops", " elements", g.getNbVertices());

@@ -2,9 +2,9 @@ package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
-import jmg.Utils;
+import j4u.chain.PluginParms;
+import jmg.Graph;
+import jmg.JmgUtils;
 import jmg.algo.Degrees;
 import jmg.chain.JMGPlugin;
 import toools.io.Cout;
@@ -12,24 +12,24 @@ import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
+public class CountK22 extends JMGPlugin<Graph, CountK22_Result>
 {
 
 	@Override
-	public CountK22_Result process(Digraph g)
+	public CountK22_Result process(Graph g)
 	{
 		return count(g);
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 	}
 
-	public CountK22_Result count(Digraph g)
+	public CountK22_Result count(Graph g)
 	{
-		g.out.ensureDefined(nbThreads);
-		g.in.ensureDefined(nbThreads);
+		g.out.ensureLoaded(nbThreads);
+		g.in.ensureLoaded(nbThreads);
 
 		CountK22_Result r = new CountK22_Result();
 		int maxDegree = Degrees.maxDegree(g.out.mem.b);
@@ -61,7 +61,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 							if (u < w && ! alreadyDone.contains(w))
 							{
 								alreadyDone.add(w);
-								int nbCN = Utils.countElementsInCommon_dichotomic(
+								int nbCN = JmgUtils.countElementsInCommon_dichotomic(
 										g.out.mem.b[u], g.out.mem.b[w]);
 
 								++_distri[nbCN];

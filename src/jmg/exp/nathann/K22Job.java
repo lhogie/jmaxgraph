@@ -1,13 +1,13 @@
 package jmg.exp.nathann;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.io.jmg.JMGDirectory;
 import jmr.Job;
 
 public class K22Job extends Job<CountK22WorkerOutput>
 {
 	static final long serialVersionUID = 876543;
-	static Digraph g;
+	static Graph g;
 
 	String jmgDirectoryPath;
 	int startVertex, endVertex;
@@ -45,6 +45,7 @@ public class K22Job extends Job<CountK22WorkerOutput>
 	public String toString()
 	{
 		String s = super.toString();
+		s += "\n vertices from " +  startVertex + " to " +  endVertex;
 		s += "\n - nbThreads=" + nbThreads;
 		return s;
 	}

@@ -4,16 +4,19 @@ import java.io.IOException;
 import java.util.Properties;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.Vertex2LabelMap;
+import jmg.exp.nathann.JSONMap;
+import jmg.exp.nathann.JSONable;
 import toools.io.IORuntimeException;
 import toools.io.file.Directory;
 import toools.io.file.RegularFile;
 import toools.io.file.nbs.NBSFile;
+import toools.io.serialization.JavaSerializer;
 import toools.text.TextUtilities;
 import toools.util.Conversion;
 
-public class JMGDirectory extends Directory
+public class JMGDirectory extends Directory implements JSONable
 {
 	static
 	{
@@ -96,14 +99,14 @@ public class JMGDirectory extends Directory
 		return properties;
 	}
 
-	public Digraph mapGraph(int nbThreads, boolean useLabels)
+	public Graph mapGraph(int nbThreads, boolean useLabels)
 	{
 		if ( ! exists())
 			throw new IllegalStateException(getPath() + " does not exist");
 
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.setDataset(this);
-		g.nbVertices = getNbVertex();
+		g.nbVerticesCache.set(getNbVertex());
 
 		if (useLabels && label2vertexFile.exists())
 		{
@@ -120,4 +123,37 @@ public class JMGDirectory extends Directory
 
 		return g;
 	}
+
+	@Override
+	public JSONMap toJSONElement()
+	{
+		JSONMap m = new JSONMap();
+
+		for (RegularFile f : getChildRegularFiles())
+		{
+			if (f.getName().endsWith(".json"))
+			{
+				m.add(f.getName(), new String(f.getContent()));
+			}
+			else if (f.getName().endsWith(".ser"))
+			{
+				Object o = JavaSerializer.getDefaultSerializer()
+						.fromBytes(f.getContent());
+
+				if (o instanceof JSONable)
+				{
+					m.add(f.getName(), ((JSONable) o).toJSONElement());
+				}
+			}
+		}
+
+		return m;
+	}
+
+	public void createSummaryJSONFile()
+	{
+		RegularFile f = new RegularFile(this, "summary.json");
+		f.setContent(toJSONElement().toString().getBytes());
+	}
+
 }

@@ -1,21 +1,21 @@
 package jmg.chain;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.gen.CompleteGraph;
 
-public class complete_graph extends JMGPlugin<Void, Digraph>
+public class complete_graph extends JMGPlugin<Void, Graph>
 {
 	int nbVertices;
 
 	@Override
-	public Digraph process(Void in)
+	public Graph process(Void in)
 	{
 		return CompleteGraph.doit(nbVertices, nbThreads);
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 		this.nbVertices = p.getInt("n");
 	}

@@ -2,14 +2,14 @@ package jmg.demo;
 
 import java.util.Random;
 
-import jmg.Digraph;
+import jmg.Graph;
 import toools.progression.LongProcess;
 
 public class CreateDigraphProgrammatically
 {
 	public static void main(String[] args)
 	{
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.out.mem.b = new int[100][];
 		g.out.mem.b = new int[1][];
 		g.out.mem.b[0] = new int[0];

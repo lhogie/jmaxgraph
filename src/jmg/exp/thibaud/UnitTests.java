@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.io.TinyReader;
 import toools.io.Cout;
 import toools.text.TextUtilities;
@@ -20,8 +20,8 @@ public class UnitTests
 		TinyReader.Text t = new TinyReader.Text();
 		t.addLine(0, 2, 3, 4, 5);
 		t.addLine(1, 3, 4, 5, 6, 7);
-		Digraph g = t.toGraph();
-		g.in.ensureDefined(8);
+		Graph g = t.toGraph();
+		g.in.ensureLoaded(8);
 
 		CountK22_Result r = new CountK22().count(g);
 		assertEquals(3, r.nbK22);
@@ -35,7 +35,7 @@ public class UnitTests
 		TinyReader.Text t = new TinyReader.Text();
 		t.addLine(0, 2, 3);
 		t.addLine(1, 2, 3);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountK22_Result r = new CountK22().count(g);
 		assertEquals(1, r.nbK22);
@@ -49,7 +49,7 @@ public class UnitTests
 		t.addLine(0, 3, 4, 5, 6);
 		t.addLine(1, 4, 5, 6);
 		t.addLine(2, 4, 5, 6, 7, 8);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountK22_Result r = new CountK22().count(g);
 		assertEquals(9, r.nbK22);
@@ -63,7 +63,7 @@ public class UnitTests
 		t.addLine(0, 1, 2);
 		t.addLine(1, 0, 2);
 		t.addLine(2, 0, 1);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountTriangles_Result r = CountTriangles.count(g, 1);
 		assertEquals(6, r.nbTransitiveTriangles);
@@ -79,7 +79,7 @@ public class UnitTests
 		t.addLine(0, 1, 2);
 		t.addLine(1, 0, 2);
 		t.addLine(2, 0, 1, 3);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountTriangles_Result r = CountTriangles.count(g, 1);
 		assertEquals(6, r.nbTransitiveTriangles);
@@ -95,7 +95,7 @@ public class UnitTests
 		t.addLine(0, 1);
 		t.addLine(1, 2);
 		t.addLine(2, 0);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountTriangles_Result r = CountTriangles.count(g, 1);
 		assertEquals(0, r.nbTransitiveTriangles);
@@ -110,7 +110,7 @@ public class UnitTests
 		TinyReader.Text t = new TinyReader.Text();
 		t.addLine(0, 2, 3);
 		t.addLine(1, 2, 3, 0);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountTriangles_Result r = CountTriangles.count(g, 1);
 		assertEquals(2, r.nbTransitiveTriangles);
@@ -125,7 +125,7 @@ public class UnitTests
 		TinyReader.Text t = new TinyReader.Text();
 		t.addLine(0, 2, 3, 4, 5);
 		t.addLine(1, 3, 4, 5, 6, 7, 0);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountTriangles_Result r = CountTriangles.count(g, 1);
 		assertEquals(3, r.nbTransitiveTriangles);
@@ -140,7 +140,7 @@ public class UnitTests
 		TinyReader.Text t = new TinyReader.Text();
 		t.addLine(0, 2, 3);
 		t.addLine(1, 2, 3);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		CountTriangles_Undirected_Result r = Count_Triangles_Undirected.count(g, 1);
 		assertEquals(0, r.nbTriangles);
@@ -155,7 +155,7 @@ public class UnitTests
 		t.addLine(0, 1);
 		t.addLine(1, 2);
 		t.addLine(2, 0, 3);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 		CountTriangles_Undirected_Result r = Count_Triangles_Undirected.count(g, 1);
 		Cout.debug(TextUtilities.box(r.toString()));
 		assertEquals(1, r.nbTriangles);

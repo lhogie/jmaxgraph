@@ -1,16 +1,16 @@
 package jmg.exp.nathann;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmr.FSMapReduce;
 import jmr.Job;
 import jmr.Problem;
 
 public class CountingCyclicTrianglesProblem extends Problem
 {
-	private final Digraph g;
+	private final Graph g;
 	private final int nbThreads;
 
-	public CountingCyclicTrianglesProblem(Digraph g, int nbThreads)
+	public CountingCyclicTrianglesProblem(Graph g, int nbThreads)
 	{
 		this.g = g;
 		this.nbThreads = nbThreads;

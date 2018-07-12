@@ -1,13 +1,13 @@
 package jmg.exp.nathann;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.chain.JMGPlugin;
 
-public class plugin extends JMGPlugin<Digraph, GlobalCount>
+public class plugin extends JMGPlugin<Graph, GlobalCount>
 {
 
 	@Override
-	public GlobalCount process(Digraph g)
+	public GlobalCount process(Graph g)
 	{
 		return new GlobalCount(
 				K22AndTransitiveTrianglesCounter.count(g, 0, g.getNbVertices(), nbThreads));

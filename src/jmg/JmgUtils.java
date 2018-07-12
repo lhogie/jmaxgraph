@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntCollection;
@@ -14,20 +15,21 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import toools.collection.LazyArray;
+import toools.collections.primitive.IntCursor;
 import toools.io.Cout;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class Utils
+public class JmgUtils
 {
 
 	// vertex labels.get(u) will be renamed u
 	public static int[][] relabel(int[][] in, IntList labels, int nbThreads)
 	{
 		int[] labels2 = new int[in.length];
-		Arrays.fill(labels2, -1);
+		Arrays.fill(labels2, - 1);
 
 		int[][] out = new int[labels.size()][];
 
@@ -37,7 +39,7 @@ public class Utils
 			out[u] = in[labels.getInt(u)];
 		}
 
-		Utils.relabel(out, labels2, nbThreads);
+		JmgUtils.relabel(out, labels2, nbThreads);
 		return out;
 	}
 
@@ -130,7 +132,7 @@ public class Utils
 
 	public static void addUndeclaredVertices(Int2ObjectMap<int[]> adj)
 	{
-		IntSet undeclaredVertices = Utils.findUndeclaredVertices(adj);
+		IntSet undeclaredVertices = JmgUtils.findUndeclaredVertices(adj);
 		LongProcess adding = new LongProcess(
 				"adding " + undeclaredVertices.size() + " vertices with no neighbors",
 				" vertex", undeclaredVertices.size());
@@ -139,7 +141,7 @@ public class Utils
 		while (i.hasNext())
 		{
 			int v = i.nextInt();
-			adj.put(v, Utils.emptyArray);
+			adj.put(v, JmgUtils.emptyArray);
 			adding.sensor.progressStatus++;
 		}
 
@@ -149,7 +151,7 @@ public class Utils
 	public static int[][] union(int[][] a, int[][] b, boolean prune, int nbThreads)
 	{
 		int[][] r = new int[a.length][];
-		
+
 		int nbVertex = a.length;
 		LongProcess computing = new LongProcess("merging ADJ lists", " adjlist",
 				nbVertex);
@@ -161,7 +163,7 @@ public class Utils
 			{
 				for (int u = lowerBound; u < upperBound; ++u)
 				{
-					r[u] = Utils.union(a[u], b[u]);
+					r[u] = JmgUtils.union(a[u], b[u]);
 
 					if (prune)
 					{
@@ -361,7 +363,7 @@ public class Utils
 
 			if (ri != R.length)
 				throw new IllegalStateException(ri + " " + R.length);
-			
+
 			return R;
 		}
 		catch (java.lang.ArrayIndexOutOfBoundsException e)
@@ -536,5 +538,57 @@ public class Utils
 		};
 
 		relabelling.end();
+	}
+
+	public static void not(boolean[] notIsolated)
+	{
+		for (int i = 0; i < notIsolated.length; ++i)
+		{
+			notIsolated[i] = ! notIsolated[i];
+		}
+	}
+
+	public static IntSet toSet(boolean[] b)
+	{
+		int sz = nbTrues(b);
+		IntSet s = new IntOpenHashSet(sz);
+
+		for (int i = 0; i < b.length; ++i)
+		{
+			if (b[i])
+			{
+				s.add(i);
+			}
+		}
+
+		return s;
+	}
+
+	private static int nbTrues(boolean[] b)
+	{
+		int n = 0;
+
+		for (int i = 0; i < b.length; ++i)
+		{
+			if (b[i])
+			{
+				++n;
+			}
+		}
+
+		return n;
+	}
+
+	public static boolean[] toBooleanArray(IntList l)
+	{
+		BooleanArrayList r = new BooleanArrayList();
+
+		for (IntCursor c : IntCursor.fromFastUtil(l))
+		{
+			r.ensureCapacity(c.value);
+			r.set(c.value, true);
+		}
+
+		return r.toBooleanArray();
 	}
 }

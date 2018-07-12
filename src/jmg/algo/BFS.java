@@ -5,9 +5,9 @@ import java.util.Arrays;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntList;
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.Direction;
 import jmg.gen.GridGenerator;
 import toools.io.Cout;
@@ -107,7 +107,7 @@ public class BFS
 
 	public static void main(String[] args)
 	{
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.out.mem.b = GridGenerator.dgrid_outs(10000, 100, true, true, false, false, 1);
 		int[] distances = bsp_seq(g.out.mem.b, 0);
 		// FastUtils.printAsMap(distances, " has distance ", System.out);
@@ -128,7 +128,7 @@ public class BFS
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
 			src = p.getInt("src");
 		}

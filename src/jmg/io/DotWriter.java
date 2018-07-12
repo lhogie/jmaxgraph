@@ -3,17 +3,17 @@ package jmg.io;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
+import jmg.Graph;
 import toools.io.file.RegularFile;
 
-public class DotWriter implements TooolsPlugin<Digraph, RegularFile>
+public class DotWriter implements TooolsPlugin<Graph, RegularFile>
 {
 	public RegularFile to;
 
 	@Override
-	public RegularFile process(Digraph g)
+	public RegularFile process(Graph g)
 	{
 
 		to.setContent(toString().getBytes());
@@ -45,7 +45,7 @@ public class DotWriter implements TooolsPlugin<Digraph, RegularFile>
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 	}
 

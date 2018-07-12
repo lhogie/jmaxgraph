@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import jmg.Digraph;
+import jmg.Graph;
 import toools.io.BinaryReader;
 import toools.io.Cout;
 import toools.io.DataBinaryEncoding;
@@ -18,13 +18,13 @@ import toools.util.Conversion;
 
 public class BigGrphReader
 {
-	public static Digraph load(List<RegularFile> files) throws IOException
+	public static Graph load(List<RegularFile> files) throws IOException
 	{
 		int[] nbEntries = countEntries(files);
 		int totalNbEntry = Conversion.long2int(MathsUtilities.sum(nbEntries));
 		Cout.result("total number of vertices in " + files.size() + " files: "
 				+ totalNbEntry);
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.out.mem.b = new int[totalNbEntry][];
 		int[] label2vertex = new int[totalNbEntry];
 		Arrays.fill(label2vertex, - 2);
@@ -58,7 +58,7 @@ public class BigGrphReader
 		return g;
 	}
 
-	private static void loadBigrphFile(RegularFile f, Digraph g, int offset,
+	private static void loadBigrphFile(RegularFile f, Graph g, int offset,
 			int[] label2vertex, LongProcess pm) throws IOException
 	{
 		Cout.progress("loading file " + f);

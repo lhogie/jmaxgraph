@@ -3,12 +3,13 @@ package jmg.exp.nathann;
 import java.io.IOException;
 import java.util.Iterator;
 
-import jmg.Digraph;
-import jmg.io.jmg.ArcFileParallelProcessor;
-import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
+import jmg.Graph;
+import jmg.ParallelAdjProcessing;
+import jmg.VertexCursor;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.Cout;
 import toools.io.IORuntimeException;
+import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 
@@ -17,7 +18,30 @@ public class K22AndTransitiveTrianglesCounter
 	static long[][] inDegreeInduced;
 	static boolean[][] preceedsX;
 
-	public static synchronized LocalCount count(Digraph g, int startVertex, int endVertex,
+	public static synchronized LocalCount writeCountFile(Graph g, int startVertex,
+			int endVertex, int nbThreads)
+	{
+		RegularFile serFile = new RegularFile(g.jmgDirectory,
+				"k22_and_transitive_triangles.ser");
+		RegularFile jsonFile = new RegularFile(g.jmgDirectory,
+				"k22_and_transitive_triangles.json");
+
+		if (jsonFile.exists())
+		{
+			return null;
+		}
+		else
+		{
+			LocalCount r = count(g, startVertex, endVertex, nbThreads);
+			// serFile.setContent(JavaSerializer.getDefaultSerializer().toBytes(r));
+
+			jsonFile.setContent(r.toJSONElement().toString(0, true).getBytes());
+			return r;
+		}
+
+	}
+
+	public static synchronized LocalCount count(Graph g, int startVertex, int endVertex,
 			int nbThreads)
 	{
 		if (g.jmgDirectory == null)
@@ -27,8 +51,8 @@ public class K22AndTransitiveTrianglesCounter
 			if (d.exists())
 				d.deleteRecursively();
 
-			g.out.ensureDefined(nbThreads);
-			g.in.ensureDefined(nbThreads);
+			g.out.ensureLoaded(nbThreads);
+			g.in.ensureLoaded(nbThreads);
 
 			try
 			{
@@ -42,12 +66,10 @@ public class K22AndTransitiveTrianglesCounter
 			g.setDataset(d);
 		}
 
-		g.out.ensureDefined(8);
+		g.out.ensureLoaded(8);
 
 		int range = endVertex - startVertex;
-		LocalCount r = new LocalCount();
-		r.startVertex = startVertex;
-		r.endVertex = endVertex;
+		LocalCount r = new LocalCount(startVertex, endVertex);
 
 		if (inDegreeInduced == null || inDegreeInduced.length != nbThreads
 				|| inDegreeInduced[0].length != g.getNbVertices())
@@ -73,14 +95,14 @@ public class K22AndTransitiveTrianglesCounter
 				+ startVertex + " to " + endVertex, " vertex", range);
 		lp.temporaryResult = r;
 
-		if (g.in.disk.file == null)
+		if ( ! g.in.disk.isDefined())
 			throw new IllegalStateException();
 
-		new ArcFileParallelProcessor(g.in.disk.file, startVertex, endVertex, 0, nbThreads,
-				lp)
+		new ParallelAdjProcessing(g.in.disk, nbThreads, lp)
 		{
+
 			@Override
-			protected void process(ThreadSpecifics s, Iterator<ArcFileCursor> iterator)
+			public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
 			{
 				long nbTransitiveTriangles = 0;
 				long nbTtransitiveTrianglesPot = 0;
@@ -96,7 +118,7 @@ public class K22AndTransitiveTrianglesCounter
 				{
 					++s.progressStatus;
 					++nbVerticesComputedSinceLastReport;
-					ArcFileCursor x = iterator.next();
+					VertexCursor x = iterator.next();
 
 					r.nbK22sPerVertex_times2[x.vertex - startVertex] = 0;
 
@@ -193,6 +215,7 @@ public class K22AndTransitiveTrianglesCounter
 		};
 
 		lp.end();
+
 		return r;
 	}
 }

@@ -1,16 +1,19 @@
 package jmg.algo;
 
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
-import jmg.Utils;
+import jmg.Adjacency;
+import jmg.Graph;
+import jmg.JmgUtils;
+import jmg.VertexCursor;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
+public class ReverseGraph implements TooolsPlugin<Graph, Graph>
 {
 	static class TimeWasted
 	{
@@ -22,11 +25,11 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		}
 	}
 
-	public static int[][] computeInverseADJ(int[][] adj, boolean freeMemOnTheFly)
+	public static int[][] opposite(Adjacency opposite, boolean freeMemOnTheFly)
 	{
-		int[] invDegree = computeReverseDegrees(adj);
+		int nbVertex = opposite.getNbVertices(1);
+		int[] invDegree = computeReverseDegrees(nbVertex, opposite);
 		int[][] r = new int[invDegree.length][];
-		int nbVertex = adj.length;
 		int[] pos = new int[nbVertex];
 		LongProcess computing = new LongProcess(
 				"computing inverse adjacencies, freeing memory=" + freeMemOnTheFly,
@@ -35,9 +38,9 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		TimeWasted timeWastedInAllocations = new TimeWasted();
 		computing.temporaryResult = timeWastedInAllocations;
 
-		for (int v = 0; v < nbVertex; ++v)
+		for (VertexCursor c : opposite)
 		{
-			for (int neighbor : adj[v])
+			for (int neighbor : c.adj)
 			{
 				int[] invAdjList = r[neighbor];
 
@@ -48,12 +51,12 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 					timeWastedInAllocations.allocating += System.currentTimeMillis() - a;
 				}
 
-				invAdjList[pos[neighbor]++] = v;
+				invAdjList[pos[neighbor]++] = c.vertex;
 			}
 
 			if (freeMemOnTheFly)
 			{
-				adj[v] = null;
+				c.adj = null;
 			}
 
 			++computing.sensor.progressStatus;
@@ -64,7 +67,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		{
 			if (r[u] == null)
 			{
-				r[u] = Utils.emptyArray;
+				r[u] = JmgUtils.emptyArray;
 			}
 		}
 
@@ -72,14 +75,12 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		return r;
 	}
 
-	public static int[][] computeInverseADJ_par(int[][] adj, boolean pruneSrc,
+	public static int[][] computeInverseADJ_par(Adjacency opposite, boolean pruneSrc,
 			int nbThreads)
 	{
-		int[] degrees = computeReverseDegrees(adj);
+		int nbVertex = opposite.getNbVertices(nbThreads);
+		int[] degrees = computeReverseDegrees(nbVertex, opposite);
 		int[][] r = allocates(degrees, nbThreads);
-
-		int nbVertex = adj.length;
-
 		int[] pos = new int[nbVertex];
 
 		LongProcess computing = new LongProcess("computing inverse adjacencies",
@@ -90,17 +91,21 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 			@Override
 			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
 			{
-				for (int u = lowerBound; u < upperBound; ++u)
+				Iterator<VertexCursor> i = opposite.iterator(lowerBound, upperBound);
+
+				while (i.hasNext())
 				{
-					for (int v : adj[u])
+					VertexCursor c = i.next();
+
+					for (int v : c.adj)
 					{
 						int[] vAdj = r[v];
-						vAdj[pos[v]++] = u;
+						vAdj[pos[v]++] = c.vertex;
 					}
 
 					if (pruneSrc)
 					{
-						adj[u] = null;
+						c.adj = null;
 					}
 
 					++s.progressStatus;
@@ -113,7 +118,7 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		{
 			if (r[u] == null)
 			{
-				r[u] = Utils.emptyArray;
+				r[u] = JmgUtils.emptyArray;
 			}
 		}
 
@@ -168,15 +173,15 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 		return r;
 	}
 
-	public static int[] computeReverseDegrees(int[][] adj)
+	public static int[] computeReverseDegrees(int nbVertices, Iterable<VertexCursor> adj)
 	{
-		LongProcess compute = new LongProcess("computeReverseDegrees", " vertex", adj.length);
-		int nbVertices = adj.length;
+		LongProcess compute = new LongProcess("computeReverseDegrees", " vertex",
+				nbVertices);
 		int[] degree = new int[nbVertices];
 
-		for (int u = 0; u < nbVertices; ++u)
+		for (VertexCursor c : adj)
 		{
-			for (int v : adj[u])
+			for (int v : c.adj)
 			{
 				++degree[v];
 			}
@@ -189,14 +194,14 @@ public class ReverseGraph implements TooolsPlugin<Digraph, Digraph>
 	}
 
 	@Override
-	public Digraph process(Digraph g)
+	public Graph process(Graph g)
 	{
 		g.reverse();
 		return g;
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 	}
 

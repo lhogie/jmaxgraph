@@ -2,8 +2,8 @@ package jmg.chain;
 
 import j4u.CommandLine;
 import j4u.License;
-import j4u.chain.Run;
 import j4u.chain.PluginFactory;
+import j4u.chain.Run;
 import toools.SystemMonitor;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
@@ -79,6 +79,6 @@ public class run extends Run
 	@Override
 	protected PluginFactory getPluginFactory()
 	{
-		return new JMGPlugins();
+		return new JMGPluginFactory();
 	}
 }

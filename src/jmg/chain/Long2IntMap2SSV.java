@@ -1,7 +1,7 @@
 package jmg.chain;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
 
 public class Long2IntMap2SSV implements TooolsPlugin<Long2IntMap, String>
@@ -24,10 +24,8 @@ public class Long2IntMap2SSV implements TooolsPlugin<Long2IntMap, String>
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
-		// TODO Auto-generated method stub
-
 	}
 
 }

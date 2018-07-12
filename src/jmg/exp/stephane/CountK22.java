@@ -3,9 +3,9 @@ package jmg.exp.stephane;
 import java.io.IOException;
 import java.util.Random;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
-import jmg.Utils;
+import j4u.chain.PluginParms;
+import jmg.Graph;
+import jmg.JmgUtils;
 import jmg.chain.JMGPlugin;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.Cout;
@@ -14,27 +14,27 @@ import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
+public class CountK22 extends JMGPlugin<Graph, CountK22_Result>
 {
 	long printEach;
 	long maxIteration;
 
 	@Override
-	public CountK22_Result process(Digraph g)
+	public CountK22_Result process(Graph g)
 	{
 		return count(g, - 1);
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 		printEach = p.getLong("printEach", 1);
 		maxIteration = p.getLong("maxIteration", - 1);
 	}
 
-	public CountK22_Result count(Digraph g, int stopIteration)
+	public CountK22_Result count(Graph g, int stopIteration)
 	{
-		g.in.ensureDefined(nbThreads);
+		g.in.ensureLoaded(nbThreads);
 
 		int nbVertices = g.getNbVertices();
 
@@ -106,7 +106,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 
 		g.in.mem.b = null;
 		System.gc();
-		g.out.ensureDefined(nbThreads);
+		g.out.ensureLoaded(nbThreads);
 
 
 		LongProcess l = new LongProcess("tracking K2,2 by Stephane", " couple",
@@ -122,7 +122,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 			int[] adjV1 = g.out.mem.b[v1];
 			int[] adjV2 = g.out.mem.b[v2];
 
-			int nbCommonNeighbors = Utils.countElementsInCommon_dichotomic(adjV1, adjV2)
+			int nbCommonNeighbors = JmgUtils.countElementsInCommon_dichotomic(adjV1, adjV2)
 					- 1;
 
 			long nbPotentialK22 = adjV1.length + adjV2.length - 2;
@@ -149,7 +149,7 @@ public class CountK22 extends JMGPlugin<Digraph, CountK22_Result>
 	public static void main(String[] args) throws IOException
 	{
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Digraph g = d.mapGraph(8, false);
+		Graph g = d.mapGraph(8, false);
 		int maxIteration = Integer.valueOf(args[1]);
 		new CountK22().count(g, maxIteration);
 		Cout.info("completed");

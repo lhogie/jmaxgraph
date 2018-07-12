@@ -3,9 +3,9 @@ package jmg.gen;
 import java.io.IOException;
 import java.util.Arrays;
 
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
-import jmg.Utils;
+import j4u.chain.PluginParms;
+import jmg.Graph;
+import jmg.JmgUtils;
 import jmg.chain.JMGPlugin;
 import jmg.io.DotWriter;
 import toools.exceptions.NotYetImplementedException;
@@ -14,7 +14,7 @@ import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class GridGenerator extends JMGPlugin<Void, Digraph>
+public class GridGenerator extends JMGPlugin<Void, Graph>
 {
 
 	public int nbColumns;
@@ -25,9 +25,9 @@ public class GridGenerator extends JMGPlugin<Void, Digraph>
 	public boolean tore = false;
 
 	@Override
-	public Digraph process(Void v)
+	public Graph process(Void v)
 	{
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.out.mem.b = dgrid_outs(nbRows, nbColumns, horizontal, vertical, diags, tore,
 				nbThreads);
 		g.properties.put("number of columns", nbColumns);
@@ -104,22 +104,21 @@ public class GridGenerator extends JMGPlugin<Void, Digraph>
 		};
 
 		lp.end();
-		Utils.ensureSorted(adj, nbThreads);
+		JmgUtils.ensureSorted(adj, nbThreads);
 		return adj;
 	}
 
 	public static void main(String[] args) throws IOException
 	{
 		int[][] adj = GridGenerator.dgrid_outs(3, 30, true, true, true, false, 1);
-		Digraph g = new Digraph();
+		Graph g = new Graph();
 		g.out.mem.b = adj;
-		g.nbVertices = g.out.mem.b.length;
 		g.symmetrize(8);
 		Cout.debug(DotWriter.toString(g.in.mem.b));
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 		nbColumns = p.getInt("cols");
 		nbRows = p.getInt("rows");

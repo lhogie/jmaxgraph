@@ -1,34 +1,31 @@
 package jmg;
 
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.function.IntPredicate;
+import java.util.concurrent.ThreadLocalRandom;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import jmg.algo.Degrees;
-import toools.math.MathsUtilities;
+import jmg.algo.ReverseGraph;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 
-public class InMemoryAdj extends Adjacency
+public class MatrixAdj extends Adjacency
 {
 	public int[][] b;
 
-	// may be null
-	public int[] degrees;
-
-	public InMemoryAdj()
+	public MatrixAdj()
 	{
 
 	}
 
-	public InMemoryAdj(int[][] b)
+	public MatrixAdj(int[][] b)
 	{
 		this.b = b;
 	}
@@ -41,7 +38,7 @@ public class InMemoryAdj extends Adjacency
 
 	public void ensureSorted(int nbThreads)
 	{
-		Utils.ensureSorted(b, nbThreads);
+		JmgUtils.ensureSorted(b, nbThreads);
 	}
 
 	public void from(Int2ObjectMap<int[]> adj, boolean addUndeclared, boolean sort,
@@ -49,7 +46,7 @@ public class InMemoryAdj extends Adjacency
 	{
 		if (addUndeclared)
 		{
-			Utils.addUndeclaredVertices(adj);
+			JmgUtils.addUndeclaredVertices(adj);
 		}
 
 		if (labelling != null)
@@ -114,33 +111,17 @@ public class InMemoryAdj extends Adjacency
 		}
 	}
 
-	public IntSet search(IntPredicate p)
-	{
-		IntSet r = new IntOpenHashSet();
 
-		for (int u = 0; u < b.length; ++u)
-		{
-			if (p.test(u))
-			{
-				r.add(u);
-			}
-		}
-
-		return r;
-	}
 
 	@Override
-	public int[] degrees(int nbThreads)
+	public int[] computeDegrees(int nbThreads)
 	{
-		if (b == null)
-			throw new JMGException("no ADJ defined");
-
 		return Degrees.computeDegrees(b, nbThreads);
 	}
 
 	public boolean isIsolated(int u)
 	{
-		return b[u].length > 0 && isReferencedInLists(u);
+		return b[u].length == 0 && ! isReferencedInLists(u);
 	}
 
 	public boolean isReferencedInLists(int u)
@@ -173,55 +154,15 @@ public class InMemoryAdj extends Adjacency
 		return found.value;
 	}
 
-	@Override
-	public IntSet findIsolatedVertices(int expectedNb, int nbThreads)
-	{
-		class A
-		{
-			boolean[] found = new boolean[b.length];
-		}
-
-		A found = new A();
-
-		new ParallelIntervalProcessing(b.length, nbThreads, null)
-		{
-			@Override
-			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
-					throws Throwable
-			{
-				for (int u = lowerBound; u < upperBound; ++u)
-				{
-					for (int v : b[u])
-					{
-						found.found[v] = true;
-					}
-				}
-			}
-		};
-
-		IntSet r = new IntOpenHashSet();
-
-		for (int u = 0; u < found.found.length; ++u)
-		{
-			if ( ! found.found[u] && b[u].length == 0)
-			{
-				r.add(u);
-			}
-		}
-
-		return r;
-	}
-
 	public void removeVertices(IntSet vertexSet, int nbThreads)
 	{
 		IntList labels = findLabels(vertexSet);
-		// Cout.debug("labels: ", labels);
-		this.b = Utils.relabel(b, labels, nbThreads);
+		this.b = JmgUtils.relabel(b, labels, nbThreads);
 	}
 
-	private IntList findLabels(IntSet vertexSet)
+	private IntList findLabels(IntSet excludedVertices)
 	{
-		int[] verticesToRemove = vertexSet.toIntArray();
+		int[] verticesToRemove = excludedVertices.toIntArray();
 
 		for (int u : verticesToRemove)
 			if (b[u].length > 0)
@@ -230,19 +171,19 @@ public class InMemoryAdj extends Adjacency
 
 		IntArrays.quickSort(verticesToRemove);
 
-		IntList labels = new IntArrayList();
+		IntList labels = new IntArrayList(b.length - excludedVertices.size());
 		int i = 0;
 
 		for (int u = 0; u < b.length; ++u)
 		{
 			// if u needs to stay
-			if (i < verticesToRemove.length && u != verticesToRemove[i])
+			if (i < verticesToRemove.length && u == verticesToRemove[i])
 			{
-				labels.add(u);
+				++i;
 			}
 			else
 			{
-				++i;
+				labels.add(u);
 			}
 		}
 
@@ -258,27 +199,27 @@ public class InMemoryAdj extends Adjacency
 	@Override
 	public long countArcs(int nbThreads)
 	{
-		if (nbArcs != - 1)
-			return nbArcs;
-
-		if (degrees != null)
-			return MathsUtilities.sum(degrees);
-
-		return Utils.countArcs(b, nbThreads);
+		return JmgUtils.countArcs(b, nbThreads);
 	}
 
 	@Override
-	public Iterator<VertexCursor> iterator()
+	public int countVertices(int nbThreads)
+	{
+		return b.length;
+	}
+
+	@Override
+	public Iterator<VertexCursor> iterator(int from, int to)
 	{
 		return new Iterator<VertexCursor>()
 		{
-			int i = 0;
+			int i = from;
 			final VertexCursor c = new VertexCursor();
 
 			@Override
 			public boolean hasNext()
 			{
-				return i < b.length;
+				return i < to;
 			}
 
 			@Override
@@ -290,6 +231,89 @@ public class InMemoryAdj extends Adjacency
 				return c;
 			}
 		};
+	}
+
+
+	@Override
+	public void setAllFrom(Adjacency adj, int nbThreads)
+	{
+		LongProcess lp = new LongProcess("from()", " vertex",
+				adj.getNbVertices(nbThreads));
+
+		new ParallelAdjProcessing(adj, nbThreads, lp)
+		{
+			@Override
+			public void f(ThreadSpecifics s, Iterator<VertexCursor> i)
+			{
+				while (i.hasNext())
+				{
+					VertexCursor c = i.next();
+					b[c.vertex] = c.adj;
+				}
+			}
+		};
+	}
+
+	public void fill(Adjacency src, double p, long seed, int nbThreads)
+	{
+		LongProcess lp = new LongProcess("from()", " vertex",
+				src.getNbVertices(nbThreads));
+
+		int nbVertex = src.countVertices(nbThreads);
+		b = new int[nbVertex][];
+
+		if (p == 0)
+		{
+			Arrays.fill(b, IntArrays.EMPTY_ARRAY);
+		}
+		else
+		{
+			new ParallelAdjProcessing(src, nbThreads, lp)
+			{
+				@Override
+				public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
+				{
+					ThreadLocalRandom prng = ThreadLocalRandom.current();
+
+					while (iterator.hasNext())
+					{
+						VertexCursor c = iterator.next();
+
+						// if no sampling
+						if (p == 1)
+						{
+							b[c.vertex] = c.adj;
+						}
+						else
+						{
+							int nbRetained = 0;
+
+							for (int v : c.adj)
+							{
+								if (prng.nextDouble() < p)
+								{
+									c.adj[nbRetained++] = v;
+								}
+							}
+
+							// if none is retained
+							if (nbRetained == 0)
+							{
+								b[c.vertex] = IntArrays.EMPTY_ARRAY;
+							}
+							else
+							{
+								b[c.vertex] = IntArrays.copy(c.adj, 0, nbRetained);
+							}
+						}
+
+						s.progressStatus++;
+					}
+				}
+			};
+		}
+
+		lp.end();
 	}
 
 }

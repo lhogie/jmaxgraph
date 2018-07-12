@@ -2,7 +2,7 @@ package jmg.io;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.Labelling;
 
 public class TinyReader
@@ -27,14 +27,13 @@ public class TinyReader
 			return b.toString();
 		}
 
-		public Digraph toGraph()
+		public Graph toGraph()
 		{
-			Digraph g = new Digraph();
+			Graph g = new Graph();
 			g.labelling = new Labelling();
 
 			Int2ObjectMap<int[]> adj = TinyReader.parse(toString());
 			g.out.mem.from(adj, true, true, g.labelling, 1);
-			g.nbVertices = g.out.mem.b.length;
 			return g;
 		}
 	}

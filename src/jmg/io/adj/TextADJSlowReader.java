@@ -23,7 +23,7 @@ public class TextADJSlowReader extends TextADJReader
 		LongProcess reading = new LongProcess("reading arcs from " + from, " arc",
 				nbArcsExpected);
 		Cout.info("using " + nbT + " threads");
-		Section[] sectionPosititions = findSection(from, nbT);
+		Section[] sectionPosititions = findSections(from, nbT);
 		Int2ObjectMap<int[]>[] localAdjs = new Int2ObjectMap[nbT];
 
 		if (hasNbVertices)

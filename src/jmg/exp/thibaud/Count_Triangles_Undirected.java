@@ -1,8 +1,8 @@
 package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntArrays;
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -12,24 +12,24 @@ public class Count_Triangles_Undirected
 {
 
 	public static class Plugin
-			extends JMGPlugin<Digraph, CountTriangles_Undirected_Result>
+			extends JMGPlugin<Graph, CountTriangles_Undirected_Result>
 	{
 		@Override
-		public CountTriangles_Undirected_Result process(Digraph g)
+		public CountTriangles_Undirected_Result process(Graph g)
 		{
 			return count(g, nbThreads);
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
 		}
 	}
 
-	public static CountTriangles_Undirected_Result count(Digraph g, int nbThreads)
+	public static CountTriangles_Undirected_Result count(Graph g, int nbThreads)
 	{
-		g.out.ensureDefined(8);
-		g.in.ensureDefined(8);
+		g.out.ensureLoaded(8);
+		g.in.ensureLoaded(8);
 
 		g.symmetrize(8);
 

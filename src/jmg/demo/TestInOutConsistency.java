@@ -2,8 +2,7 @@ package jmg.demo;
 
 import java.util.Random;
 
-import jmg.Digraph;
-import jmg.Utils;
+import jmg.JmgUtils;
 import jmg.io.jmg.ArcFile;
 import jmg.io.jmg.JMGDirectory;
 import toools.SystemMonitor;
@@ -17,19 +16,17 @@ public class TestInOutConsistency
 		SystemMonitor.defaultMonitor.start();
 
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Digraph g = d.mapGraph(8, false);
-		Cout.debug(g);
 		Random r = new Random();
 
 		for (int i = 0;; ++i)
 		{
 			if (r.nextBoolean())
 			{
-				test(r, g.getNbVertices(), g.in.disk.file, g.out.disk.file, true);
+				test(r, d.inFile.getNbEntries(), d.inFile, d.outFile, true);
 			}
 			else
 			{
-				test(r, g.getNbVertices(), g.out.disk.file, g.in.disk.file, true);
+				test(r, d.outFile.getNbEntries(), d.outFile, d.inFile, true);
 
 			}
 		}
@@ -48,7 +45,7 @@ public class TestInOutConsistency
 			Cout.result("Testing if (" + src + " => " + dest + " in file " + f1
 					+ " exists in " + f2);
 
-			boolean ok = Utils.contains(f2.readEntry(src).adj, dest);
+			boolean ok = JmgUtils.contains(f2.readEntry(src).adj, dest);
 			Cout.result(ok);
 
 			if ( ! ok && stopAtFirstError)

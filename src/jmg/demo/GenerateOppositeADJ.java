@@ -2,7 +2,7 @@ package jmg.demo;
 
 import java.io.IOException;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.io.jmg.JMGDirectory;
 import toools.SystemMonitor;
 import toools.io.Cout;
@@ -15,19 +15,17 @@ public class GenerateOppositeADJ
 		SystemMonitor.defaultMonitor.start();
 
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Digraph g = d.mapGraph(8, false);
+		Graph g = d.mapGraph(8, false);
 
-		if (g.out.disk.file.exists() && ! g.in.disk.file.exists())
+		if (g.out.disk.isDefined() && ! g.in.disk.isDefined())
 		{
 			Cout.info("Generating IN adj");
-			g.in.mem.b = g.out.disk.file.readAndComputeOppositeADJ(8);
-			g.in.disk.save(g.in.mem.b);
+			g.in.disk.setAllFrom(g.out.disk.opposite(), 8);
 		}
-		else if (g.in.disk.file.exists() && ! g.out.disk.file.exists())
+		else if (g.in.disk.isDefined() && ! g.out.disk.isDefined())
 		{
 			Cout.info("Generating OUT adj");
-			g.out.mem.b = g.in.disk.file.readAndComputeOppositeADJ(8);
-			g.out.disk.save(g.out.mem.b);
+			g.out.disk.setAllFrom(g.in.disk.opposite(), 8);
 		}
 		else
 		{

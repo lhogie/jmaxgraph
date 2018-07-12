@@ -1,13 +1,13 @@
 package jmg.exp.nathann;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.io.jmg.JMGDirectory;
 import jmr.Job;
 
 public class CountCyclicJob extends Job<CountK22WorkerOutput>
 {
 	static final long serialVersionUID = 876543;
-	static Digraph g;
+	static Graph g;
 
 	String jmgDirectoryPath;
 	int startVertex, endVertex;

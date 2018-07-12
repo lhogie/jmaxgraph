@@ -1,61 +1,50 @@
 package jmg;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
-import jmg.algo.ReverseGraph;
-
-public class Direction implements Serializable, Iterable<VertexCursor>
+public class Direction extends Adjacency
 {
-	public enum NAME {IN, OUT}
-	
-	public InMemoryAdj mem = new InMemoryAdj();
-	public transient OnDiskAdj disk = new OnDiskAdj();
+	public enum NAME
+	{
+		in, out
+	}
+
+	public MatrixAdj mem = new MatrixAdj();
+	public transient ArcFileAdj disk = new ArcFileAdj();
 	public Direction opposite;
 
-	
-	public void load(double edgeProbability, long seed, int nbThreads)
+	public Adjacency getPreferredAdj()
 	{
-		mem.b = disk.file.readADJ(edgeProbability, seed, nbThreads);
+		if (mem.isDefined())
+			return mem;
+
+		if (disk.isDefined())
+			return disk;
+
+		return null;
 	}
 
-	
-	public void load(int nbThreads)
-	{
-		mem.b = disk.file.readADJ(1, 0, nbThreads);
-	}
-	
-	public void computeFromOppositeDirection()
-	{
-		if (mem.b != null)
-		{
-			mem.b = null;
-			System.gc();
-		}
 
-		mem.b = ReverseGraph.computeInverseADJ(opposite.mem.b, false);
-	}
 
-	public void ensureDefined(int nbThreads)
+	public void ensureLoaded(int nbThreads)
 	{
+		// if not already loaded
 		if ( ! mem.isDefined())
 		{
 			// it's on disk
-			if (disk.file != null && disk.file.exists())
+			if (disk.isDefined())
 			{
-				load(nbThreads);
+				mem.setAllFrom(disk, nbThreads);
 			}
 			else
 			{
 				// it's not but maybe it can be computed from the other
 				// direction
-
-				if ( ! opposite.mem.isDefined() && ! opposite.disk.isDefined())
+				if ( ! opposite.isDefined())
 					throw new IllegalStateException(
-							"unable to load or compute this adjacency since no file or opposite adjacency is available");
+							"unable to load or compute this adjacency since no  opposite adjacency is defined");
 
-				opposite.ensureDefined(nbThreads);
-				computeFromOppositeDirection();
+				mem.setAllFrom(opposite.opposite(), nbThreads);
 			}
 		}
 	}
@@ -63,18 +52,42 @@ public class Direction implements Serializable, Iterable<VertexCursor>
 	@Override
 	public Iterator<VertexCursor> iterator()
 	{
-		if (mem.isDefined())
-		{
-			return mem.iterator();
-		}
-		else if (disk.isDefined())
-		{
-			return disk.iterator();
-		}
-		else
-		{
-			throw new IllegalStateException("no adj to iterate on");
-		}
+		return getPreferredAdj().iterator();
+	}
+
+	public boolean isDefined()
+	{
+		return getPreferredAdj() != null;
+	}
+
+	@Override
+	public int[] get(int u)
+	{
+		return getPreferredAdj().get(u);
+	}
+
+	@Override
+	public int[] degrees(int nbThreads)
+	{
+		return getPreferredAdj().degrees(nbThreads);
+	}
+
+	@Override
+	public Iterator<VertexCursor> iterator(int from, int to)
+	{
+		return getPreferredAdj().iterator(from, to);
+	}
+
+	@Override
+	public void setAllFrom(Adjacency from, int nbThreads)
+	{
+		getPreferredAdj().setAllFrom(from, nbThreads);
+	}
+
+	@Override
+	public int countVertices(int nbThreads)
+	{
+		return getPreferredAdj().getNbVertices(nbThreads);
 	}
 
 }

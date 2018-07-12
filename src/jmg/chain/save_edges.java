@@ -1,35 +1,24 @@
 package jmg.chain;
 
-import java.io.IOException;
-
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
 import jmg.Direction;
+import jmg.Graph;
 
-public class save_edges extends JMGPlugin<Digraph, Digraph>
+public class save_edges extends JMGPlugin<Graph, Graph>
 {
 	public Direction.NAME directionType;
 
 	@Override
-	public void setup(PluginConfig parms)
+	public void setParameters(PluginParms parms)
 	{
 		this.directionType = Direction.NAME.valueOf(parms.get("type"));
 	}
 
 	@Override
-	public Digraph process(Digraph g)
+	public Graph process(Graph g)
 	{
 		Direction d = g.getDirection(directionType);
-
-		try
-		{
-			d.disk.save(d.mem.b);
-		}
-		catch (IOException e)
-		{
-			throw new IllegalStateException();
-		}
-
+		d.disk.setAllFrom(d.mem, nbThreads);
 		return g;
 	}
 

@@ -3,9 +3,9 @@ package jmg.exp.nathann;
 import java.io.IOException;
 import java.util.Iterator;
 
-import jmg.Digraph;
-import jmg.io.jmg.ArcFileParallelProcessor;
-import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
+import jmg.Graph;
+import jmg.ParallelAdjProcessing;
+import jmg.VertexCursor;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.Cout;
 import toools.io.IORuntimeException;
@@ -17,8 +17,8 @@ public class CountCyclicTriangles
 
 	static boolean[][] preceedsX;
 
-	public static synchronized LocalCount count(Digraph g, int startVertex,
-			int endVertex, int nbThreads)
+	public static synchronized LocalCount count(Graph g, int startVertex, int endVertex,
+			int nbThreads)
 	{
 		if (g.jmgDirectory == null)
 		{
@@ -27,8 +27,8 @@ public class CountCyclicTriangles
 			if (d.exists())
 				d.deleteRecursively();
 
-			g.out.ensureDefined(nbThreads);
-			g.in.ensureDefined(nbThreads);
+			g.out.ensureLoaded(nbThreads);
+			g.in.ensureLoaded(nbThreads);
 
 			try
 			{
@@ -42,12 +42,10 @@ public class CountCyclicTriangles
 			g.setDataset(d);
 		}
 
-		g.out.ensureDefined(8);
+		g.out.ensureLoaded(8);
 
 		int range = endVertex - startVertex;
-		LocalCount r = new LocalCount();
-		r.startVertex = startVertex;
-		r.endVertex = endVertex;
+		LocalCount r = new LocalCount(startVertex, endVertex);
 		r.nbK22sPerVertex_times2 = new long[range];
 
 		if (preceedsX == null || preceedsX.length != nbThreads
@@ -64,18 +62,18 @@ public class CountCyclicTriangles
 			Cout.info("DONE");
 		}
 
-		LongProcess lp = new LongProcess(
-				"Nathann tracking cyclic triangles from " + startVertex + " to " + endVertex,
-				" vertex", range);
+		LongProcess lp = new LongProcess("Nathann tracking cyclic triangles from "
+				+ startVertex + " to " + endVertex, " vertex", range);
 		lp.temporaryResult = r;
 
-		if (g.in.disk.file == null)
+		if ( ! g.in.disk.isDefined())
 			throw new IllegalStateException();
 
-		new ArcFileParallelProcessor(g.in.disk.file, startVertex, endVertex, 0, nbThreads, lp)
+		new ParallelAdjProcessing(g.in.disk, nbThreads, lp)
 		{
+
 			@Override
-			protected void process(ThreadSpecifics s, Iterator<ArcFileCursor> iterator)
+			public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
 			{
 				long nbCyclicTriangles_times3 = 0;
 				boolean[] _preceedsX = preceedsX[s.rank];
@@ -87,11 +85,10 @@ public class CountCyclicTriangles
 				{
 					++s.progressStatus;
 					++nbVerticesComputedSinceLastReport;
-					ArcFileCursor x = iterator.next();
+					VertexCursor x = iterator.next();
 
 					if (x.adj.length < 2)
 						continue;
-
 
 					for (int u : x.adj)
 					{
@@ -99,7 +96,7 @@ public class CountCyclicTriangles
 					}
 
 					long nbInternalArcs_cyclic = 0;
-	
+
 					for (int u : outAdjTable[x.vertex])
 					{
 						for (int v : outAdjTable[u])

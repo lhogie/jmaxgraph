@@ -1,6 +1,6 @@
 package jmg.chain;
 
-import j4u.chain.DefaultPlugins;
+import j4u.chain.DefaultPluginFactory;
 import j4u.chain.NBSReader;
 import j4u.chain.TooolsPlugin;
 import jmg.algo.BFS;
@@ -18,19 +18,22 @@ import jmg.io.adj.TextADJWriter;
 import jmg.io.jmg.JMGDirectory;
 import jmg.io.jmg.JMGReader;
 import jmg.io.jmg.JMGWriter;
+import toools.io.Cout;
 import toools.io.file.RegularFile;
 import toools.io.file.nbs.NBSFile;
 
-public class JMGPlugins extends DefaultPlugins
+public class JMGPluginFactory extends DefaultPluginFactory
 {
-	public JMGPlugins()
+	public JMGPluginFactory()
 	{
-		importPackages.add(JMGPlugins.class.getPackage());
+		importPackages.add(JMGPluginFactory.class.getPackage());
 	}
 
 	@Override
 	public TooolsPlugin<?, ?> create(String name, boolean bootstrap)
 	{
+		Cout.debugSuperVisible(name);
+		
 		if (name.endsWith(".jmg") || name.endsWith(".jmg/"))
 		{
 			if (bootstrap)
@@ -46,7 +49,7 @@ public class JMGPlugins extends DefaultPlugins
 				return w;
 			}
 		}
-		else if (name.endsWith(".ram.adj"))
+		else if (name.endsWith(".adj"))
 		{
 			if (bootstrap)
 			{
@@ -106,9 +109,9 @@ public class JMGPlugins extends DefaultPlugins
 				return w;
 			}
 		}
-		else if (name.equals("loadadj"))
+		else if (name.equals("load_arcs"))
 		{
-			return new load_edges();
+			return new load_arcs();
 		}
 		else if (name.equals("saveadj"))
 		{
@@ -116,7 +119,7 @@ public class JMGPlugins extends DefaultPlugins
 		}
 		else if (name.equals("sample"))
 		{
-			return new load_edges();
+			return new load_arcs();
 		}
 		else if (name.equals("gnp"))
 		{

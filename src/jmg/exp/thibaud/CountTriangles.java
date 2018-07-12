@@ -1,8 +1,8 @@
 package jmg.exp.thibaud;
 
 import it.unimi.dsi.fastutil.ints.IntArrays;
-import j4u.chain.PluginConfig;
-import jmg.Digraph;
+import j4u.chain.PluginParms;
+import jmg.Graph;
 import jmg.algo.CountBidirectionalArcs;
 import jmg.chain.JMGPlugin;
 import toools.progression.LongProcess;
@@ -10,24 +10,24 @@ import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
 import toools.util.assertion.Assertions;
 
-public class CountTriangles extends JMGPlugin<Digraph, CountTriangles_Result>
+public class CountTriangles extends JMGPlugin<Graph, CountTriangles_Result>
 {
 
 	@Override
-	public CountTriangles_Result process(Digraph g)
+	public CountTriangles_Result process(Graph g)
 	{
 		return count(g, nbThreads);
 	}
 
 	@Override
-	public void setup(PluginConfig p)
+	public void setParameters(PluginParms p)
 	{
 	}
 
-	public static CountTriangles_Result count(Digraph g, int nbThreads)
+	public static CountTriangles_Result count(Graph g, int nbThreads)
 	{
-		g.out.ensureDefined(8);
-		g.in.ensureDefined(8);
+		g.out.ensureLoaded(8);
+		g.in.ensureLoaded(8);
 
 		CountTriangles_Result r = new CountTriangles_Result();
 

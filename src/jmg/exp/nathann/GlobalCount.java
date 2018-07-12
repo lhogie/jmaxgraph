@@ -3,7 +3,7 @@ package jmg.exp.nathann;
 import java.util.Iterator;
 
 import it.unimi.dsi.fastutil.longs.LongArrays;
-import jmg.Digraph;
+import jmg.Graph;
 import jmr.FSMapReduce;
 import jmr.GlobalOutput;
 import toools.Longs;
@@ -13,7 +13,7 @@ import toools.io.file.nbs.NBSFile;
 public class GlobalCount extends GlobalOutput<CountK22WorkerOutput>
 {
 	static final long serialVersionUID = 136049;
-	private transient final Digraph g;
+	private transient final Graph g;
 	private transient final FSMapReduce<CountK22WorkerOutput> mr;
 
 	public long nbVertices;
@@ -27,7 +27,7 @@ public class GlobalCount extends GlobalOutput<CountK22WorkerOutput>
 	public long[] nbTrianglesPerVertex;
 	public long[] nbTrianglesPotPerVertex;
 
-	public GlobalCount(Digraph g, FSMapReduce<CountK22WorkerOutput> mr, int nbThreads)
+	public GlobalCount(Graph g, FSMapReduce<CountK22WorkerOutput> mr, int nbThreads)
 	{
 		this.g = g;
 		this.mr = mr;

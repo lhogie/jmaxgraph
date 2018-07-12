@@ -1,7 +1,6 @@
 package jmg.io.jmg;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import jmg.VertexCursor;
 import toools.io.BinaryReader;
@@ -11,7 +10,6 @@ import toools.io.file.nbs.NBSFileIterator;
 
 public class ArcFileVertexIterator
 		extends FileIterator<ArcFileVertexIterator.ArcFileCursor>
-		implements Iterator<ArcFileVertexIterator.ArcFileCursor>
 {
 	public static class ArcFileCursor extends VertexCursor
 	{

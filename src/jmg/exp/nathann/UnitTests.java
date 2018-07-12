@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import jmg.Digraph;
+import jmg.Graph;
 import jmg.io.TinyReader;
 
 public class UnitTests
@@ -18,7 +18,7 @@ public class UnitTests
 		TinyReader.Text t = new TinyReader.Text();
 		t.addLine(0, 2, 3, 4, 5);
 		t.addLine(1, 3, 4, 5, 6, 7);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		GlobalCount r = new GlobalCount(
 				K22AndTransitiveTrianglesCounter.count(g, 0, g.getNbVertices(), 2));
@@ -32,7 +32,7 @@ public class UnitTests
 		TinyReader.Text t = new TinyReader.Text();
 		t.addLine(0, 2, 3);
 		t.addLine(1, 2, 3);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		GlobalCount r = new GlobalCount(
 				K22AndTransitiveTrianglesCounter.count(g, 0, g.getNbVertices(), 2));
@@ -47,7 +47,7 @@ public class UnitTests
 		t.addLine(0, 3, 4, 5, 6);
 		t.addLine(1, 4, 5, 6);
 		t.addLine(2, 4, 5, 6, 7, 8);
-		Digraph g = t.toGraph();
+		Graph g = t.toGraph();
 
 		GlobalCount r = new GlobalCount(
 				K22AndTransitiveTrianglesCounter.count(g, 0, g.getNbVertices(), 2));

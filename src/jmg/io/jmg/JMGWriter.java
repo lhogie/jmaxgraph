@@ -2,19 +2,19 @@ package jmg.io.jmg;
 
 import java.io.IOException;
 
-import j4u.chain.PluginConfig;
+import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Digraph;
+import jmg.Graph;
 
 public class JMGWriter
 {
 
-	public static class Plugin implements TooolsPlugin<Digraph, Digraph>
+	public static class Plugin implements TooolsPlugin<Graph, Graph>
 	{
 		public JMGDirectory to;
 
 		@Override
-		public Digraph process(Digraph g)
+		public Graph process(Graph g)
 		{
 			try
 			{
@@ -28,7 +28,7 @@ public class JMGWriter
 		}
 
 		@Override
-		public void setup(PluginConfig p)
+		public void setParameters(PluginParms p)
 		{
 		}
 	}

@@ -3,7 +3,9 @@ package jmg.exp.nathann;
 import java.io.IOException;
 import java.util.Iterator;
 
-import jmg.Digraph;
+import jmg.Graph;
+import jmg.ParallelAdjProcessing;
+import jmg.VertexCursor;
 import jmg.io.jmg.ArcFileParallelProcessor;
 import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.JMGDirectory;
@@ -17,7 +19,7 @@ public class TrianglesCounter
 
 	static boolean[][] preceedsX;
 
-	public static synchronized LocalCount count(Digraph g, int startVertex, int endVertex,
+	public static synchronized LocalCount count(Graph g, int startVertex, int endVertex,
 			int nbThreads)
 	{
 		if (g.jmgDirectory == null)
@@ -27,8 +29,8 @@ public class TrianglesCounter
 			if (d.exists())
 				d.deleteRecursively();
 
-			g.out.ensureDefined(nbThreads);
-			g.in.ensureDefined(nbThreads);
+			g.out.ensureLoaded(nbThreads);
+			g.in.ensureLoaded(nbThreads);
 
 			try
 			{
@@ -42,12 +44,10 @@ public class TrianglesCounter
 			g.setDataset(d);
 		}
 
-		g.out.ensureDefined(8);
+		g.out.ensureLoaded(8);
 
 		int range = endVertex - startVertex;
-		LocalCount r = new LocalCount();
-		r.startVertex = startVertex;
-		r.endVertex = endVertex;
+		LocalCount r = new LocalCount(startVertex, endVertex);
 		r.nbK22sPerVertex_times2 = new long[range];
 		r.nbTrianglesPerVertex = new long[range];
 
@@ -70,13 +70,14 @@ public class TrianglesCounter
 				" vertex", range);
 		lp.temporaryResult = r;
 
-		if (g.in.disk.file == null)
+		if ( ! g.in.disk.isDefined())
 			throw new IllegalStateException();
 
-		new ArcFileParallelProcessor(g.in.disk.file, startVertex, endVertex, 0, nbThreads, lp)
+		new ParallelAdjProcessing(g.in.disk, nbThreads, lp)
 		{
+			
 			@Override
-			protected void process(ThreadSpecifics s, Iterator<ArcFileCursor> iterator)
+			public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
 			{
 				long nbTransitiveTriangles = 0;
 				long nbCyclicTriangles_times3 = 0;
@@ -90,7 +91,7 @@ public class TrianglesCounter
 				{
 					++s.progressStatus;
 					++nbVerticesComputedSinceLastReport;
-					ArcFileCursor x = iterator.next();
+					VertexCursor x = iterator.next();
 
 					long dinx = x.adj.length;
 					long nbTrianglesForX = dinx * g.out.mem.b[x.vertex].length;
@@ -164,8 +165,9 @@ public class TrianglesCounter
 					r.nbTransitiveTriangles += nbTransitiveTriangles;
 					r.nbCyclicTriangles_times3 += nbCyclicTriangles_times3;
 				}
-			}
+				}
 		};
+	
 
 		lp.end();
 		return r;
