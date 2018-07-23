@@ -6,7 +6,6 @@ import java.util.Iterator;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import jmg.Graph;
 import jmg.VertexCursor;
-import jmg.io.jmg.ArcFileVertexIterator.ArcFileCursor;
 import jmg.io.jmg.ArcFileWriter;
 import jmg.io.jmg.JMGDirectory;
 import toools.progression.LongProcess;

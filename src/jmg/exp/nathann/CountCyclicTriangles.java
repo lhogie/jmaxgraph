@@ -1,6 +1,5 @@
 package jmg.exp.nathann;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import jmg.Graph;
@@ -8,7 +7,6 @@ import jmg.ParallelAdjProcessing;
 import jmg.VertexCursor;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.Cout;
-import toools.io.IORuntimeException;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 
@@ -23,23 +21,15 @@ public class CountCyclicTriangles
 		if (g.jmgDirectory == null)
 		{
 			JMGDirectory d = new JMGDirectory("$HOME/tmp/flsjklkj");
+			Graph h = new Graph(d, false, 1);
+			g.out.mem.fill(g.out, 1, 0, nbThreads);
+			g.in.mem.fill(g.in, 1, 0, nbThreads);
 
 			if (d.exists())
 				d.deleteRecursively();
 
-			g.out.ensureLoaded(nbThreads);
-			g.in.ensureLoaded(nbThreads);
-
-			try
-			{
-				g.write(d);
-			}
-			catch (IOException e)
-			{
-				throw new IORuntimeException(e);
-			}
-
-			g.setDataset(d);
+			h.writeToDisk();
+			g = h;
 		}
 
 		g.out.ensureLoaded(8);
@@ -69,15 +59,16 @@ public class CountCyclicTriangles
 		if ( ! g.in.disk.isDefined())
 			throw new IllegalStateException();
 
+		int[][] outAdjTable = g.out.mem.b;
+
 		new ParallelAdjProcessing(g.in.disk, nbThreads, lp)
 		{
 
 			@Override
-			public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
+			public void processSubAdj(ThreadSpecifics s, Iterator<VertexCursor> iterator)
 			{
 				long nbCyclicTriangles_times3 = 0;
 				boolean[] _preceedsX = preceedsX[s.rank];
-				int[][] outAdjTable = g.out.mem.b;
 
 				int nbVerticesComputedSinceLastReport = 0;
 

@@ -1,6 +1,5 @@
 package jmg.exp.nathann;
 
-import java.io.IOException;
 import java.util.Iterator;
 
 import jmg.Graph;
@@ -8,7 +7,6 @@ import jmg.ParallelAdjProcessing;
 import jmg.VertexCursor;
 import jmg.io.jmg.JMGDirectory;
 import toools.io.Cout;
-import toools.io.IORuntimeException;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -47,23 +45,15 @@ public class K22AndTransitiveTrianglesCounter
 		if (g.jmgDirectory == null)
 		{
 			JMGDirectory d = new JMGDirectory("$HOME/tmp/flsjklkj");
+			Graph h = new Graph(d, false, 1);
+			g.out.mem.fill(g.out, 1, 0, nbThreads);
+			g.in.mem.fill(g.in, 1, 0, nbThreads);
 
 			if (d.exists())
 				d.deleteRecursively();
 
-			g.out.ensureLoaded(nbThreads);
-			g.in.ensureLoaded(nbThreads);
-
-			try
-			{
-				g.write(d);
-			}
-			catch (IOException e)
-			{
-				throw new IORuntimeException(e);
-			}
-
-			g.setDataset(d);
+			h.writeToDisk();
+			g = h;
 		}
 
 		g.out.ensureLoaded(8);
@@ -98,11 +88,13 @@ public class K22AndTransitiveTrianglesCounter
 		if ( ! g.in.disk.isDefined())
 			throw new IllegalStateException();
 
+		int[][] outAdjTable = g.out.mem.b;
+
 		new ParallelAdjProcessing(g.in.disk, nbThreads, lp)
 		{
 
 			@Override
-			public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
+			public void processSubAdj(ThreadSpecifics s, Iterator<VertexCursor> iterator)
 			{
 				long nbTransitiveTriangles = 0;
 				long nbTtransitiveTrianglesPot = 0;
@@ -110,7 +102,6 @@ public class K22AndTransitiveTrianglesCounter
 				long sumNbPotK22 = 0;
 				long[] _inDegreeInduced = inDegreeInduced[s.rank];
 				boolean[] _preceedsX = preceedsX[s.rank];
-				int[][] outAdjTable = g.out.mem.b;
 
 				int nbVerticesComputedSinceLastReport = 0;
 
@@ -123,7 +114,7 @@ public class K22AndTransitiveTrianglesCounter
 					r.nbK22sPerVertex_times2[x.vertex - startVertex] = 0;
 
 					long dinx = x.adj.length;
-					long nbTrianglesForX = dinx * g.out.mem.b[x.vertex].length;
+					long nbTrianglesForX = dinx * outAdjTable[x.vertex].length;
 					nbTtransitiveTrianglesPot += nbTrianglesForX;
 					r.nbTrianglesPotPerVertex[x.vertex - startVertex] = nbTrianglesForX;
 

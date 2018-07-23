@@ -2,6 +2,10 @@ package jmg;
 
 import java.util.Iterator;
 
+import jmg.algo.ReverseGraph;
+import jmg.io.jmg.ArcFile;
+import toools.io.file.Directory;
+
 public class Direction extends Adjacency
 {
 	public enum NAME
@@ -9,9 +13,22 @@ public class Direction extends Adjacency
 		in, out
 	}
 
-	public MatrixAdj mem = new MatrixAdj();
-	public transient ArcFileAdj disk = new ArcFileAdj();
+	public MatrixAdj mem;
+	public transient ArcFileAdj disk;
 	public Direction opposite;
+
+	public Direction(Directory d, int nbThreads)
+	{
+		super(d, nbThreads);
+		this.mem = new MatrixAdj(null, d, nbThreads);
+		this.disk = d == null ? null : new ArcFileAdj(new ArcFile(d, "arcs"), nbThreads);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "use RAM: " + (mem != null) + ", disk file: " + disk;
+	}
 
 	public Adjacency getPreferredAdj()
 	{
@@ -23,8 +40,6 @@ public class Direction extends Adjacency
 
 		return null;
 	}
-
-
 
 	public void ensureLoaded(int nbThreads)
 	{
@@ -44,7 +59,7 @@ public class Direction extends Adjacency
 					throw new IllegalStateException(
 							"unable to load or compute this adjacency since no  opposite adjacency is defined");
 
-				mem.setAllFrom(opposite.opposite(), nbThreads);
+				mem.setAllFrom(opposite.opposite(nbThreads), nbThreads);
 			}
 		}
 	}
@@ -67,9 +82,19 @@ public class Direction extends Adjacency
 	}
 
 	@Override
-	public int[] degrees(int nbThreads)
+	public int[] degrees()
 	{
-		return getPreferredAdj().degrees(nbThreads);
+		if (isDefined())
+		{
+			return getPreferredAdj().degrees();
+		}
+		else if (opposite.isDefined())
+		{
+			return ReverseGraph.computeReverseDegrees(getNbVertices(), opposite);
+		}
+
+		throw new IllegalStateException(
+				"no possibility to retrieve the number of vertices");
 	}
 
 	@Override
@@ -87,7 +112,17 @@ public class Direction extends Adjacency
 	@Override
 	public int countVertices(int nbThreads)
 	{
-		return getPreferredAdj().getNbVertices(nbThreads);
+		if (isDefined())
+		{
+			return getPreferredAdj().getNbVertices();
+		}
+		else if (opposite.isDefined())
+		{
+			return opposite.getPreferredAdj().getNbVertices();
+		}
+
+		throw new IllegalStateException(
+				"no possibility to retrieve the number of vertices");
 	}
 
 }

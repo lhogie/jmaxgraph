@@ -15,7 +15,8 @@ import toools.thread.ParallelIntervalProcessing;
 public class DirectedGNP
 {
 
-	public static MatrixAdj out(int nbVertex, double p, Random prng, int nbThreads)
+	public static int[][] out(int nbVertex, double p, Random prng, boolean allowLoops,
+			int nbThreads)
 	{
 		LongProcess lp = new LongProcess("generating GNP graph", " adj-list", nbVertex);
 
@@ -37,7 +38,7 @@ public class DirectedGNP
 
 					for (int v = 0; v < nbVertex; ++v)
 					{
-						if (u != v)
+						if (allowLoops || u != v)
 						{
 							if (random.nextDouble() < p)
 							{
@@ -59,7 +60,7 @@ public class DirectedGNP
 		};
 
 		lp.end();
-		return new MatrixAdj(r);
+		return r;
 	}
 
 	public static class Plugin extends JMGPlugin<Void, Graph>
@@ -67,13 +68,13 @@ public class DirectedGNP
 		public double p = 0.5;
 		public int nbVertex = 1000;
 		public Random r = new Random();
+		private boolean allowLoops = false;
 
 		@Override
 		public Graph process(Void v)
 		{
 			Graph g = new Graph();
-			g.out.mem = out(nbVertex, p, r, nbThreads);
-			g.properties.put("edge probability", "" + p);
+			g.out.mem = new MatrixAdj(out(nbVertex, p, r, allowLoops, nbThreads), null, nbThreads);
 			return g;
 		}
 
@@ -83,6 +84,7 @@ public class DirectedGNP
 			super.setParameters(p);
 			nbVertex = p.getInt("n");
 			this.p = p.getDouble("p");
+			this.allowLoops = p.getBoolean("allowLoops");
 
 			long seed = p.contains("seed") ? p.getInt("seed")
 					: System.currentTimeMillis();

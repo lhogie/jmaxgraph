@@ -27,7 +27,7 @@ public class ReverseGraph implements TooolsPlugin<Graph, Graph>
 
 	public static int[][] opposite(Adjacency opposite, boolean freeMemOnTheFly)
 	{
-		int nbVertex = opposite.getNbVertices(1);
+		int nbVertex = opposite.getNbVertices();
 		int[] invDegree = computeReverseDegrees(nbVertex, opposite);
 		int[][] r = new int[invDegree.length][];
 		int[] pos = new int[nbVertex];
@@ -78,7 +78,7 @@ public class ReverseGraph implements TooolsPlugin<Graph, Graph>
 	public static int[][] computeInverseADJ_par(Adjacency opposite, boolean pruneSrc,
 			int nbThreads)
 	{
-		int nbVertex = opposite.getNbVertices(nbThreads);
+		int nbVertex = opposite.getNbVertices();
 		int[] degrees = computeReverseDegrees(nbVertex, opposite);
 		int[][] r = allocates(degrees, nbThreads);
 		int[] pos = new int[nbVertex];

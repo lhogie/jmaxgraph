@@ -9,21 +9,42 @@ import java.util.function.Predicate;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import jmg.algo.ReverseGraph;
+import toools.io.file.Directory;
+import toools.io.serialization.Serializer;
+import toools.io.serialization.TextSerializer;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 
 public abstract class Adjacency implements AdjacencyPrimitives
 {
-	public Cache<int[]> degreesCache = new Cache<>(null);
-	public Cache<Long> nbArcsCache = new Cache<>( - 1L);
-	public Cache<Integer> nbVerticesCache = new Cache<>( - 1);
-	public Cache<Integer> maxDegreeCache = new Cache<>( - 1);
-	public Cache<Double> avgDegreeCache = new Cache<>( - 1d);
+	public final Cache<int[]> degreesCache;
+	public final Cache<Long> nbArcsCache;
+	public final Cache<Integer> nbVerticesCache;
+	public final Cache<Integer> maxDegreeCache;
+	public final Cache<Double> avgDegreeCache;
 
-	public MatrixAdj opposite()
+	public Adjacency(Directory d, int nbThreads)
 	{
-		return new MatrixAdj(ReverseGraph.opposite(this, true));
+		degreesCache = new Cache<int[]>(null, "degrees", d,
+				Serializer.getDefaultSerializer(), () -> computeDegrees(nbThreads));
+
+		nbArcsCache = new Cache<Long>( - 1L, "nb_arcs", d, new TextSerializer.Int64(),
+				() -> countArcs(nbThreads));
+
+		nbVerticesCache = new Cache<Integer>( - 1, "nb_vertices", d,
+				new TextSerializer.Int32(), () -> countVertices(nbThreads));
+
+		maxDegreeCache = new Cache<Integer>( - 1, "max_degree", d,
+				new TextSerializer.Int32(), () -> MathsUtilities.max(degrees()));
+
+		avgDegreeCache = new Cache<Double>( - 1d, "avg_degree", d,
+				new TextSerializer.Float64(), () -> MathsUtilities.avg(degrees()));
+	}
+
+	public MatrixAdj opposite(int nbThreads)
+	{
+		return new MatrixAdj(ReverseGraph.opposite(this, true), null, nbThreads);
 	}
 
 	public IntSet search(Predicate<VertexCursor> p, int nbExpected)
@@ -44,32 +65,32 @@ public abstract class Adjacency implements AdjacencyPrimitives
 	@Override
 	public Iterator<VertexCursor> iterator()
 	{
-		return iterator(0, getNbVertices(1));
+		return iterator(0, getNbVertices());
 	}
 
-	public int getNbVertices(int nbThreads)
+	public int getNbVertices()
 	{
-		return nbVerticesCache.get(() -> countVertices(nbThreads));
+		return nbVerticesCache.get();
 	}
 
-	public int maxDegree(int nbThreads)
+	public int maxDegree()
 	{
-		return maxDegreeCache.get(() -> MathsUtilities.max(degrees(nbThreads)));
+		return maxDegreeCache.get();
 	}
 
-	public double avgDegree(int nbThreads)
+	public double avgDegree()
 	{
-		return avgDegreeCache.get(() -> MathsUtilities.avg(degrees(nbThreads)));
+		return avgDegreeCache.get();
 	}
 
-	public double stdDevDegree(int nbThreads)
+	public double stdDevDegree()
 	{
-		return MathsUtilities.stdDev(degrees(nbThreads));
+		return MathsUtilities.stdDev(degrees());
 	}
 
 	public final boolean[] findIsolatedVertices(int expectedNb, int nbThreads)
 	{
-		int nbVertices = getNbVertices(nbThreads);
+		int nbVertices = getNbVertices();
 
 		boolean[] isolated = new boolean[nbVertices];
 		Arrays.fill(isolated, true);
@@ -95,28 +116,32 @@ public abstract class Adjacency implements AdjacencyPrimitives
 		return isolated;
 	}
 
-	public int[] degrees(int nbThreads)
+	public int[] degrees()
 	{
-		return degreesCache.get(() -> computeDegrees(nbThreads));
+		return degreesCache.get();
 	}
 
 	public int[] computeDegrees(int nbThreads)
 	{
-		int[] r = new int[getNbVertices(nbThreads)];
+		int[] r = new int[getNbVertices()];
+		LongProcess lp = new LongProcess("compute degrees2", " vertex", getNbVertices());
 
 		new ParallelAdjProcessing(this, nbThreads, null)
 		{
 
 			@Override
-			public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
+			public void processSubAdj(ThreadSpecifics s, Iterator<VertexCursor> iterator)
 			{
 				while (iterator.hasNext())
 				{
 					VertexCursor c = iterator.next();
 					r[c.vertex] = c.adj.length;
+					s.progressStatus++;
 				}
 			}
 		};
+
+		lp.end();
 
 		return r;
 	}
@@ -124,16 +149,16 @@ public abstract class Adjacency implements AdjacencyPrimitives
 	public Map<String, Object> makeReport(int nbThreads)
 	{
 		Map<String, Object> m = new HashMap<>();
-		m.put("nbArcs", getNbArcs(nbThreads));
-		m.put("max degree", maxDegree(nbThreads));
-		m.put("avg degree", avgDegree(nbThreads));
-		m.put("std dev degree", stdDevDegree(nbThreads));
+		m.put("nbArcs", getNbArcs());
+		m.put("max degree", maxDegree());
+		m.put("avg degree", avgDegree());
+		m.put("std dev degree", stdDevDegree());
 		return m;
 	}
 
-	public long getNbArcs(int nbThreads)
+	public long getNbArcs()
 	{
-		return nbArcsCache.get(() -> countArcs(nbThreads));
+		return nbArcsCache.get();
 	}
 
 	protected long countArcs(int nbThreads)

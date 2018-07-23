@@ -20,12 +20,12 @@ public class GenerateOppositeADJ
 		if (g.out.disk.isDefined() && ! g.in.disk.isDefined())
 		{
 			Cout.info("Generating IN adj");
-			g.in.disk.setAllFrom(g.out.disk.opposite(), 8);
+			g.in.disk.setAllFrom(g.out.disk.opposite(8), 8);
 		}
 		else if (g.in.disk.isDefined() && ! g.out.disk.isDefined())
 		{
 			Cout.info("Generating OUT adj");
-			g.out.disk.setAllFrom(g.in.disk.opposite(), 8);
+			g.out.disk.setAllFrom(g.in.disk.opposite(8), 8);
 		}
 		else
 		{

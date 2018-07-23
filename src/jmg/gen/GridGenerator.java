@@ -30,8 +30,6 @@ public class GridGenerator extends JMGPlugin<Void, Graph>
 		Graph g = new Graph();
 		g.out.mem.b = dgrid_outs(nbRows, nbColumns, horizontal, vertical, diags, tore,
 				nbThreads);
-		g.properties.put("number of columns", nbColumns);
-		g.properties.put("number of rows", nbRows);
 		return g;
 	}
 

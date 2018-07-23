@@ -2,14 +2,27 @@ package jmg;
 
 import java.util.Iterator;
 
-import jmg.algo.ReverseGraph;
 import jmg.io.jmg.ArcFile;
 import toools.io.IORuntimeException;
 
 public class ArcFileAdj extends Adjacency
 {
-	private ArcFile file;
 
+	private final ArcFile file;
+
+	public ArcFileAdj(ArcFile f, int nbThreads)
+	{
+		super(f.getParent(), nbThreads);
+		file = f;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "ADJ stored in" + file;
+	}
+
+	
 	@Override
 	public int[] get(int u)
 	{
@@ -21,8 +34,6 @@ public class ArcFileAdj extends Adjacency
 	{
 		file.writeADJ(adj);
 	}
-
-
 
 	@Override
 	public int[] computeDegrees(int nbThreads)
@@ -54,11 +65,15 @@ public class ArcFileAdj extends Adjacency
 		return (Iterator<VertexCursor>) (Object) file.iterator(from, to,
 				nbPreallocatedArrays, bufSize);
 	}
-
-
-
+/*
 	public void setFile(ArcFile f)
 	{
 		this.file = f;
+	}
+	*/
+
+	public ArcFile getArcFile()
+	{
+		return file;
 	}
 }

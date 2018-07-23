@@ -14,7 +14,7 @@ public class CountBidirectionalArcs
 	public static long count(Graph g, int nbThreads)
 	{
 		LongProcess p = new LongProcess("count bidirectional arcs", " vertex",
-				g.getNbVertices(nbThreads));
+				g.getNbVertices());
 		AtomicLong count = new AtomicLong(0);
 		p.temporaryResult = count;
 

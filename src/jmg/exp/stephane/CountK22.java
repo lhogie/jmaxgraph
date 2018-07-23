@@ -122,7 +122,7 @@ public class CountK22 extends JMGPlugin<Graph, CountK22_Result>
 			int[] adjV1 = g.out.mem.b[v1];
 			int[] adjV2 = g.out.mem.b[v2];
 
-			int nbCommonNeighbors = JmgUtils.countElementsInCommon_dichotomic(adjV1, adjV2)
+			int nbCommonNeighbors = JmgUtils.sizeOfIntersection(adjV1, adjV2)
 					- 1;
 
 			long nbPotentialK22 = adjV1.length + adjV2.length - 2;

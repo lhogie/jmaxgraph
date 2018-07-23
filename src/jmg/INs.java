@@ -1,7 +1,14 @@
 package jmg;
 
+import toools.io.file.Directory;
+
 public class INs extends Direction
 {
+	public INs(Directory d, int nbThreads)
+	{
+		super(d, nbThreads);
+	}
+
 	@Override
 	public int hashCode()
 	{

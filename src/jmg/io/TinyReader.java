@@ -27,13 +27,18 @@ public class TinyReader
 			return b.toString();
 		}
 
+		public Graph toGraph(Graph g)
+		{
+			g.labelling = new Labelling();
+			Int2ObjectMap<int[]> adj = TinyReader.parse(toString());
+			g.out.mem.from(adj, true, true, g.labelling, 1);
+			return g;
+		}
+
 		public Graph toGraph()
 		{
 			Graph g = new Graph();
-			g.labelling = new Labelling();
-
-			Int2ObjectMap<int[]> adj = TinyReader.parse(toString());
-			g.out.mem.from(adj, true, true, g.labelling, 1);
+			toGraph(g);
 			return g;
 		}
 	}

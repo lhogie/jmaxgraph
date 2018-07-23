@@ -110,7 +110,7 @@ public class EdgeListFileReader
 		Graph g = new Graph();
 		g.out.mem.b = r;
 
-		System.out.println(g.getNbArcs(1));
+		System.out.println(g.getNbArcs());
 	}
 
 }

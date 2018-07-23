@@ -3,6 +3,7 @@ package jmg;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
@@ -200,7 +201,7 @@ public class JmgUtils
 		return r.toString();
 	}
 
-	public static int countElementsInCommon_dichotomic(int[] A, int[] B)
+	public static int sizeOfIntersection(int[] A, int[] B)
 	{
 		if (A.length == 0 || B.length == 0)
 			return 0;
@@ -306,7 +307,7 @@ public class JmgUtils
 
 	public static int[] union(int[] A, int[] B)
 	{
-		int[] R = new int[A.length + B.length - countElementsInCommon_dichotomic(A, B)];
+		int[] R = new int[A.length + B.length - sizeOfIntersection(A, B)];
 		int ai = 0, bi = 0, ri = 0;
 
 		try
@@ -590,5 +591,57 @@ public class JmgUtils
 		}
 
 		return r.toBooleanArray();
+	}
+
+	public static int[] sortVerticesBy(int[] values)
+	{
+		int[] r = new int[values.length];
+
+		for (int u = 0; u < r.length; ++u)
+		{
+			r[u] = u;
+		}
+
+		IntArrays.parallelQuickSort(r, (u, v) -> Integer.compare(values[u], values[v]));
+		return r;
+	}
+
+	public static int countTrueCells(boolean[] seen)
+	{
+		int n = 0;
+
+		for (boolean b : seen)
+		{
+			if (b)
+				++n;
+		}
+
+		return n;
+	}
+	
+	public static int countTrueCells_par(boolean[] seen, int nbThreads)
+	{
+		AtomicInteger a = new AtomicInteger(0);
+		
+		new ParallelIntervalProcessing(seen.length, nbThreads, null)
+		{
+			
+			@Override
+			protected void process(ThreadSpecifics s, int lowerBound, int upperBound)
+					throws Throwable
+			{
+				int n = 0;
+
+				for (int i = lowerBound; i < upperBound; ++i)
+				{
+					if (seen[i])
+						++n;
+				}
+				
+				a.addAndGet(n);
+			}
+		};
+
+		return a.get();
 	}
 }

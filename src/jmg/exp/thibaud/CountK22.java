@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import j4u.chain.PluginParms;
 import jmg.Graph;
 import jmg.JmgUtils;
-import jmg.algo.Degrees;
 import jmg.chain.JMGPlugin;
 import toools.io.Cout;
 import toools.progression.LongProcess;
@@ -32,7 +31,7 @@ public class CountK22 extends JMGPlugin<Graph, CountK22_Result>
 		g.in.ensureLoaded(nbThreads);
 
 		CountK22_Result r = new CountK22_Result();
-		int maxDegree = Degrees.maxDegree(g.out.mem.b);
+		int maxDegree = g.out.mem.maxDegree();
 		Cout.info("max degree=" + maxDegree);
 		r.distri = new int[maxDegree + 1];
 
@@ -61,7 +60,7 @@ public class CountK22 extends JMGPlugin<Graph, CountK22_Result>
 							if (u < w && ! alreadyDone.contains(w))
 							{
 								alreadyDone.add(w);
-								int nbCN = JmgUtils.countElementsInCommon_dichotomic(
+								int nbCN = JmgUtils.sizeOfIntersection(
 										g.out.mem.b[u], g.out.mem.b[w]);
 
 								++_distri[nbCN];

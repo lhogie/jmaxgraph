@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import jmg.algo.Degrees;
-import jmg.algo.ReverseGraph;
+import toools.io.file.Directory;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -20,14 +20,10 @@ public class MatrixAdj extends Adjacency
 {
 	public int[][] b;
 
-	public MatrixAdj()
+	public MatrixAdj(int[][] initalAdj, Directory d, int nbThreads)
 	{
-
-	}
-
-	public MatrixAdj(int[][] b)
-	{
-		this.b = b;
+		super(d, nbThreads);
+		this.b = initalAdj;
 	}
 
 	@Override
@@ -111,8 +107,6 @@ public class MatrixAdj extends Adjacency
 		}
 	}
 
-
-
 	@Override
 	public int[] computeDegrees(int nbThreads)
 	{
@@ -156,11 +150,11 @@ public class MatrixAdj extends Adjacency
 
 	public void removeVertices(IntSet vertexSet, int nbThreads)
 	{
-		IntList labels = findLabels(vertexSet);
+		IntList labels = recomputeLabelsByExcluding(vertexSet);
 		this.b = JmgUtils.relabel(b, labels, nbThreads);
 	}
 
-	private IntList findLabels(IntSet excludedVertices)
+	private IntList recomputeLabelsByExcluding(IntSet excludedVertices)
 	{
 		int[] verticesToRemove = excludedVertices.toIntArray();
 
@@ -233,31 +227,33 @@ public class MatrixAdj extends Adjacency
 		};
 	}
 
-
 	@Override
 	public void setAllFrom(Adjacency adj, int nbThreads)
 	{
-		LongProcess lp = new LongProcess("from()", " vertex",
-				adj.getNbVertices(nbThreads));
+		int nbVertices = adj.getNbVertices();
+		b = new int[nbVertices][];
+		LongProcess lp = new LongProcess("building matrix ADJ", " vertex", nbVertices);
 
 		new ParallelAdjProcessing(adj, nbThreads, lp)
 		{
 			@Override
-			public void f(ThreadSpecifics s, Iterator<VertexCursor> i)
+			public void processSubAdj(ThreadSpecifics s, Iterator<VertexCursor> i)
 			{
 				while (i.hasNext())
 				{
 					VertexCursor c = i.next();
 					b[c.vertex] = c.adj;
+					s.progressStatus++;
 				}
 			}
 		};
+
+		lp.end();
 	}
 
 	public void fill(Adjacency src, double p, long seed, int nbThreads)
 	{
-		LongProcess lp = new LongProcess("from()", " vertex",
-				src.getNbVertices(nbThreads));
+		LongProcess lp = new LongProcess("from()", " vertex", src.getNbVertices());
 
 		int nbVertex = src.countVertices(nbThreads);
 		b = new int[nbVertex][];
@@ -271,7 +267,8 @@ public class MatrixAdj extends Adjacency
 			new ParallelAdjProcessing(src, nbThreads, lp)
 			{
 				@Override
-				public void f(ThreadSpecifics s, Iterator<VertexCursor> iterator)
+				public void processSubAdj(ThreadSpecifics s,
+						Iterator<VertexCursor> iterator)
 				{
 					ThreadLocalRandom prng = ThreadLocalRandom.current();
 

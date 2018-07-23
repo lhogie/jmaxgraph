@@ -2,8 +2,8 @@ package jmg.chain;
 
 import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Graph;
 import jmg.Direction;
+import jmg.Graph;
 
 public class getadj implements TooolsPlugin<Graph, Direction>
 {

@@ -44,7 +44,6 @@ public class load_arcs extends JMGPlugin<Graph, Graph>
 				.toSet(d.mem.findIsolatedVertices(0, nbThreads));
 		Cout.info("removing " + isolatedVertices.size() + " isolated vertices");
 		d.mem.removeVertices(isolatedVertices, nbThreads);
-		g.nbVerticesCache.set(d.mem.b.length);
 		return g;
 	}
 

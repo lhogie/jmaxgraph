@@ -23,7 +23,7 @@ public class info extends JMGPlugin<Graph, Graph>
 		Cout.info("nbVertex=" + g.getNbVertices());
 
 		if (g.out.isDefined() || g.in.isDefined())
-			Cout.result("nbArcs=" + g.getNbArcs(nbThreads));
+			Cout.result("nbArcs=" + g.getNbArcs());
 
 		if (showOuts)
 		{
@@ -42,13 +42,13 @@ public class info extends JMGPlugin<Graph, Graph>
 		if (maxOutDegree)
 		{
 			g.out.ensureLoaded(nbThreads);
-			Cout.info("max-out-degree=" + g.out.mem.maxDegree(nbThreads));
+			Cout.info("max-out-degree=" + g.out.mem.maxDegree());
 		}
 
 		if (maxInDegree)
 		{
 			g.in.ensureLoaded(nbThreads);
-			Cout.info("max-in-degree=" + g.in.mem.maxDegree(nbThreads));
+			Cout.info("max-in-degree=" + g.in.mem.maxDegree());
 		}
 
 		if (hashCode)

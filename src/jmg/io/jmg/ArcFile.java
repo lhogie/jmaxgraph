@@ -3,11 +3,8 @@ package jmg.io.jmg;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.concurrent.ThreadLocalRandom;
 
-import it.unimi.dsi.fastutil.ints.IntArrays;
 import jmg.Adjacency;
 import jmg.JmgUtils;
 import jmg.VertexCursor;
@@ -116,7 +113,7 @@ public class ArcFile extends RegularFile
 	{
 		try
 		{
-			int nbVertex = adj.getNbVertices(1);
+			int nbVertex = adj.getNbVertices();
 			LongProcess saving = new LongProcess("writing " + this, " adj-list",
 					nbVertex);
 
@@ -271,7 +268,7 @@ public class ArcFile extends RegularFile
 	{
 		int nbVertices = getNbEntries();
 		int[] degrees = new int[nbVertices];
-		LongProcess lp = new LongProcess("compute degrees", " vertex", getSize());
+		LongProcess lp = new LongProcess("compute degrees from ARC file", " vertex", nbVertices);
 
 		new ArcFileParallelProcessor(this, 0, getNbEntries(), 1000, nbThreads, lp)
 		{

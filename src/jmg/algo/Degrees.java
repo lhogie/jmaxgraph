@@ -49,15 +49,7 @@ public class Degrees
 		return r;
 	}
 
-	public static int maxDegree(int[][] adj)
-	{
-		return MathsUtilities.max(computeDegrees(adj, nbThreads));
-	}
 
-	public static double avgDegree(int[][] adj)
-	{
-		return MathsUtilities.avg(computeDegrees(adj, nbThreads));
-	}
 
 	public static double stdDev(int[][] adj)
 	{

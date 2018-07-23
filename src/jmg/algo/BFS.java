@@ -7,10 +7,9 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntList;
 import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
-import jmg.Graph;
 import jmg.Direction;
+import jmg.Graph;
 import jmg.gen.GridGenerator;
-import toools.io.Cout;
 import toools.progression.LongProcess;
 
 public class BFS
@@ -29,7 +28,7 @@ public class BFS
 
 	}
 
-	public static BFSResult classic(int[][] adj, int src)
+	public static BFSResult classic(int[][] adj, int src, int maxDistance, int maxSize)
 	{
 		LongProcess lp = new LongProcess("BFS (classic)", " vertex", adj.length);
 		int[] distances = new int[adj.length];
@@ -39,6 +38,7 @@ public class BFS
 		int to = 1;
 		q[0] = src;
 		distances[src] = 0;
+		int nbVerticesVisited = 1;
 
 		while (from != to)
 		{
@@ -47,12 +47,19 @@ public class BFS
 			int v = q[from++];
 			int d = distances[v];
 
-			for (int n : adj[v])
+			if (d <= maxDistance)
 			{
-				if (distances[n] == - 1)
+				for (int n : adj[v])
 				{
-					distances[n] = d + 1;
-					q[to++] = n;
+					if (distances[n] == - 1)
+					{
+						distances[n] = d + 1;
+
+						if (nbVerticesVisited++ >= maxSize)
+							break;
+
+						q[to++] = n;
+					}
 				}
 			}
 		}
@@ -108,12 +115,13 @@ public class BFS
 	public static void main(String[] args)
 	{
 		Graph g = new Graph();
-		g.out.mem.b = GridGenerator.dgrid_outs(10000, 100, true, true, false, false, 1);
+		g.out.mem.b = GridGenerator.dgrid_outs(100000, 100, true, true, false, false, 1);
 		int[] distances = bsp_seq(g.out.mem.b, 0);
 		// FastUtils.printAsMap(distances, " has distance ", System.out);
 		System.out.println("*****");
-		int[] distances2 = classic(g.out.mem.b, 0).distances;
-		Cout.debug(distances2);
+		int[] distances2 = classic(g.out.mem.b, 0, Integer.MAX_VALUE,
+				Integer.MAX_VALUE).distances;
+//		Cout.debug(distances2);
 		// FastUtils.printAsMap(distances2, " has distance ", System.out);
 	}
 
@@ -124,7 +132,7 @@ public class BFS
 		@Override
 		public BFSResult process(Direction d)
 		{
-			return BFS.classic(d.mem.b, src);
+			return BFS.classic(d.mem.b, src, Integer.MAX_VALUE, Integer.MAX_VALUE);
 		}
 
 		@Override

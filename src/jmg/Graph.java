@@ -1,32 +1,55 @@
 package jmg;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Properties;
-import java.util.function.Supplier;
 
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import jmg.algo.ReverseGraph;
 import jmg.io.jmg.JMGDirectory;
-import toools.io.file.RegularFile;
+import toools.io.file.Directory;
+import toools.util.Conversion;
 
 public class Graph implements Serializable
 {
-	public Properties properties = new Properties();
 	public final Direction out;
 	public final Direction in;
-	public boolean isMultiGraph = false;
-	public JMGDirectory jmgDirectory;
+	public final JMGDirectory jmgDirectory;
 	public Labelling labelling;
-	public final Cache<Integer> nbVerticesCache = new Cache<>( - 1);
 
 	public Graph()
 	{
-		out = new OUTs();
-		in = new INs();
+		this(null);
+	}
+
+	public Graph(JMGDirectory d)
+	{
+		this(d, false, Runtime.getRuntime().availableProcessors());
+	}
+
+	public Graph(JMGDirectory d, boolean useLabels, int nbThreads)
+	{
+		this.jmgDirectory = d;
+		out = new OUTs(d == null ? null : new Directory(d, "out"), nbThreads);
+		in = new INs(d == null ? null : new Directory(d, "in"), nbThreads);
 		out.opposite = in;
 		in.opposite = out;
+
+		if (d != null)
+		{
+			d.ensureExists();
+
+			if (useLabels && d.label2vertexFile.exists())
+			{
+				labelling.label2vertex = Conversion
+						.toIntArray(d.label2vertexFile.readValues(nbThreads));
+
+				assert new IntOpenHashSet(labelling.label2vertex)
+						.size() == labelling.label2vertex.length : new IntOpenHashSet(
+								labelling.label2vertex).size() + " != "
+								+ labelling.label2vertex.length;
+
+				labelling.vertex2label = new Vertex2LabelMap(labelling.label2vertex);
+			}
+		}
 	}
 
 	public Direction getDirection(Direction.NAME d)
@@ -45,73 +68,57 @@ public class Graph implements Serializable
 
 	public void addArc_slow(int u, int v)
 	{
-		if (out.mem != null)
+		if (out.mem.isDefined())
 		{
-			out.mem.b[u] = JmgUtils.insert(out.mem.b[u], v, isMultiGraph);
+			out.mem.b[u] = JmgUtils.insert(out.mem.b[u], v, true);
 		}
 
-		if (in.mem != null)
+		if (in.mem.isDefined())
 		{
-			in.mem.b[v] = JmgUtils.insert(in.mem.b[v], u, isMultiGraph);
+			in.mem.b[v] = JmgUtils.insert(in.mem.b[v], u, true);
 		}
 	}
 
 	public void addArcs_slow(int u, int... V)
 	{
-		if (out.mem.b != null)
+		if (out.mem.isDefined())
 		{
 			out.mem.b[u] = JmgUtils.union(out.mem.b[u], V);
 		}
 
-		if (in.mem.b != null)
+		if (in.mem.isDefined())
 		{
 			for (int v : V)
 			{
-				JmgUtils.insert(in.mem.b[v], u, isMultiGraph);
+				JmgUtils.insert(in.mem.b[v], u, true);
 			}
 		}
 	}
 
 	public void removeArc_slow(int u, int v)
 	{
-		if (out.mem.b != null)
+		if (out.mem.isDefined())
 		{
-			out.mem.b[u] = JmgUtils.remove(out.mem.b[u], v, ! isMultiGraph);
+			out.mem.b[u] = JmgUtils.remove(out.mem.b[u], v, ! true);
 		}
 
-		if (in.mem.b != null)
+		if (in.mem.isDefined())
 		{
-			in.mem.b[v] = JmgUtils.remove(in.mem.b[v], u, ! isMultiGraph);
+			in.mem.b[v] = JmgUtils.remove(in.mem.b[v], u, ! true);
 		}
 	}
 
 	public int getNbVertices()
 	{
-		return getNbVertices(1);
-	}
-
-	public int getNbVertices(int nbThreads)
-	{
-		Supplier<Integer> s = new Supplier<Integer>()
+		for (Adjacency adj : new Adjacency[] { out.mem, in.mem, out.disk, in.disk })
 		{
-
-			@Override
-			public Integer get()
+			if (adj.isDefined())
 			{
-				for (Adjacency adj : new Adjacency[] { out.mem, in.mem, out.disk,
-						in.disk })
-				{
-					if (adj.isDefined())
-					{
-						return adj.getNbVertices(nbThreads);
-					}
-				}
-
-				throw new IllegalStateException("no adj loaded");
+				return adj.getNbVertices();
 			}
-		};
+		}
 
-		return nbVerticesCache.get(s);
+		throw new IllegalStateException("no adj available");
 	}
 
 	public void symmetrize(int nbThreads)
@@ -153,13 +160,13 @@ public class Graph implements Serializable
 		}
 	}
 
-	public long getNbArcs(int nbThreads)
+	public long getNbArcs()
 	{
 		for (Adjacency adj : new Adjacency[] { out.mem, in.mem, out.disk, in.disk })
 		{
 			if (adj.isDefined())
 			{
-				return adj.getNbArcs(nbThreads);
+				return adj.getNbArcs();
 			}
 		}
 
@@ -172,26 +179,9 @@ public class Graph implements Serializable
 		return "graph: " + getNbVertices() + " vertices";
 	}
 
-	public void setDataset(JMGDirectory jmgDirectory)
+	public void writeToDisk()
 	{
-		this.jmgDirectory = jmgDirectory;
-
-		if (jmgDirectory.inFile.exists())
-		{
-			in.disk.setFile(jmgDirectory.inFile);
-		}
-
-		if (jmgDirectory.outFile.exists())
-		{
-			out.disk.setFile(jmgDirectory.outFile);
-		}
-	}
-
-	public void write(JMGDirectory d) throws IOException
-	{
-		d.mkdirs();
-		writeProperties(d.getPropertyFile());
-
+		jmgDirectory.ensureExists();
 		assert new IntOpenHashSet(labelling.label2vertex)
 				.size() == labelling.label2vertex.length : new IntOpenHashSet(
 						labelling.label2vertex).size() + " != "
@@ -199,33 +189,19 @@ public class Graph implements Serializable
 
 		if (labelling != null)
 		{
-			d.getLabel2VertexFile().saveValues(labelling.label2vertex.length,
+			jmgDirectory.getLabel2VertexFile().saveValues(labelling.label2vertex.length,
 					l -> labelling.label2vertex[l], 4);
 		}
 
 		if (out.mem.isDefined())
 		{
-			d.getOutFile().writeADJ(out.mem);
+			out.disk.setAllFrom(out.mem, 1);
 		}
 
 		if (in.mem.isDefined())
 		{
-			d.getInFile().writeADJ(in.mem);
+			in.disk.setAllFrom(in.mem, 1);
 		}
-	}
-
-	public void writeProperties(RegularFile f) throws IOException
-	{
-		properties.put("nbVertices", "" + getNbVertices(1));
-		properties.put("nbArcs", "" + getNbArcs(1));
-		OutputStream pos = f.createWritingStream();
-		properties.store(pos, "JMG property file");
-		pos.close();
-	}
-
-	public boolean noADJLoaded()
-	{
-		return out.mem.b == null && in.mem.b == null;
 	}
 
 	@Override
@@ -235,6 +211,21 @@ public class Graph implements Serializable
 		h = 31 * h + out.hashCode();
 		h = 31 * h + in.hashCode();
 		return h;
+	}
+
+	public void from(Graph g, int nbThreads)
+	{
+		if (g.in.mem.isDefined())
+			in.mem.setAllFrom(g.in.mem, nbThreads);
+
+		if (g.in.disk.isDefined())
+			in.disk.setAllFrom(g.in.disk, nbThreads);
+
+		if (g.out.mem.isDefined())
+			out.mem.setAllFrom(g.out.mem, nbThreads);
+
+		if (g.in.disk.isDefined())
+			out.disk.setAllFrom(g.out.disk, nbThreads);
 	}
 
 }

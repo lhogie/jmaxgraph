@@ -39,14 +39,8 @@ public class ArcFileVertexIterator
 
 		try
 		{
-			if (endVertex < nbVertices)
-			{
-				this.finalPos = idxf.readValue(endVertex);
-			}
-			else
-			{
-				this.finalPos = f.getSize();
-			}
+			this.finalPos = endVertex < nbVertices ? idxf.readValue(endVertex)
+					: f.getSize();
 
 			this.indexIterator = new NBSFileIterator(f.getIndexFile(), startVertex);
 			unbufferredInputStream.skip(currentPos = indexIterator.nextLong());
