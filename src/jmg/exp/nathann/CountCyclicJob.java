@@ -22,7 +22,7 @@ public class CountCyclicJob extends Job<CountK22WorkerOutput>
 
 		if (g == null)
 		{
-			g = d.mapGraph(nbThreads, false);
+			g = new Graph(d, false, nbThreads);
 		}
 
 		LocalCount ar;

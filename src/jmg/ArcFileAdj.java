@@ -12,7 +12,7 @@ public class ArcFileAdj extends Adjacency
 
 	public ArcFileAdj(ArcFile f, int nbThreads)
 	{
-		super(f.getParent(), nbThreads);
+		super(f == null ? null : f.getParent(), nbThreads);
 		file = f;
 	}
 

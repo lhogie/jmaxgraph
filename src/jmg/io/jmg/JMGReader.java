@@ -14,7 +14,7 @@ public class JMGReader
 		@Override
 		public Graph read()
 		{
-			return from.mapGraph(nbThreads, useLabels);
+			return new Graph(from, useLabels, nbThreads);
 		}
 
 		@Override

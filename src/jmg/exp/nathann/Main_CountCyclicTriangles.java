@@ -12,7 +12,7 @@ public class Main_CountCyclicTriangles
 	public static void main(String[] args)
 	{
 		JMGDirectory dataset = new JMGDirectory(args[0]);
-		Graph g = dataset.mapGraph(1, false);
+		Graph g = new Graph(dataset, false, 1);
 
 		Problem problem = new CountingCyclicTrianglesProblem(g, - 1);
 

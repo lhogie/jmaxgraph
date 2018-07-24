@@ -15,22 +15,22 @@ public class GenerateUndirectedGraph
 	public static void main(String[] args) throws IOException
 	{
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Graph g = d.mapGraph(8, false);
-		Graph h = new Graph();
-		h.out.mem.b = new int[g.getNbVertices()][];
+		Graph g = new Graph(d);
 
+		JMGDirectory outd = new JMGDirectory(args[1]);
+		Graph h = new Graph(outd);
+		
 		Iterator<VertexCursor> outIterator = g.out.disk.iterator();
 		Iterator<VertexCursor> inIterator = g.in.disk.iterator();
 
-		IntArrayList r = new IntArrayList();
 
 		int nbVertices = g.getNbVertices();
 		LongProcess lp = new LongProcess("generating undirected topology", " vertex",
 				nbVertices);
 
-		JMGDirectory outd = new JMGDirectory(args[1]);
-		outd.create();
-		ArcFileWriter w = new ArcFileWriter(outd.outFile, nbVertices);
+		ArcFileWriter w = new ArcFileWriter(h.out.disk.getArcFile(), nbVertices);
+
+		IntArrayList r = new IntArrayList();
 
 		for (int u = 0; u < nbVertices; ++u)
 		{

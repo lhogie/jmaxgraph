@@ -9,8 +9,12 @@
 \begin{document}
 \maketitle
 
-The digital world we live in generates  huge amounts of data. This data comes from a large variety of sources, including sensors (biological, meteorological ones, GPS, etc), social networks, application logs, etc, human production (videos, writings, etc). Big Data is the generic term which gathers the scientific domains which tackle the exploitation of this large datasets.
-Dealing with large datasets indeeds poses a number of difficulties. Put it briefly, the larger the data, the more algorithm complexity impacts computation times, practical handing...
+
+This paper describes JMaxGraph, a Java library for the analysis of large graph topologies.
+
+
+
+
 
 The objective of this paper is to describe our experience in dealing with
 a large dataset representing the connections between users in Twitter. It enumerates the obstacles we faced, and exposes the solutions we had
@@ -33,11 +37,17 @@ Our objective was to compute the number of occurrences of certain topological pa
 
 \section{State of the Art}
 
+There exist numerous libraries for graph manipulation, like JGraphT, Jung, LEDA, Jung, etc. These libraries cannot be used when the garph is
+
+
 Our attempts to manipulate the graph with common graph libraries failed because  of both the memory and computational overhead of the data-structures they employ.
 JGraphT enables the
 
 Distributed graph platforms such as Hadoop Giraph and Spark GraphX boast the ability to deal with very large graphs.  The solve the inherent complexity of distributed computing by proposing the BSP programming model. BSP is a vertex-centric message-based programming model which is very adequate to the implementation of simple vertex-centric algorithms. Unfortunately it cannot be used for algorithms that have no natural vertex-centric expression, for which it imposes poor performance because of network congestion due to too numerous messages transiting.
 Even though we succeeded in implementing algorithms in those platforms, GraphX cannot be used because of its huge memory requirements and unreliable behavior.
+
+\section{Objectives}
+
 
 
 

@@ -149,7 +149,7 @@ public class CountK22 extends JMGPlugin<Graph, CountK22_Result>
 	public static void main(String[] args) throws IOException
 	{
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Graph g = d.mapGraph(8, false);
+		Graph g = new Graph(d, false, 8);
 		int maxIteration = Integer.valueOf(args[1]);
 		new CountK22().count(g, maxIteration);
 		Cout.info("completed");

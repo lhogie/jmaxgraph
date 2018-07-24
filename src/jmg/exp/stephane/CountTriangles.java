@@ -127,7 +127,7 @@ public class CountTriangles extends JMGPlugin<Graph, CountTriangleResult>
 	public static void main(String[] args) throws IOException
 	{
 		JMGDirectory d = new JMGDirectory("$HOME/datasets/sample-0.001b.jmg");
-		Graph g = d.mapGraph(8, false);
+		Graph g = new Graph(d, false, 8);
 		CountTriangles.count(g, 1);
 	}
 }

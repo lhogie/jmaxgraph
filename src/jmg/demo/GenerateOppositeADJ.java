@@ -15,7 +15,7 @@ public class GenerateOppositeADJ
 		SystemMonitor.defaultMonitor.start();
 
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Graph g = d.mapGraph(8, false);
+		Graph g = new Graph(d, false, 8);
 
 		if (g.out.disk.isDefined() && ! g.in.disk.isDefined())
 		{

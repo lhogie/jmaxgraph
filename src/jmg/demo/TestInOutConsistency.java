@@ -2,6 +2,7 @@ package jmg.demo;
 
 import java.util.Random;
 
+import jmg.Graph;
 import jmg.JmgUtils;
 import jmg.io.jmg.ArcFile;
 import jmg.io.jmg.JMGDirectory;
@@ -16,17 +17,19 @@ public class TestInOutConsistency
 		SystemMonitor.defaultMonitor.start();
 
 		JMGDirectory d = new JMGDirectory(args[0]);
+		Graph g = new Graph(d);
 		Random r = new Random();
+		int n = g.getNbVertices();
 
 		for (int i = 0;; ++i)
 		{
 			if (r.nextBoolean())
 			{
-				test(r, d.inFile.getNbEntries(), d.inFile, d.outFile, true);
+				test(r, n, g.in.disk.getArcFile(), g.out.disk.getArcFile(), true);
 			}
 			else
 			{
-				test(r, d.outFile.getNbEntries(), d.outFile, d.inFile, true);
+				test(r, n, g.out.disk.getArcFile(), g.in.disk.getArcFile(), true);
 
 			}
 		}

@@ -37,10 +37,10 @@ public class Graph implements Serializable
 		{
 			d.ensureExists();
 
-			if (useLabels && d.label2vertexFile.exists())
+			if (useLabels && d.getLabel2VertexFile().exists())
 			{
 				labelling.label2vertex = Conversion
-						.toIntArray(d.label2vertexFile.readValues(nbThreads));
+						.toIntArray(d.getLabel2VertexFile().readValues(nbThreads));
 
 				assert new IntOpenHashSet(labelling.label2vertex)
 						.size() == labelling.label2vertex.length : new IntOpenHashSet(

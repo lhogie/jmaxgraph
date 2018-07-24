@@ -21,7 +21,7 @@ public class Direction extends Adjacency
 	{
 		super(d, nbThreads);
 		this.mem = new MatrixAdj(null, d, nbThreads);
-		this.disk = d == null ? null : new ArcFileAdj(new ArcFile(d, "arcs"), nbThreads);
+		this.disk = new ArcFileAdj(d == null ? null : new ArcFile(d, "arcs"), nbThreads);
 	}
 
 	@Override

@@ -15,7 +15,7 @@ public class CountTrianglesOnEachSample
 		{
 			JMGDirectory d = new JMGDirectory("$HOME/datasets/sample-0.01" + c + ".jmg");
 			Cout.result("Reading " + d);
-			Graph g = d.mapGraph(8, false);
+			Graph g = new Graph(d, false, 8);
 
 			Cout.result("CountK2_2_Thibaud on directed graph");
 			Cout.result(new CountK22().count(g));

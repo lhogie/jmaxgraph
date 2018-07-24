@@ -19,9 +19,9 @@ public class GenerateUndirectedGraph2
 			System.out.println(GenerateUndirectedGraph2.class + " srcJmg destJmg");
 			System.exit(1);
 		}
-		
+
 		JMGDirectory d = new JMGDirectory(args[0]);
-		Graph g = d.mapGraph(8, false);
+		Graph g = new Graph(d, false, 8);
 		Graph h = new Graph();
 		h.out.mem.b = new int[g.getNbVertices()][];
 
@@ -34,9 +34,8 @@ public class GenerateUndirectedGraph2
 		LongProcess lp = new LongProcess("generating undirected topology", " vertex",
 				nbVertices);
 
-		JMGDirectory outd = new JMGDirectory(args[1]);
-		outd.create();
-		ArcFileWriter w = new ArcFileWriter(outd.outFile, nbVertices);
+		Graph outg = new Graph(new JMGDirectory(args[1]));
+		ArcFileWriter w = new ArcFileWriter(outg.out.disk.getArcFile(), nbVertices);
 
 		for (int u = 0; u < nbVertices; ++u)
 		{
