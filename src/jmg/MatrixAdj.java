@@ -1,5 +1,6 @@
 package jmg;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
@@ -10,7 +11,9 @@ import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import jmg.algo.Degrees;
+import jmg.io.adj.TextADJFastReader;
 import toools.io.file.Directory;
+import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -311,6 +314,13 @@ public class MatrixAdj extends Adjacency
 		}
 
 		lp.end();
+	}
+
+	public void from(RegularFile f) throws IOException
+	{
+		TextADJFastReader r = new TextADJFastReader();
+		Int2ObjectMap<int[]> adj = r.readFile(f);
+		from(adj, true, true, null, 1);
 	}
 
 }
