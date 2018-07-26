@@ -18,6 +18,7 @@ public class BFS
 	{
 		int[] visitOrder;
 		int[] distances;
+		public int nbVerticesVisited;
 
 		@Override
 		public String toString()
@@ -69,6 +70,7 @@ public class BFS
 		BFSResult r = new BFSResult();
 		r.visitOrder = q;
 		r.distances = distances;
+		r.nbVerticesVisited = to;
 		return r;
 	}
 
@@ -121,7 +123,7 @@ public class BFS
 		System.out.println("*****");
 		int[] distances2 = classic(g.out.mem.b, 0, Integer.MAX_VALUE,
 				Integer.MAX_VALUE).distances;
-//		Cout.debug(distances2);
+		// Cout.debug(distances2);
 		// FastUtils.printAsMap(distances2, " has distance ", System.out);
 	}
 
