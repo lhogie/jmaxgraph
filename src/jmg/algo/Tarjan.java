@@ -20,6 +20,8 @@ public class Tarjan
 	{
 		Graph g = new Graph();
 		
+		g.out.
+		
 		// gets the OUT adjacencies for all vertices
 		MatrixAdj outs = g.out.mem;
 		

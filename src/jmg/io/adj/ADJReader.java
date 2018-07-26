@@ -21,8 +21,9 @@ public abstract class ADJReader extends DatasetReaderPlugin
 	public void setParameters(PluginParms parms)
 	{
 		super.setParameters(parms);
-		nbVerticesExpected = parms.contains("nbVertices") ? parms.getInt("nbVertices") : -1;
-		nbArcsExpected = parms.contains("nbArcs") ? parms.getLong("nbArcs") : -1;
+		nbVerticesExpected = parms.contains("nbVertices") ? parms.getInt("nbVertices")
+				: - 1;
+		nbArcsExpected = parms.contains("nbArcs") ? parms.getLong("nbArcs") : - 1;
 
 		if (parms.contains("from"))
 			from = new RegularFile(parms.get("from"));
@@ -48,6 +49,12 @@ public abstract class ADJReader extends DatasetReaderPlugin
 		{
 			throw new IllegalStateException(e);
 		}
+	}
+
+	public Int2ObjectMap<int[]> readFile(RegularFile f) throws IOException
+	{
+		from = f;
+		return readFile();
 	}
 
 	protected abstract Int2ObjectMap<int[]> readFile() throws IOException;
