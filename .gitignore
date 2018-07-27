@@ -4,4 +4,5 @@ build/
 /miapita.conf
 .classpath
 .project
+.DS_Store
 
