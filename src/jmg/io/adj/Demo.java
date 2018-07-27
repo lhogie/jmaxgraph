@@ -12,6 +12,7 @@ public class Demo
 	{
 		Graph g = new Graph();
 		g.out.mem.from(new RegularFile("demo.adj"));
+		//g.out.mem.from(new RegularFile(args[0]));
 		Cout.result(g);
 	}
 }

@@ -2,3 +2,7 @@ bin/
 build/
 /degree_distribution.txt
 /miapita.conf
+build.xml
+.classpath
+.DS_Store
+.project
