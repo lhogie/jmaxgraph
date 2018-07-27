@@ -32,7 +32,10 @@
 
 package jmg.algo;
 
+import java.io.IOException;
+
 import jmg.Graph;
+import toools.io.file.RegularFile;
 
 /**
  * The {@code TransitiveClosure} class represents a data type for computing the
@@ -104,31 +107,38 @@ public class TransitiveClosure {
 	 *
 	 * @param args
 	 *            the command-line arguments
+	 * @throws IOException
+	 * 
+	 * @michel
+	 * arguments
+	 * data/digraph/tinyDG.txt
 	 */
-	public static void main(String[] args) {
-//		In in = new In(args[0]);
-//		Digraph G = new Digraph(in);
-//
-//		TransitiveClosure tc = new TransitiveClosure(G);
-//
-//		// print header
-//		StdOut.print("     ");
-//		for (int v = 0; v < G.V(); v++)
-//			StdOut.printf("%3d", v);
-//		StdOut.println();
-//		StdOut.println("--------------------------------------------");
-//
-//		// print transitive closure
-//		for (int v = 0; v < G.V(); v++) {
-//			StdOut.printf("%3d: ", v);
-//			for (int w = 0; w < G.V(); w++) {
-//				if (tc.reachable(v, w))
-//					StdOut.printf("  T");
-//				else
-//					StdOut.printf("   ");
-//			}
-//			StdOut.println();
-//		}
+	public static void main(String[] args) throws IOException {
+
+		// read in digraph from command-line argument
+		Graph G = new Graph();
+		G.out.mem.from(new RegularFile(args[0]));
+
+		TransitiveClosure tc = new TransitiveClosure(G);
+
+		// print header
+		System.out.print("     ");
+		for (int v = 0; v < G.getNbVertices(); v++)
+			System.out.printf("%3d", v);
+		System.out.println();
+		System.out.println("--------------------------------------------");
+
+		// print transitive closure
+		for (int v = 0; v < G.getNbVertices(); v++) {
+			System.out.printf("%3d: ", v);
+			for (int w = 0; w < G.getNbVertices(); w++) {
+				if (tc.reachable(v, w))
+					System.out.printf("  T");
+				else
+					System.out.printf("   ");
+			}
+			System.out.println();
+		}
 	}
 
 }

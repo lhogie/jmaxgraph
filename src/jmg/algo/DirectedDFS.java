@@ -153,6 +153,10 @@ public class DirectedDFS {
 	 * @param args
 	 *            the command-line arguments
 	 * @throws IOException
+	 * 
+	 * @michel
+	 * arguments
+	 * data/digraph/tinyDG.txt 1 8
 	 */
 	public static void main(String[] args) throws IOException {
 

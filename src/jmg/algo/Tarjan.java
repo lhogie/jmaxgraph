@@ -1,14 +1,62 @@
+/******************************************************************************
+ *  Compilation:  javac Tarjan.java
+ *  Execution:    Java Tarjan V E
+ *  Dependencies: Digraph.java Stack.java TransitiveClosure.java StdOut.java
+ *  Data files:   https://algs4.cs.princeton.edu/42digraph/tinyDG.txt
+ *                https://algs4.cs.princeton.edu/42digraph/mediumDG.txt
+ *                https://algs4.cs.princeton.edu/42digraph/largeDG.txt
+ *
+ *  Compute the strongly-connected components of a digraph using 
+ *  Tarjan's algorithm.
+ *
+ *  Runs in O(E + V) time.
+ *
+ *  % java TarjanSCC tinyDG.txt
+ *  5 components
+ *  1 
+ *  0 2 3 4 5
+ *  9 10 11 12
+ *  6 8
+ *  7 
+ *
+ ******************************************************************************/
+
 package jmg.algo;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.Random;
 
 import jmg.Graph;
 import jmg.MatrixAdj;
-import jmg.gen.DirectedGNP;
+import toools.io.file.RegularFile;
 
+/**
+ * The {@code TarjanSCC} class represents a data type for determining the strong
+ * components in a digraph. The <em>id</em> operation determines in which strong
+ * component a given vertex lies; the <em>areStronglyConnected</em> operation
+ * determines whether two vertices are in the same strong component; and the
+ * <em>count</em> operation determines the number of strong components.
+ * 
+ * The <em>component identifier</em> of a component is one of the vertices in
+ * the strong component: two vertices have the same component identifier if and
+ * only if they are in the same strong component.
+ * 
+ * <p>
+ * This implementation uses Tarjan's algorithm. The constructor takes time
+ * proportional to <em>V</em> + <em>E</em> (in the worst case), where <em>V</em>
+ * is the number of vertices and <em>E</em> is the number of edges. Afterwards,
+ * the <em>id</em>, <em>count</em>, and <em>areStronglyConnected</em> operations
+ * take constant time. For alternate implementations of the same API, see
+ * {@link KosarajuSharirSCC} and {@link GabowSCC}.
+ * <p>
+ * For additional documentation, see
+ * <a href="https://algs4.cs.princeton.edu/42digraph">Section 4.2</a> of
+ * <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
+ *
+ * @author Robert Sedgewick
+ * @author Kevin Wayne
+ */
 public class Tarjan {
 
 	private boolean[] marked; // marked[v] = has v been visited?
@@ -34,6 +82,7 @@ public class Tarjan {
 				dfs(G, v);
 		}
 		// check that id[] gives strong components
+		// optional
 		assert check(G);
 	}
 
@@ -106,6 +155,7 @@ public class Tarjan {
 	}
 
 	// does the id[] array contain the strongly connected components?
+	// optional
 	private boolean check(Graph G) {
 		TransitiveClosure tc = new TransitiveClosure(G);
 		for (int v = 0; v < G.getNbVertices(); v++) {
@@ -124,22 +174,36 @@ public class Tarjan {
 			throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V - 1));
 	}
 
-	public static void main(String[] args) {
-		
-		Graph G = new Graph();
-		
-		// load a graph
-		// gets the out adjacency lists for all vertices
-		MatrixAdj outs = G.out.mem;
-		outs.b = DirectedGNP.out(20, 0.1, new Random(), false, 1);
-		int nbVertices = outs.b.length;
-		for (int u = 0; u < nbVertices; ++u) {
-			// Cout.debug(outs.b[u]);
-			System.out.println(u + ": " + Arrays.toString(outs.b[u]));
-		}
-		
+	/**
+	 * Unit tests the {@code Tarjan} data type.
+	 *
+	 * @param args
+	 *            the command-line arguments
+	 * @throws IOException
+	 * 
+	 * @michel : 
+	 * demo with data/digraph/tinyDG.txt
+	 * https://algs4.cs.princeton.edu/42digraph/
+	 */
+	public static void main(String[] args) throws IOException {
+
+		// Graph G = new Graph();
+
+		// // load a graph
+		// // gets the out adjacency lists for all vertices
+		// MatrixAdj outs = G.out.mem;
+		// outs.b = DirectedGNP.out(20, 0.1, new Random(), false, 1);
+		// int nbVertices = outs.b.length;
+		// for (int u = 0; u < nbVertices; ++u) {
+		// // Cout.debug(outs.b[u]);
+		// System.out.println(u + ": " + Arrays.toString(outs.b[u]));
+		// }
+
 		// demo Tarjan
-		
+		// read in digraph from command-line argument
+		Graph G = new Graph();
+		G.out.mem.from(new RegularFile(args[0]));
+
 		Tarjan scc = new Tarjan(G);
 
 		// number of connected components
@@ -165,3 +229,24 @@ public class Tarjan {
 		}
 	}
 }
+/******************************************************************************
+ * Copyright 2002-2016, Robert Sedgewick and Kevin Wayne.
+ *
+ * This file is part of algs4.jar, which accompanies the textbook
+ *
+ * Algorithms, 4th edition by Robert Sedgewick and Kevin Wayne, Addison-Wesley
+ * Professional, 2011, ISBN 0-321-57351-X. http://algs4.cs.princeton.edu
+ *
+ *
+ * algs4.jar is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * algs4.jar is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * algs4.jar. If not, see http://www.gnu.org/licenses.
+ ******************************************************************************/
