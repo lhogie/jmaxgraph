@@ -23,8 +23,13 @@
 
 package jmg.algo;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import jmg.Graph;
 import jmg.MatrixAdj;
+import toools.io.file.RegularFile;
 
 /**
  * The {@code DirectedDFS} class represents a data type for determining the
@@ -147,31 +152,32 @@ public class DirectedDFS {
 	 *
 	 * @param args
 	 *            the command-line arguments
+	 * @throws IOException
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 
-//		// read in digraph from command-line argument
-//		In in = new In(args[0]);
-//		Digraph G = new Digraph(in);
-//
-//		// read in sources from command-line arguments
-//		Bag<Integer> sources = new Bag<Integer>();
-//		for (int i = 1; i < args.length; i++) {
-//			int s = Integer.parseInt(args[i]);
-//			sources.add(s);
-//		}
-//
-//		// multiple-source reachability
-//		DirectedDFS dfs = new DirectedDFS(G, sources);
-//
-//		// print out vertices reachable from sources
-//		for (int v = 0; v < G.V(); v++) {
-//			if (dfs.marked(v))
-//				StdOut.print(v + " ");
-//		}
-//		StdOut.println();
+		// read in digraph from command-line argument
+
+		Graph G = new Graph();
+		G.out.mem.from(new RegularFile(args[0]));
+
+		// read in sources from command-line arguments
+		Set<Integer> sources = new HashSet<Integer>();
+		for (int i = 1; i < args.length; i++) {
+			int s = Integer.parseInt(args[i]);
+			sources.add(s);
+		}
+
+		// multiple-source reachability
+		DirectedDFS dfs = new DirectedDFS(G, sources);
+
+		// print out vertices reachable from sources
+		for (int v = 0; v < G.getNbVertices(); v++) {
+			if (dfs.marked(v))
+				System.out.print(v + " ");
+		}
+		System.out.println();
 	}
-
 }
 
 /******************************************************************************
