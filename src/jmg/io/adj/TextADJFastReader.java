@@ -17,6 +17,8 @@ import toools.util.Conversion;
 
 public class TextADJFastReader extends TextADJReader
 {
+
+	
 	@Override
 	public Int2ObjectMap<int[]> readFile() throws IOException
 	{
