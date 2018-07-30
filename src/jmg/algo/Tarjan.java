@@ -1,23 +1,24 @@
 /******************************************************************************
  *  Compilation:  javac Tarjan.java
- *  Execution:    Java Tarjan V E
- *  Dependencies: Digraph.java Stack.java TransitiveClosure.java StdOut.java
- *  Data files:   https://algs4.cs.princeton.edu/42digraph/tinyDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/mediumDG.txt
- *                https://algs4.cs.princeton.edu/42digraph/largeDG.txt
+ *  Execution:    Java Tarjan graph.txt
+ *  Dependencies: jmaxgraph-0.3.0.jar toools.jar fastutil-8.1.0.jar java4unix.jar
+ *  Data files:   data/digraph/tinyDG.txt
  *
  *  Compute the strongly-connected components of a digraph using 
- *  Tarjan's algorithm.
+ *  Tarjan's algorithm tuned according Robert Sedgewick
  *
  *  Runs in O(E + V) time.
  *
- *  % java TarjanSCC tinyDG.txt
+ *  % java Tarjan data/digraph/tinyDG.txt
  *  5 components
  *  1 
  *  0 2 3 4 5
  *  9 10 11 12
  *  6 8
  *  7 
+ *  
+ *  % java -cp ../jar/jmg.jar:../jar/toools.jar:../jar/fastutil-8.1.0.jar:
+ *  ../jar/java4unix.jar jmg.algo.Tarjan tinyDG.txt
  *
  ******************************************************************************/
 
@@ -60,9 +61,9 @@ import toools.io.file.RegularFile;
 public class Tarjan {
 
 	private boolean[] marked; // marked[v] = has v been visited?
-	private int[] id; // id[v] = id of strong component containing v
-	private int[] low; // low[v] = low number of v
-	private int pre; // preorder number counter
+	private int[] id; // id[v] = id of the strong component containing v
+	private int[] low; // low[v] = low number of any node reachable from v through DFS subtree
+	private int pre; // preorder number counter = DFS count
 	private int count; // number of strongly-connected components
 	private ArrayDeque<Integer> stack;
 
@@ -73,7 +74,7 @@ public class Tarjan {
 	 *            the digraph
 	 */
 	public Tarjan(Graph G) {
-		marked = new boolean[G.getNbVertices()];
+		marked = new boolean[G.getNbVertices()]; // initialized to False
 		stack = new ArrayDeque<Integer>();
 		id = new int[G.getNbVertices()];
 		low = new int[G.getNbVertices()];
@@ -83,7 +84,7 @@ public class Tarjan {
 		}
 		// check that id[] gives strong components
 		// optional
-		assert check(G);
+		// assert check(G);
 	}
 
 	private void dfs(Graph G, int v) {
@@ -91,6 +92,11 @@ public class Tarjan {
 		marked[v] = true;
 		low[v] = pre++;
 		int min = low[v];
+		/*
+		 * min is not stored in an array as it is the case in the original algorithm.
+		 * It's value is only required for v and the last w visited. See also the
+		 * algorithm of Cheriyan-Mehlhorn-Gabow.
+		 */
 		stack.push(v);
 		for (int w : outs.b[v]) {
 			if (!marked[w])
@@ -98,15 +104,17 @@ public class Tarjan {
 			if (low[w] < min)
 				min = low[w];
 		}
-		if (min < low[v]) {
+		if (min < low[v]) { // low[v] != min, not the root of a SCC
 			low[v] = min;
 			return;
 		}
+		/* new SCC found with v as root */
 		int w;
 		do {
 			w = stack.pop();
 			id[w] = count;
 			low[w] = outs.b.length;
+			/* may not be lower than another */
 		} while (w != v);
 		count++;
 	}
@@ -181,9 +189,8 @@ public class Tarjan {
 	 *            the command-line arguments
 	 * @throws IOException
 	 * 
-	 * @michel : 
-	 * demo with data/digraph/tinyDG.txt
-	 * https://algs4.cs.princeton.edu/42digraph/
+	 * @michel : demo with data/digraph/tinyDG.txt
+	 *         https://algs4.cs.princeton.edu/42digraph/
 	 */
 	public static void main(String[] args) throws IOException {
 
