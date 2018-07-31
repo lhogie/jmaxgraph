@@ -210,7 +210,7 @@ public class Tarjan {
 		// read in digraph from command-line argument
 		Graph G = new Graph();
 		G.out.mem.from(new RegularFile(args[0]));
-
+		
 		Tarjan scc = new Tarjan(G);
 
 		// number of connected components
