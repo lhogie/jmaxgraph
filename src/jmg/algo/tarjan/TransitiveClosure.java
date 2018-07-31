@@ -30,7 +30,7 @@
  *
  ******************************************************************************/
 
-package jmg.algo;
+package jmg.algo.tarjan;
 
 import java.io.IOException;
 

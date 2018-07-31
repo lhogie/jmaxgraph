@@ -7,10 +7,10 @@ import jmg.chain.JMGPlugin;
 public abstract class DatasetReaderPlugin extends JMGPlugin<Void, Graph>
 {
 
-	protected int bufSize = 65530 * 256;
-	protected boolean addUndeclared = true;
-	protected boolean relabel = true;
-	protected boolean sort = true;
+	public int bufSize = 65530 * 256;
+	public boolean addUndeclared = true;
+	public boolean relabel = true;
+	public boolean sort = true;
 
 	@Override
 	public Graph process(Void g)

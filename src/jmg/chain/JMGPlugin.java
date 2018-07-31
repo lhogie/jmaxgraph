@@ -7,7 +7,7 @@ import toools.thread.MultiThreadProcessing;
 
 public abstract class JMGPlugin<IN, OUT> implements TooolsPlugin<IN, OUT>
 {
-	protected int nbThreads = MultiThreadProcessing.NB_THREADS_TO_USE;
+	public int nbThreads = MultiThreadProcessing.NB_THREADS_TO_USE;
 	
 
 	@Override

@@ -29,7 +29,13 @@ public class BFS
 
 	}
 
-	public static BFSResult classic(int[][] adj, int src, int maxDistance, int maxSize)
+	public static interface V
+	{
+		boolean found(int u, int d);
+	}
+
+	public static BFSResult classic(int[][] adj, int src, int maxDistance, int maxSize,
+			V handler)
 	{
 		LongProcess lp = new LongProcess("BFS (classic)", " vertex", adj.length);
 		int[] distances = new int[adj.length];
@@ -47,6 +53,7 @@ public class BFS
 
 			int v = q[from++];
 			int d = distances[v];
+			handler.found(v, d);
 
 			if (d <= maxDistance)
 			{
@@ -121,8 +128,8 @@ public class BFS
 		int[] distances = bsp_seq(g.out.mem.b, 0);
 		// FastUtils.printAsMap(distances, " has distance ", System.out);
 		System.out.println("*****");
-		int[] distances2 = classic(g.out.mem.b, 0, Integer.MAX_VALUE,
-				Integer.MAX_VALUE).distances;
+		int[] distances2 = classic(g.out.mem.b, 0, Integer.MAX_VALUE, Integer.MAX_VALUE,
+				(u, v) -> true).distances;
 		// Cout.debug(distances2);
 		// FastUtils.printAsMap(distances2, " has distance ", System.out);
 	}
@@ -134,7 +141,8 @@ public class BFS
 		@Override
 		public BFSResult process(Direction d)
 		{
-			return BFS.classic(d.mem.b, src, Integer.MAX_VALUE, Integer.MAX_VALUE);
+			return BFS.classic(d.mem.b, src, Integer.MAX_VALUE, Integer.MAX_VALUE,
+					(u, v) -> true);
 		}
 
 		@Override

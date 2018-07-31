@@ -41,7 +41,7 @@ public abstract class ADJReader extends DatasetReaderPlugin
 		{
 			Int2ObjectMap<int[]> adj = readFile();
 			Graph g = new Graph();
-			g.labelling = new Labelling();
+			g.labelling = relabel ? new Labelling() : null;
 			g.out.mem.from(adj, addUndeclared, sort, g.labelling, nbThreads);
 			return g;
 		}

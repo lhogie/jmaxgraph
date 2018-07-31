@@ -18,7 +18,6 @@ import toools.util.Conversion;
 public class TextADJFastReader extends TextADJReader
 {
 
-	
 	@Override
 	public Int2ObjectMap<int[]> readFile() throws IOException
 	{
@@ -43,7 +42,7 @@ public class TextADJFastReader extends TextADJReader
 			protected void runInParallel(ThreadSpecifics s, List<Thread> threads)
 					throws Throwable
 			{
-				Int2ObjectMap<int[]> _localAdj = localAdjs[s.rank] =new Int2ObjectOpenHashMap<>(
+				Int2ObjectMap<int[]> _localAdj = localAdjs[s.rank] = new Int2ObjectOpenHashMap<>(
 						nbVerticesExpected >= 0 ? nbVerticesExpected / threads.size()
 								: 0);
 

@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \usepackage{amsfonts}
 \usepackage{amssymb}
-\title{On analyzing large graphs}
+\title{Practical analysis of very large graphs with the JMaxGraph library}
 \author{}
 \begin{document}
 \maketitle
@@ -12,22 +12,25 @@
 
 This article first introduces JMaxGraph, a Java library for the analysis of large graph topologies.
 
-By large we mean so large that standard tools for graph processing cannot be used.
+The term "large graph" refers to graph sizes beyond the limit to which usual tools for graph processing can be used.
 
-This article enumerates the obstacles we faced, and it exposes the solutions we had
-to find for each of them in order to reach our goal.
-
-
-As an example, the use case we present in this paper uses the graph of Twitter users.
-The data connecting users in Twitter was collected by the DIANA research group (Inria) in 2011. It comes as a single 215GB text file, in the ADJ format. It stores 
+As an example, the use case we present in this paper uses the graph of Twitter users, which was collected by the DIANA research group (Inria). The dataset comes as a single 215GB text file, in the ADJ format. It stores 
 398,846,191 vertices and 23,137,510,395 arcs.
+Such a dimensional graph cannot be processed by tools that were not designed with extreme scalability in mind.
+
+JMaxGraph is the result of many years of experience in the development of software tools for graph algorithmics Research within the Coati Research Group at Inria Sophia Antipolis, Universit\'e C\^ote d'Azur, I3S laboratory. JMaxGraph can be seen as a synthesis of these past developements. the Mascopt library started in 2001 aimed at understanding and implementing optimization techniques applied to graphs.
+Grph, started in 2008, is a library for the manipulation of large mixed dynamic graphs, was motivated by the limitations of Mascopt in terms of graph models and performance.
+The BigGrph project, started in 2014-17,  aimed at improving again the scalability and Grph, was a applied research effort to provide a parallel and 
+distributed graph library for the in-memory analysis of large graphs. 
+The goal of JMaxGraph is to gather in one comprehensive library the strength of the its ancestor projects, while trying to avoid as much as possible their pitfalls.
 
 
-
-
-\section{Other graph analysis tools}
+\section{State of the Art of graph analysis tools}
 
 Sage, NetworkIt and NetworkX are written in Python. They are highly flexible libraries which are easily usable through the Python interpreter. They compensate the inherent slowness of interpreted Python by offering a facilities and bridges to algorithms written in C. Unfortunately the overhead of frequently switching context between Python and C result in poor performance.
+
+The Boost Graph Library (BGL)
+distributed-memory parallelism, you can also look at the Parallel BGL. 
 
 JGraphT and Jung are Java libraries. Their offer a similar Object-oriented model. They both are written in Java, using idiomatic programming paradigm, therefore they both suffer from  the heavy memory model of the JVM. Indeed in the Hotspot JVM, object overhead is 8 bytes and every object occupies a number of bytes that is a multiple of 8. If the number of bytes required by an object for its header and fields is not a multiple 8, then you round up to the next multiple of 8. As a consequence, an instance of a Vertex class with one single int field to store the ID of the vertex  occupies 16 bytes in memory, where it should has only 4 bytes. Each reference to this instance uses 8 more bytes (in a 64bit memory model). Note that if an object is not referenced, it is destroyed by the garbage collector.
 
@@ -43,39 +46,99 @@ GraphChi leaves the graph on disk. It proposes an efficient loading mechanism in
 WebGraph is a centralized library written in Java. Its data-structure 
 uses compression in order to allow large graphs to fit in RAM. Using this data-structure imposes a compromise between decompression-overhead and compression ratio.
 
-\section{JMaxGraph}
+\section{JMaxGraph design}
 
-JMaxGraph benefits from our experience in dealing with existing libraries and programming paradigms for graph algorithms.
-Its main features are:
-\begin{enumerate}
-\item it is written in Java for its portability, industrial-class strength and popularity
-\item it supports both in-memory (uncompressed) and disk-based (compressed) operations. An algorithm can use both at the same time.
-\item its data-structure uses lowest-level abstraction in order to avoid Java overhead when dealing with objects
-\item it makes extensive use of multi-threading in order to take full advantage of multi-core computers (in today's clusters, no node have less that 16 cores)
-\item it uses a custom file-system based Map/Reduce distributed computation engine. It order to enable large experimentation campaigns, it is able to recover on error thanks to its incremental job system.
-\end{enumerate}
+JMaxGraph benefits from our experience in dealing with existing libraries and in implementing sequential/parallel/distributed graph algorithms.
 
-In order to allow this, JMaxGraph has a number restriction:
+Its design aims at overcoming the limitations of existing libraries both in terms of scalability and flexiliblity.
 
-\begin{enumerate}
-\item vertices are numbers --- not objects --- leaving to the user the responsibility to provide a bridge to its OO model if any.
+Most of existing libraries (JGraphT, Jung, Giraph, WebGraph, GraphX) are designed to run on top of the Java Virtual Machine, so is JMaxGraph. The JVM ensures maximum portability and excellent performance.
+It has been developed for more than 20 years by the Sun then Oracle companies which brought it industrial-class quality.
+
+In spite on its intrinsic qualities, Java has a number of limitations. In particular it has intensive RAM usage and method calls overhead when dealing with objects. These entails JMaxGraph
+to use and expose a low-level data-structure.
+
+JMaxGraph supports both in-memory (uncompressed) and disk-based (compressed) operations. An algorithm can use both at the same time. Which is required when it needs to operate on both IN and OUT adjacencies but only one one them fits in RAM.
+In this case the algorithms must iterate  on the on-disk adjacency while it can access randomly the opposite one.
+
+As of 2018, computational clusters have no node with less that 16 cores. This allows computation to greatly benefit from parellelism.
+JMaxGraph then makes extensive use of multi-threading in order to maximum the load of nodes and reduce the overall computation time.
+
+Large experimentation campaigns imply running time which are beyond human's patience. They need to be distributed over the nodes of a cluster. Because of the high probability of failures, their execution needs to be incremental. This enables to recover on error at the point the error occurred. To allow this, JMaxGraph features a custom file-system based Map/Reduce distributed computation engine.
+
+In order to allow this, JMaxGraph has a number of  restriction:
+
+
+
+\subsection{Graph model}
+
+In JMaxGraph, vertices are integers. They are implemented by Java primitive int values.
+
 The vertex ID space is contiguous, ranging from 0 to N-1, N being the number of vertices in the graph.
-\item it does not store edges, nor it stores values for edges
-\end{enumerate}
+
+Neighbors are stored in sorted arrays.
+This allows $O(log(d(u)))$ search for a given neighbor.
+
+JMaxGraph does not store edges, nor it stores values for edges.
+
+It provides an abstraction for the basic operations than be be performed on adjacencies, regardless of their implementation strategy:
+\begin{itemize}
+\item $ADJ.getNbVertices()$ : obtaining the number of vertices;
+\item $ADJ.iterator(startVertex)$ iterating over the set of vertices, starting at vertex $startVertex$;
+\item $ADJ.getNeighbors(u)$ retrieving the neighbors of a given vertex $u$.
+\end{itemize}
+
+There currently exist two implementations for adjacencies. One loads dat  in RAM in order to process it efficiently. Another one leaves the data on disk.
+
+An algorithms requiring data to be loaded in RAM can directly use the int array-array, thereby bypassing the OO layer.
 
 
 \subsection{In-memory data-structure}
 
-The adj-list are stored in an array. Neighbors of vertex $u$ can in found at the $u^{th}$ cell, referred to as $adj[u]$.
+Adj-lists are stored in int arrays. Neighbors of vertex $u$ can in found at the $u^{th}$ cell, referred to as $adj[u]$.
 Adj-list are ordered. The $u^{th}$ neighbor of vertex $u$ can be obtained by $adj[u][i]$.
 
-This allows $O(log(n))$ search for a given arc.
 
 JMaxGraph exposes the $int[][]$ to algorithm for the following reason: the graph data can hence be accessed in direct, with no need to do through methods, which woul impose a JMG, passing parameter, thereby manipulation the thread stack. Performance greatly benefits from using this low-level approach.
 
 Java Arrays have another significant advantage: they can be accessed in parallel by threads with no performance loss. Several threads working on distinct areas of an array are then not be slowed done by each other nor they generate inconsistent values.
 
-\section{On-disk storage: the JMG data format}
+\subsection{On-disk storage: the JMG data format}
+
+
+In the JMG format, the graph is described by a directory containing directories for each direction available, IN and/or OUT.
+
+Each of this directory contains at minimum the ARC file for this direction.
+ARC files store adjacencies.  An ARC file come with its index file, called \texttt{-index.nbs}, a NBS file being a binary fixed-length encoding for integer numbers.
+For each vertex $u$, the index file has an entry which gives the offset in the ARC file at which the set of neighbors of $u$ are stored.
+
+This set of neighbors is encoded at a byte sequence of length:
+$$if u < N l = index(u+1) - index(u) else l = size(arcfile) - index(u)$$
+
+
+Starting at position $index(u)$, the byte sequence encoding the set of neighbors for vertex $u$ is organized like this:
+\begin{enumerate}
+\item 8 bytes encode the neighbor with lowest ID
+\item 1 byte encodes the number of bytes used to store each other neighbor, let us refer to it as $e$. The number of neighbors is then defined by $1 + \frac{l - 9}{e}$.
+\item each following neighbor $v_i$ of $u$ is then encoded as the delta $d$ of its ID and the ID of the previous neighbor.
+The ID of the $i^{th} (with\ i > 0)$ neighbor is obtained by:
+$$v_i = v_{i-1} + d$$.
+\end{enumerate}
+Since every vertex may use words of different length to store their neighborhood,  the number neighbors cannot be computed out of this $l$.
+
+The JMG file format exhibits the following advantages:
+\begin{enumerate}
+\item the dataset can be accessed randomly. This means that the degree and the adjacency of any given vertex can be retrieved from disk without having to load/parse other vertices.
+\item an ARC file is iterable. This means that adj-list contains in an ARC file can be processed on-the-fly when the file is loaded. This mechanism fastens algorithms which process any adj-list one single time and make it possible to execute certain algorithms even though there is not enough RAM to load the entire graph.
+\item there is no vertex in adjacency lists that is not in the vertex set.
+\item adjacency lists are compressed in such a way that the more an adj-list is long, the fewer bytes will be used to store each individual element.
+\item compression/decompression time is insignificant since it consists in one single addition for every arc.
+\end{enumerate}
+
+The Twitter datasets is 3-times smaller when encoded as a JMG datasets rather than stored in an ADJ file.
+
+
+\subsection{performance of JMG}
 
 The Twitter graph initially came as an ADJ file. The ADJ file format defines that the first line of the file is the number of vertices. Each following line then consists of:
 \begin{enumerate}
@@ -110,42 +173,14 @@ We made a new implementation of buffered reading and number parsing, which speed
 \caption{blabla}
 \end{figure}
 
-In the JMG format, the graph is described by several files in a directory. Two file types:
 
-The \texttt{properties.txt}  is an ASCII text file. It consists of a sequence of $key=value$ lines. It stores various graph property, such as the number of vertices in the graph.
 
-ARC files store adjacencies. A JMG directory embeds at least one ARC file, which stores either the OUT-adj or the IN-adj. But it may contain the ARC files for both directions.
-The IN (resp. OUT) adjacency is expected to be found in a file \texttt{in.arc} (resp. \texttt{out.arc}). Such ARC file comes with its index file, called \texttt{-index.nbs}. An NBS file is a binary fixed-length encoding for integer numbers.
-For each vertex $u$, the index file has an entry which gives the position in the adjacency file at which the set of neighbors of $u$ are stored.
-
-In the ARC file, this set of neighbors is encoded at a byte sequence of length:
-$$l = index(u+1) - index(u)$$
- Note that if $u$ is the vertex with the highest ID,  they does not exist such thing as $index(u+1))$. The length of the byte sequence describing its neighborhoods is then defined by:
- $$l = size(indexFile) - index(u)$$
-Note also that the number neighbors cannot be computed out of this $l$, as every vertex may use words of different length to store their neighborhood.
-Then, starting at position $index(u)$, the byte sequence encoding the set of neighbors for vertex $u$ is organized like this:
-\begin{enumerate}
-\item 8 bytes encode the neighbor with lowest ID
-\item 1 byte encodes the number of bytes used to store each other neighbor, let us refer to it as $e$. The number of neighbors is then defined by $1 + \frac{l - 9}{e}$.
-\item each following neighbor $v_i$ of $u$ is encoded as the delta $d$ of its ID and the ID of the previous neighbor.
-The ID of the $i^{th} (with\ i > 0)$ neighbor is obtained by:
-$$v_i = v_{i-1} + d$$.
-\end{enumerate}
-
-The JMG file format exhibits the following advantages:
-\begin{enumerate}
-\item adjacency lists are ordered, which is very profitable to algorithms which can hence resort to dichotomy.
-\item the dataset can be accessed randomly. This means that the degree and the adjacency of any given vertex can be retrieved from disk without having to load/parse other vertices.
-\item an ARC file is iterable. This means that adj-list contains in an ARC file can be processed on-the-fly when the file is loaded. This mechanism fastens algorithms which process any adj-list one single time and make it possible to execute certain algorithms even though there is not enough RAM to load the entire graph.
-\item there is no vertex in adjacency lists that is not in the vertex set.
-\item adjacency lists are compressed in such a way that the more an adj-list is long, the fewer bytes will be used to store each individual element.
-\item compression/decompression time is insignificant
-\end{enumerate}
-
-The Twitter datasets is 3-times smaller when encoded as a JMG datasets rather than stored in an ADJ file.
 
 
 \section{Graph processing models}
+
+This section describes 
+graph processing paradigms, and the way it handle each of them.
 
 \subsection{Sequential}
 
@@ -155,13 +190,26 @@ Benefits from direct-access to Java arrays
 
 Benefits from concurrent nature of Java arrays.
 
+\subsection{BSP}
+
+JMaxGraph does not support BSP. BSP is useful to distributed computations. In Java, a general model for BSP imposes that messages are objects. Every communication implies instantiating a message object which has too large overhead.
 
 \subsection{Map/Reduce}
-one job per file
-large number of jobs in order to allow better distribution accros cluster nodes
 
-inherently incremental, meaning that job result are stored in a file as soon as it is computed. No job will be computed twice. Which makes it resilient to failures because when/if the system gets restarted, it will continue computation at the stage it was.
-distributed, with no restriction whatsoever on the number of workers 
+When a problem can be divided in a number of sub-problems, it can be solved in parallel on multiple nodes.
+
+JMaxGraph comes with the JMR toolkit, which is a file-based Map/Reduce middleware.
+
+JMR defines that a sub-problem is encoded in a binary file stored in a shared-directory. This relies on shared-filesystem, which is the general rule in today's clusters.
+
+Workers run on various nodes of the clusters. They all have access to the shared directory of not-yet-solved sub-problems, where they pick some.
+
+On completion of a sub-problem, the worker generates a new result files in a shared-directory of results, and it deletes the sub-problem file.
+
+The global computation is assumed to be completed when the sub-problem shared directory is empty.
+
+This has several advantages. There is no need to run distributed data storage servers (like HDFS) because it relies on the cluster shared file-system (NFS, Lustre, etc). Also the system is inherently incremental, which makes it resilient to failures.
+Note that they is no restriction whatsoever on the number of workers, which can vary upon time. The most workers, the sooner the computation  will complete.
 
 \section{Algorithms}
 

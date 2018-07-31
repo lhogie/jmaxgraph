@@ -72,5 +72,7 @@ public abstract class TextADJReader extends ADJReader
 		super.setParameters(parms);
 		hasNbVertices = parms.getBoolean("hasNbVertices");
 	}
+	
+	
 
 }

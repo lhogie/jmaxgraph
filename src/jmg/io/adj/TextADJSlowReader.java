@@ -7,7 +7,9 @@ import java.util.Scanner;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrays;
 import toools.io.Cout;
+import toools.io.Utilities;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 import toools.util.Conversion;
@@ -44,11 +46,10 @@ public class TextADJSlowReader extends TextADJReader
 				Int2ObjectMap<int[]> _localAdj = new Int2ObjectOpenHashMap<>(
 						nbVerticesExpected / NB_THREADS_TO_USE);
 				localAdjs[s.rank] = _localAdj;
-				Section b = sectionPosititions[s.rank];
 				InputStream _is = from.createReadingStream(65536 * 256);
 
-				if (_is.skip(b.fromPosition) != b.endVertex)
-					throw new IllegalStateException();
+				Section section = sectionPosititions[s.rank];
+				Utilities.skip(_is, section.fromPosition);
 
 				Scanner _scanner = new Scanner(_is);
 
@@ -66,25 +67,24 @@ public class TextADJSlowReader extends TextADJReader
 					int _src = Conversion.long2int(_scanner.nextLong());
 
 					// if it reaches the end of the section
-					if (_src == b.endVertex)
+					if (_src == section.endVertex)
 						break;
 
 					int _nbNeighbors = _scanner.nextInt();
 
-					// int[] _outNeighbors = _nbNeighbors == 0 ?
-					// Utils.emptyArray
-					// : new int[_nbNeighbors];
+					int[] _outNeighbors = _nbNeighbors == 0 ? IntArrays.EMPTY_ARRAY
+							: new int[_nbNeighbors];
 
 					for (int i = 0; i < _nbNeighbors; ++i)
 					{
 						int neighbor = _scanner.nextInt();
-						// _outNeighbors[i] = neighbor;
+						_outNeighbors[i] = neighbor;
 						++_nbEdge;
 					}
 
 					s.progressStatus += _nbNeighbors;
 
-					// _localAdj.put(_src, _outNeighbors);
+					_localAdj.put(_src, _outNeighbors);
 				}
 
 				Cout.progress("thread " + s.rank + " has read " + _localAdj.size()
