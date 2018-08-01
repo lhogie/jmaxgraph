@@ -1,7 +1,7 @@
 package jmg.exp.nathann;
 
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 
 public class K22AndTransitiveTrianglesCounterPlugin extends JMGPlugin<Graph, LocalCount>
 {

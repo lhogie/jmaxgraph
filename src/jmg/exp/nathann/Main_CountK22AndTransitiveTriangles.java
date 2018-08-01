@@ -2,7 +2,7 @@ package jmg.exp.nathann;
 
 import j4u.chain.PluginParms;
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.io.file.Directory;
 
 public class Main_CountK22AndTransitiveTriangles extends JMGPlugin<Graph, GlobalCount>

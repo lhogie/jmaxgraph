@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import j4u.chain.PluginParms;
 import jmg.Graph;
 import jmg.MatrixAdj;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
@@ -74,7 +74,8 @@ public class DirectedGNP
 		public Graph process(Void v)
 		{
 			Graph g = new Graph();
-			g.out.mem = new MatrixAdj(out(nbVertex, p, r, allowLoops, nbThreads), null, nbThreads);
+			g.out.mem = new MatrixAdj(out(nbVertex, p, r, allowLoops, nbThreads), null,
+					nbThreads);
 			return g;
 		}
 

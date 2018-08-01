@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntArrays;
 import j4u.chain.PluginParms;
 import jmg.Graph;
 import jmg.algo.CountBidirectionalArcs;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;
@@ -31,7 +31,8 @@ public class CountTriangles extends JMGPlugin<Graph, CountTriangles_Result>
 
 		CountTriangles_Result r = new CountTriangles_Result();
 
-		LongProcess l = new LongProcess("tracking transitive triangles", " vertex", g.getNbVertices());
+		LongProcess l = new LongProcess("tracking transitive triangles", " vertex",
+				g.getNbVertices());
 
 		l.temporaryResult = r;
 

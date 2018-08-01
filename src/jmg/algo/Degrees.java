@@ -1,7 +1,7 @@
 package jmg.algo;
 
 import j4u.chain.PluginParms;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;

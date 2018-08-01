@@ -1,7 +1,7 @@
 package jmg.exp.nathann;
 
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 
 public class plugin extends JMGPlugin<Graph, GlobalCount>
 {

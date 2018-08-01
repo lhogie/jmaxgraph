@@ -6,8 +6,8 @@ import java.util.Random;
 
 import j4u.chain.PluginParms;
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
 import jmg.io.jmg.JMGDirectory;
+import jmg.plugins.JMGPlugin;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;

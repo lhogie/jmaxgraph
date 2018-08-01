@@ -2,7 +2,7 @@ package jmg.io.jmg;
 
 import j4u.chain.PluginParms;
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 
 public class JMGWriter
 {
@@ -23,8 +23,8 @@ public class JMGWriter
 		@Override
 		public void setParameters(PluginParms p)
 		{
-			to = new JMGDirectory(p.get("name"));
+			if (to == null)
+				to = new JMGDirectory(p.get("path"));
 		}
 	}
-
 }

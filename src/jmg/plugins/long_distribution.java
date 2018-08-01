@@ -1,20 +1,21 @@
-package jmg.chain;
+package jmg.plugins;
 
-import it.unimi.dsi.fastutil.ints.Int2IntAVLTreeMap;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntAVLTreeMap;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;
 import toools.collections.primitive.IntCursor;
 import toools.progression.LongProcess;
 
-public class int_distribution implements TooolsPlugin<int[], Int2IntMap>
+public class long_distribution implements TooolsPlugin<long[], Long2IntMap>
 {
-	public static Int2IntMap getDistribution(int[] m)
+	public static Long2IntMap getDistribution(long[] m)
 	{
 		LongProcess pm = new LongProcess("computing distribution", " element", m.length);
-		Int2IntMap distribution = new Int2IntAVLTreeMap();
+		Long2IntMap distribution = new Long2IntAVLTreeMap();
 
-		for (int n : m)
+		for (long n : m)
 		{
 			++pm.sensor.progressStatus;
 
@@ -29,15 +30,15 @@ public class int_distribution implements TooolsPlugin<int[], Int2IntMap>
 	{
 		StringBuilder r = new StringBuilder();
 
-		for (IntCursor k : IntCursor.fromFastUtil(distribution.keySet()))
+		for (IntCursor value : IntCursor.fromFastUtil(distribution.keySet()))
 		{
-			int nbElement = distribution.get(k.value);
+			int nbElement = distribution.get(value.value);
 
 			if (nbElement > 0)
 			{
 				r.append(nbElement);
 				r.append(" elements have value ");
-				r.append(k.value);
+				r.append(value.value);
 				r.append('\n');
 			}
 		}
@@ -46,7 +47,7 @@ public class int_distribution implements TooolsPlugin<int[], Int2IntMap>
 	}
 
 	@Override
-	public Int2IntMap process(int[] a)
+	public Long2IntMap process(long[] a)
 	{
 		return getDistribution(a);
 	}

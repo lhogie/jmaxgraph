@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import j4u.chain.PluginParms;
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;

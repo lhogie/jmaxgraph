@@ -1,4 +1,4 @@
-package jmg.chain;
+package jmg.plugins;
 
 import j4u.chain.DefaultPluginFactory;
 import j4u.chain.NBSReader;

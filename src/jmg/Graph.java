@@ -176,6 +176,7 @@ public class Graph implements Serializable
 	@Override
 	public String toString()
 	{
+		
 		return "graph: " + getNbVertices() + " vertices";
 	}
 

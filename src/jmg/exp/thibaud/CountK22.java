@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import j4u.chain.PluginParms;
 import jmg.Graph;
 import jmg.JmgUtils;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.io.Cout;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
@@ -60,8 +60,8 @@ public class CountK22 extends JMGPlugin<Graph, CountK22_Result>
 							if (u < w && ! alreadyDone.contains(w))
 							{
 								alreadyDone.add(w);
-								int nbCN = JmgUtils.sizeOfIntersection(
-										g.out.mem.b[u], g.out.mem.b[w]);
+								int nbCN = JmgUtils.sizeOfIntersection(g.out.mem.b[u],
+										g.out.mem.b[w]);
 
 								++_distri[nbCN];
 

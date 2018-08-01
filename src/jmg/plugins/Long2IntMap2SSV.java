@@ -1,4 +1,4 @@
-package jmg.chain;
+package jmg.plugins;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import j4u.chain.PluginParms;

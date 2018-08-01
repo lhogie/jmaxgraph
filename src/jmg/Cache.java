@@ -2,6 +2,7 @@ package jmg;
 
 import java.util.function.Supplier;
 
+import toools.io.Cout;
 import toools.io.file.Directory;
 import toools.io.file.RegularFile;
 import toools.io.serialization.Serializer;
@@ -24,13 +25,39 @@ public class Cache<T>
 			Supplier<T> supplier)
 	{
 		this.invalidValue = iv;
-		this.file = d == null ? null
-				: new RegularFile(d, name + "." + serializer.getMIMEType());
 		this.serializer = serializer == null ? Serializer.getDefaultSerializer()
 				: serializer;
-		this.value = file == null || ! file.exists() ? invalidValue
-				: set(deserialize(file.getContent()));
 		this.supplier = supplier;
+
+		if (d == null)
+		{
+			this.file = null;
+			this.value = invalidValue;
+		}
+		else
+		{
+			this.file = new RegularFile(d, name + "." + serializer.getMIMEType());
+
+			if (file.exists())
+			{
+				byte[] fileContent = file.getContent();
+
+				try
+				{
+					this.value = deserialize(fileContent);
+				}
+				catch (Exception e)
+				{
+					this.value = invalidValue;
+					Cout.warning("file " + file
+							+ " cannot be read, it's value will have to be recomputerd");
+				}
+			}
+			else
+			{
+				this.value = invalidValue;
+			}
+		}
 	}
 
 	protected T deserialize(byte[] bytes)
@@ -58,8 +85,17 @@ public class Cache<T>
 	{
 		if (file != null)
 		{
-			file.getParent().ensureExists();
-			file.setContent(serialize(t));
+			byte[] bytes = serialize(t);
+
+			try
+			{
+				file.getParent().ensureExists();
+				file.setContent(bytes);
+			}
+			catch (Throwable e)
+			{
+				Cout.warning(e.getMessage());
+			}
 		}
 
 		return this.value = t;
@@ -67,7 +103,14 @@ public class Cache<T>
 
 	public boolean isValid()
 	{
-		return ! value.equals(invalidValue);
+		if (invalidValue == null)
+		{
+			return value != null;
+		}
+		else
+		{
+			return ! invalidValue.equals(value);
+		}
 	}
 
 	public void invalidate()

@@ -3,7 +3,7 @@ package jmg.exp.thibaud;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import j4u.chain.PluginParms;
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing.ThreadSpecifics;
 import toools.thread.ParallelIntervalProcessing;

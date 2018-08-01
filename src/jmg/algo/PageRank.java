@@ -5,7 +5,7 @@ import java.util.Random;
 
 import j4u.chain.PluginParms;
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 import toools.io.Cout;
 import toools.math.MathsUtilities;
 import toools.progression.LongProcess;

@@ -2,7 +2,7 @@ package jmg.io;
 
 import j4u.chain.PluginParms;
 import jmg.Graph;
-import jmg.chain.JMGPlugin;
+import jmg.plugins.JMGPlugin;
 
 public abstract class DatasetReaderPlugin extends JMGPlugin<Void, Graph>
 {

@@ -1,4 +1,4 @@
-package jmg.chain;
+package jmg.plugins;
 
 import j4u.chain.PluginParms;
 import j4u.chain.TooolsPlugin;

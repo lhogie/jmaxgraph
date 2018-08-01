@@ -1,19 +1,19 @@
-package jmg.chain;
+package jmg;
 
 import j4u.CommandLine;
 import j4u.License;
 import j4u.chain.PluginFactory;
-import j4u.chain.Run;
+import jmg.plugins.JMGPluginFactory;
 import toools.SystemMonitor;
 import toools.io.file.RegularFile;
 import toools.progression.LongProcess;
 import toools.thread.MultiThreadProcessing;
 
-public class run extends Run
+public class chain extends j4u.chain.chain
 {
 	private int nbThreads;
 
-	public run(RegularFile launcher)
+	public chain(RegularFile launcher)
 	{
 		super(launcher);
 		getVMOptions().add("-Xmx200G");
@@ -25,7 +25,7 @@ public class run extends Run
 	}
 
 	@Override
-	public int runScript(CommandLine cmdLine) throws Throwable
+	public int runScript(CommandLine cmdLine)
 	{
 		int monitorPeriod = Integer.valueOf(getOptionValue(cmdLine, "--systemMonitor"));
 
@@ -73,7 +73,7 @@ public class run extends Run
 
 	public static void main(String[] args) throws Throwable
 	{
-		new run(null).run(args);
+		new chain(null).run(args);
 	}
 
 	@Override

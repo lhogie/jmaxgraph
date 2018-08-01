@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import jmg.Graph;
+import jmg.VertexCursor;
 import toools.io.PrintStreamCounter;
 import toools.progression.LongProcess;
 
@@ -14,21 +15,22 @@ public class TextADJWriter extends ADJWriter
 	public long[] write(Graph g, OutputStream os)
 	{
 		PrintStreamCounter out = new PrintStreamCounter(new PrintStream(os));
-		int nbVertex = g.out.mem.b.length;
+		int nbVertex = g.getNbVertices();
 		LongProcess p = new LongProcess("writing text ADJ", " adj-list", nbVertex);
 		long[] index = new long[nbVertex];
 		int pos = 0;
 		pos += out.print(nbVertex);
 		pos += out.print('\n');
 
-		for (int label = 0; label < nbVertex; ++label)
+		
+		for (VertexCursor u : g.out)
 		{
-			index[label] = pos;
+			index[u.vertex] = pos;
 			pos += out
-					.print(g.labelling == null ? label : g.labelling.label2vertex[label]);
+					.print(g.labelling == null ? u.vertex : g.labelling.label2vertex[u.vertex]);
 			pos += out.print(' ');
 
-			int[] neighbors = g.out.mem.b[label];
+			int[] neighbors = u.adj;
 			pos += out.print(neighbors.length);
 
 			if (neighbors.length > 0)
@@ -54,7 +56,7 @@ public class TextADJWriter extends ADJWriter
 			pos += out.print('\n');
 			++p.sensor.progressStatus;
 		}
-
+		
 		out.flush();
 		p.end();
 		return index;
