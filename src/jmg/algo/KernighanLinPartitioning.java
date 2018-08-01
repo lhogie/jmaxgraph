@@ -74,7 +74,7 @@ public class KernighanLinPartitioning extends Partitioning
 	public static void main(String[] args)
 	{
 		Graph g = new Graph();
-		g.out.mem = new MatrixAdj(DirectedGNP.out(100000, 0.01, new Random(), true, 4),
+		g.out.mem = new MatrixAdj(DirectedGNP.out(100000, 0.01, 0, true, 4),
 				null, 1);
 
 		KernighanLinPartitioning p = new KernighanLinPartitioning(g, 2);

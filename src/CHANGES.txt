@@ -10,3 +10,7 @@ Version 0.2.0	released on 2018/07/24
 
 Version 0.3.0	released on 2018/07/24
 
+
+
+Version 0.4.0	released on 2018/08/01
+
